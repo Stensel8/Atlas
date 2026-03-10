@@ -1,3 +1,19 @@
+# Guard against re-running when an existing user's profile is accidentally reset by Windows.
+# Each user's SID is recorded in HKLM after a successful first-time setup so that this script
+# is skipped if the profile is ever recreated from the Default user template.
+# This check runs BEFORE elevation so that re-runs on already-configured accounts never
+# trigger a UAC prompt.
+$currentUserSid = [System.Security.Principal.WindowsIdentity]::GetCurrent().User.Value
+$atlasUserSetupKey = "HKLM:\SOFTWARE\AtlasOS\UserSetup"
+$alreadySetUp = $false
+if (Test-Path $atlasUserSetupKey) {
+    $setupProps = Get-ItemProperty $atlasUserSetupKey -ErrorAction SilentlyContinue
+    if ($setupProps -and $setupProps.$currentUserSid -eq 1) {
+        $alreadySetUp = $true
+    }
+}
+if ($alreadySetUp) { exit 0 }
+
 if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) { 
   Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs; exit 
 }
@@ -13,23 +29,6 @@ if (!(Test-Path $atlasDesktop) -or !(Test-Path $atlasModules)) {
     Write-Host "Atlas was about to configure user settings, but its files weren't found. :(" -ForegroundColor Red
     Read-Pause
     exit 1
-}
-
-# Guard against re-running when an existing user's profile is accidentally reset by Windows.
-# Each user's SID is recorded in HKLM after a successful first-time setup so that this script
-# is skipped if the profile is ever recreated from the Default user template.
-$currentUserSid = [System.Security.Principal.WindowsIdentity]::GetCurrent().User.Value
-$atlasUserSetupKey = "HKLM:\SOFTWARE\AtlasOS\UserSetup"
-$alreadySetUp = $false
-if (Test-Path $atlasUserSetupKey) {
-    $setupProps = Get-ItemProperty $atlasUserSetupKey -ErrorAction SilentlyContinue
-    if ($setupProps -and $setupProps.$currentUserSid -eq 1) {
-        $alreadySetUp = $true
-    }
-}
-if ($alreadySetUp) {
-    Write-Host "Atlas new-user setup has already been applied for this account. Skipping." -ForegroundColor Cyan
-    exit 0
 }
 
 $Host.UI.RawUI.WindowTitle = $title
@@ -70,10 +69,12 @@ Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Search" 
 
 # Mark this user account as having completed Atlas new-user setup so the script is
 # skipped if the profile is ever accidentally recreated from the Default user template.
+# Written here (at the very end, right before logoff) so it is only set after all
+# setup steps above have successfully completed.
 if (-not (Test-Path $atlasUserSetupKey)) {
     New-Item -Path $atlasUserSetupKey -Force | Out-Null
 }
-Set-ItemProperty -Path $atlasUserSetupKey -Name $currentUserSid -Value 1 -Type DWORD
+New-ItemProperty -Path $atlasUserSetupKey -Name $currentUserSid -Value 1 -PropertyType DWord -Force | Out-Null
 
 # Leave
 Start-Sleep 5 
