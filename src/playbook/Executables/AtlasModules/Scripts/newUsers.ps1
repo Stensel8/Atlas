@@ -15,6 +15,23 @@ if (!(Test-Path $atlasDesktop) -or !(Test-Path $atlasModules)) {
     exit 1
 }
 
+# Guard against re-running when an existing user's profile is accidentally reset by Windows.
+# Each user's SID is recorded in HKLM after a successful first-time setup so that this script
+# is skipped if the profile is ever recreated from the Default user template.
+$currentUserSid = [System.Security.Principal.WindowsIdentity]::GetCurrent().User.Value
+$atlasUserSetupKey = "HKLM:\SOFTWARE\AtlasOS\UserSetup"
+$alreadySetUp = $false
+if (Test-Path $atlasUserSetupKey) {
+    $setupProps = Get-ItemProperty $atlasUserSetupKey -ErrorAction SilentlyContinue
+    if ($setupProps -and $setupProps.$currentUserSid -eq 1) {
+        $alreadySetUp = $true
+    }
+}
+if ($alreadySetUp) {
+    Write-Host "Atlas new-user setup has already been applied for this account. Skipping." -ForegroundColor Cyan
+    exit 0
+}
+
 $Host.UI.RawUI.WindowTitle = $title
 Write-Host $title -ForegroundColor Yellow
 Write-Host $('-' * ($title.length + 3)) -ForegroundColor Yellow
@@ -50,6 +67,13 @@ $Browser
 
 & "$atlasModules\Scripts\taskbarPins.ps1" $Browser
 Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Search" -Name "SearchboxTaskbarMode" -Value 1
+
+# Mark this user account as having completed Atlas new-user setup so the script is
+# skipped if the profile is ever accidentally recreated from the Default user template.
+if (-not (Test-Path $atlasUserSetupKey)) {
+    New-Item -Path $atlasUserSetupKey -Force | Out-Null
+}
+Set-ItemProperty -Path $atlasUserSetupKey -Name $currentUserSid -Value 1 -Type DWORD
 
 # Leave
 Start-Sleep 5 
