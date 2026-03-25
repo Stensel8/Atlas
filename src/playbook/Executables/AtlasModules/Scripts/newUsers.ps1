@@ -1,21 +1,9 @@
-# Guard against re-running when an existing user's profile is accidentally reset by Windows.
-# Each user's SID is recorded in HKLM after a successful first-time setup so that this script
-# is skipped if the profile is ever recreated from the Default user template.
-# This check runs BEFORE elevation so that re-runs on already-configured accounts never
-# trigger a UAC prompt.
-$currentUserSid = [System.Security.Principal.WindowsIdentity]::GetCurrent().User.Value
-$atlasUserSetupKey = "HKLM:\SOFTWARE\AtlasOS\UserSetup"
-$alreadySetUp = $false
-if (Test-Path $atlasUserSetupKey) {
-    $setupProps = Get-ItemProperty $atlasUserSetupKey -ErrorAction SilentlyContinue
-    if ($setupProps -and $setupProps.$currentUserSid -eq 1) {
-        $alreadySetUp = $true
-    }
-}
-if ($alreadySetUp) { exit 0 }
+# Guard against re-running on already-configured accounts (e.g., after profile reset)
+$sid = [System.Security.Principal.WindowsIdentity]::GetCurrent().User.Value
+if ((Get-ItemProperty -Path "HKLM:\SOFTWARE\AtlasOS\UserSetup" -Name $sid -ErrorAction SilentlyContinue).$sid -eq 1) { exit }
 
-if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) { 
-  Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs; exit 
+if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
+  Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs; exit
 }
 
 $windir = [Environment]::GetFolderPath('Windows')
@@ -67,15 +55,10 @@ $Browser
 & "$atlasModules\Scripts\taskbarPins.ps1" $Browser
 Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Search" -Name "SearchboxTaskbarMode" -Value 1
 
-# Mark this user account as having completed Atlas new-user setup so the script is
-# skipped if the profile is ever accidentally recreated from the Default user template.
-# Written here (at the very end, right before logoff) so it is only set after all
-# setup steps above have successfully completed.
-if (-not (Test-Path $atlasUserSetupKey)) {
-    New-Item -Path $atlasUserSetupKey -Force | Out-Null
-}
-New-ItemProperty -Path $atlasUserSetupKey -Name $currentUserSid -Value 1 -PropertyType DWord -Force | Out-Null
+# Mark setup complete for this SID to prevent re-runs after profile reset
+New-Item -Path "HKLM:\SOFTWARE\AtlasOS\UserSetup" -Force | Out-Null
+New-ItemProperty -Path "HKLM:\SOFTWARE\AtlasOS\UserSetup" -Name $sid -Value 1 -PropertyType DWord -Force | Out-Null
 
 # Leave
-Start-Sleep 5 
+Start-Sleep 5
 logoff
