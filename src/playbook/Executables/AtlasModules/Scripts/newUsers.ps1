@@ -1,5 +1,9 @@
-if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) { 
-  Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs; exit 
+# Guard against re-running on already-configured accounts (e.g., after profile reset)
+$sid = [System.Security.Principal.WindowsIdentity]::GetCurrent().User.Value
+if ((Get-ItemProperty -Path "HKLM:\SOFTWARE\AtlasOS\UserSetup" -Name $sid -ErrorAction SilentlyContinue).$sid -eq 1) { exit }
+
+if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
+  Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs; exit
 }
 
 $windir = [Environment]::GetFolderPath('Windows')
@@ -51,6 +55,10 @@ $Browser
 & "$atlasModules\Scripts\taskbarPins.ps1" $Browser
 Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Search" -Name "SearchboxTaskbarMode" -Value 1
 
+# Mark setup complete for this SID to prevent re-runs after profile reset
+New-Item -Path "HKLM:\SOFTWARE\AtlasOS\UserSetup" -Force | Out-Null
+New-ItemProperty -Path "HKLM:\SOFTWARE\AtlasOS\UserSetup" -Name $sid -Value 1 -PropertyType DWord -Force | Out-Null
+
 # Leave
-Start-Sleep 5 
+Start-Sleep 5
 logoff
