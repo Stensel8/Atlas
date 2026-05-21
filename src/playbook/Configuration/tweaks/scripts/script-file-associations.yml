@@ -2,27 +2,28 @@
 title: Set File Associations
 description: Sets file associations for the user-selected web browser and other apps
 actions:
-  - !run:
-    exe: 'FILEASSOC.cmd'
+  - !powerShell:
+    command: '.\fileAssoc.ps1'
     exeDir: true
+    wait: true
     option: '!uninstall-edge'
-  - !run:
-    exe: 'FILEASSOC.cmd'
-    args: '"Brave"'
+  - !powerShell:
+    command: '.\fileAssoc.ps1 -Browser "Brave"'
+    exeDir: true
+    wait: true
     option: 'browser-brave'
+  - !powerShell:
+    command: '.\fileAssoc.ps1 -Browser "LibreWolf"'
     exeDir: true
-  - !run:
-    exe: 'FILEASSOC.cmd'
-    args: '"LibreWolf"'
+    wait: true
     option: 'browser-librewolf'
+  - !powerShell:
+    command: '.\fileAssoc.ps1 -Browser "Firefox"'
     exeDir: true
-  - !run:
-    exe: 'FILEASSOC.cmd'
-    args: '"Firefox"'
+    wait: true
     option: 'browser-firefox'
+  - !powerShell:
+    command: '.\fileAssoc.ps1 -Browser "Google Chrome"'
     exeDir: true
-  - !run:
-    exe: 'FILEASSOC.cmd'
-    args: '"Google Chrome"'
+    wait: true
     option: 'browser-chrome'
-    exeDir: true

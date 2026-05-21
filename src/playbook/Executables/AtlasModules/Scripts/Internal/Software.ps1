@@ -108,10 +108,12 @@ function Assert-AtlasWingetReady {
 function Invoke-WingetInstall {
     param(
         [Parameter(Mandatory)][string]$Id,
-        [string]$Description = $Id
+        [string]$Description = $Id,
+        [switch]$MachineScope
     )
     Write-Output "Installing $Description..."
-    & winget install --id $Id --silent --accept-package-agreements --accept-source-agreements --no-upgrade 2>&1 | Out-Null
+    $scopeArgs = if ($MachineScope) { @('--scope', 'machine') } else { @() }
+    & winget install --id $Id --silent --accept-package-agreements --accept-source-agreements --no-upgrade @scopeArgs 2>&1 | Out-Null
     # Treat "already installed" / "no upgrade" exit codes as success
     if ($LASTEXITCODE -notin @(0, -1978335135, -1978335189, -1978335147, -1978335212)) {
         Write-Warning "$Description (winget id: $Id) returned exit code $LASTEXITCODE."
@@ -132,9 +134,8 @@ function Install-ArchiveTool {
     }
 
     Invoke-WingetInstall -Id 'M2Team.NanaZip' -Description 'NanaZip'
-    if ($LASTEXITCODE -notin @(0, -1978335189, -1978335147, -1978335212)) {
-        Write-Warning 'NanaZip via winget failed; falling back to 7-Zip.'
-        Invoke-WingetInstall -Id '7zip.7zip' -Description '7-Zip'
+    if ($LASTEXITCODE -notin @(0, -1978335135, -1978335189, -1978335147, -1978335212)) {
+        Write-Warning 'NanaZip installation failed — skipping archive tool.'
     }
 }
 
@@ -155,10 +156,10 @@ function Install-AtlasToolbox {
     Start-AtlasInstaller -FilePath $toolboxPath -ArgumentList '/verysilent /install /MERGETASKS="desktopicon"' -Description 'Atlas Toolbox'
 }
 
-function Install-BraveBrowser   { Invoke-WingetInstall -Id 'Brave.Brave'          -Description 'Brave Browser'    }
-function Install-FirefoxBrowser { Invoke-WingetInstall -Id 'Mozilla.Firefox'      -Description 'Mozilla Firefox'  }
-function Install-ChromeBrowser  { Invoke-WingetInstall -Id 'Google.Chrome'        -Description 'Google Chrome'    }
-function Install-UniGetUI       { Invoke-WingetInstall -Id 'Devolutions.UniGetUI' -Description 'UniGetUI'         }
+function Install-BraveBrowser   { Invoke-WingetInstall -Id 'Brave.Brave'          -Description 'Brave Browser'   -MachineScope }
+function Install-FirefoxBrowser { Invoke-WingetInstall -Id 'Mozilla.Firefox'      -Description 'Mozilla Firefox' -MachineScope }
+function Install-ChromeBrowser  { Invoke-WingetInstall -Id 'Google.Chrome'        -Description 'Google Chrome'   -MachineScope }
+function Install-UniGetUI       { Invoke-WingetInstall -Id 'Devolutions.UniGetUI' -Description 'UniGetUI'                      }
 
 # ── Entry point ──────────────────────────────────────────────────────────────
 
