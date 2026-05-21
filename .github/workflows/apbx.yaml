@@ -24,7 +24,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        # gh api repos/actions/checkout/commits/v6 --jq '.sha'
+        # gh api repos/actions/checkout/commits/[VERSION] --jq '.sha'
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           ref: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.branch || github.ref }}
@@ -35,7 +35,7 @@ jobs:
 
       - name: Get changed files
         id: changed-files
-        # gh api repos/tj-actions/changed-files/commits/v47.0.6 --jq '.sha'
+        # gh api repos/tj-actions/changed-files/commits/[VERSION] --jq '.sha'
         uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
         with:
           files_yaml: |
@@ -138,7 +138,7 @@ jobs:
         working-directory: src\playbook
 
       - name: Upload artifact
-        # gh api repos/actions/upload-artifact/commits/v7.0.1 --jq '.sha'
+        # gh api repos/actions/upload-artifact/commits/[VERSION] --jq '.sha'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ steps.create-pb.outcome != 'skipped' }}
         with:
