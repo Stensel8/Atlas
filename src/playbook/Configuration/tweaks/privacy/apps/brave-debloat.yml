@@ -1,0 +1,91 @@
+---
+title: Brave Browser Debloat
+description: Applies privacy and debloat policies for Brave Browser via Group Policy registry keys. Only applied when Brave is selected as the browser.
+actions:
+  - !registryKey:
+    path: 'HKLM\SOFTWARE\Policies\BraveSoftware\Brave'
+    operation: add
+    option: 'browser-brave'
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\BraveSoftware\Brave'
+    value: 'BraveRewardsDisabled'
+    data: '1'
+    type: REG_DWORD
+    option: 'browser-brave'
+
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\BraveSoftware\Brave'
+    value: 'BraveWalletDisabled'
+    data: '1'
+    type: REG_DWORD
+    option: 'browser-brave'
+
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\BraveSoftware\Brave'
+    value: 'BraveVPNDisabled'
+    data: '1'
+    type: REG_DWORD
+    option: 'browser-brave'
+
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\BraveSoftware\Brave'
+    value: 'BraveAIChatEnabled'
+    data: '0'
+    type: REG_DWORD
+    option: 'browser-brave'
+
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\BraveSoftware\Brave'
+    value: 'BraveStatsPingEnabled'
+    data: '0'
+    type: REG_DWORD
+    option: 'browser-brave'
+
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\BraveSoftware\Brave'
+    value: 'BraveNewsDisabled'
+    data: '1'
+    type: REG_DWORD
+    option: 'browser-brave'
+
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\BraveSoftware\Brave'
+    value: 'BraveTalkDisabled'
+    data: '1'
+    type: REG_DWORD
+    option: 'browser-brave'
+
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\BraveSoftware\Brave'
+    value: 'TorDisabled'
+    data: '1'
+    type: REG_DWORD
+    option: 'browser-brave'
+
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\BraveSoftware\Brave'
+    value: 'BraveP3AEnabled'
+    data: '0'
+    type: REG_DWORD
+    option: 'browser-brave'
+
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\BraveSoftware\Brave'
+    value: 'UrlKeyedAnonymizedDataCollectionEnabled'
+    data: '0'
+    type: REG_DWORD
+    option: 'browser-brave'
+
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\BraveSoftware\Brave'
+    value: 'SafeBrowsingExtendedReportingEnabled'
+    data: '0'
+    type: REG_DWORD
+    option: 'browser-brave'
+
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\BraveSoftware\Brave'
+    value: 'MetricsReportingEnabled'
+    data: '0'
+    type: REG_DWORD
+    option: 'browser-brave'

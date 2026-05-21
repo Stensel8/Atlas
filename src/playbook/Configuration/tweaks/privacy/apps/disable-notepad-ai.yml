@@ -1,0 +1,12 @@
+---
+title: Disable Notepad AI Features
+description: Disables AI features in Notepad including the Copilot button, via Group Policy registry keys.
+actions:
+  - !registryKey:
+    path: 'HKLM\SOFTWARE\Policies\WindowsNotepad'
+    operation: add
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\WindowsNotepad'
+    value: 'DisableAIFeatures'
+    data: '1'
+    type: REG_DWORD

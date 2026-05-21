@@ -108,6 +108,9 @@ actions:
   # -------------------------------------------------------------------------- #
   - !task: {path: 'tweaks\privacy\apps\disable-nvidia-telemetry.yml'}
   - !task: {path: 'tweaks\privacy\apps\disable-office-telemetry.yml'}
+  - !task: {path: 'tweaks\privacy\apps\edge-debloat.yml'}
+  - !task: {path: 'tweaks\privacy\apps\brave-debloat.yml'}
+  - !task: {path: 'tweaks\privacy\apps\disable-notepad-ai.yml'}
 
   # -------------------------------------------------------------------------- #
   #  privacy\advertising                                                       #

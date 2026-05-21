@@ -1,0 +1,114 @@
+---
+title: Microsoft Edge Debloat
+description: Applies privacy and debloat policies for Microsoft Edge via Group Policy registry keys. Always applied regardless of whether Edge is installed.
+actions:
+  - !registryKey:
+    path: 'HKLM\SOFTWARE\Policies\Microsoft\Edge'
+    operation: add
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\Microsoft\Edge'
+    value: 'PersonalizationReportingEnabled'
+    data: '0'
+    type: REG_DWORD
+
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\Microsoft\Edge'
+    value: 'ShowRecommendationsEnabled'
+    data: '0'
+    type: REG_DWORD
+
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\Microsoft\Edge'
+    value: 'HideFirstRunExperience'
+    data: '1'
+    type: REG_DWORD
+
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\Microsoft\Edge'
+    value: 'UserFeedbackAllowed'
+    data: '0'
+    type: REG_DWORD
+
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\Microsoft\Edge'
+    value: 'ConfigureDoNotTrack'
+    data: '1'
+    type: REG_DWORD
+
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\Microsoft\Edge'
+    value: 'AlternateErrorPagesEnabled'
+    data: '0'
+    type: REG_DWORD
+
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\Microsoft\Edge'
+    value: 'EdgeCollectionsEnabled'
+    data: '0'
+    type: REG_DWORD
+
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\Microsoft\Edge'
+    value: 'EdgeShoppingAssistantEnabled'
+    data: '0'
+    type: REG_DWORD
+
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\Microsoft\Edge'
+    value: 'MicrosoftEdgeInsiderPromotionEnabled'
+    data: '0'
+    type: REG_DWORD
+
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\Microsoft\Edge'
+    value: 'ShowMicrosoftRewards'
+    data: '0'
+    type: REG_DWORD
+
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\Microsoft\Edge'
+    value: 'WebWidgetAllowed'
+    data: '0'
+    type: REG_DWORD
+
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\Microsoft\Edge'
+    value: 'DiagnosticData'
+    data: '0'
+    type: REG_DWORD
+
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\Microsoft\Edge'
+    value: 'EdgeAssetDeliveryServiceEnabled'
+    data: '0'
+    type: REG_DWORD
+
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\Microsoft\Edge'
+    value: 'WalletDonationEnabled'
+    data: '0'
+    type: REG_DWORD
+
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\Microsoft\Edge'
+    value: 'DefaultBrowserSettingsCampaignEnabled'
+    data: '0'
+    type: REG_DWORD
+
+  - !registryKey:
+    path: 'HKLM\SOFTWARE\Policies\Microsoft\EdgeUpdate'
+    operation: add
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\Microsoft\EdgeUpdate'
+    value: 'CreateDesktopShortcutDefault'
+    data: '0'
+    type: REG_DWORD
+
+  - !registryKey:
+    path: 'HKLM\SOFTWARE\Policies\Microsoft\Edge\ExtensionInstallBlocklist'
+    operation: add
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\Microsoft\Edge\ExtensionInstallBlocklist'
+    value: '1'
+    data: 'ofefcgjbeghpigppfmkologfjadafddi'
+    type: REG_SZ
