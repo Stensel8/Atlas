@@ -447,28 +447,6 @@ try {
         Write-Warning "Can't find '$oemScriptRelativePath', not setting OEM version."
     }
 
-    # Pre-fetch Edge.bat so offline installs can use it without a live download
-    $edgeBatRelativePath = Join-Path -Path (Join-Path -Path (Join-Path -Path (Join-Path -Path 'Executables' -ChildPath 'AtlasModules') -ChildPath 'Scripts') -ChildPath 'Internal') -ChildPath 'Edge.bat'
-    $tempEdgeBatPath = $null
-    $prevProgressPref = $ProgressPreference
-    try {
-        $playbookTempPath = Get-PlaybookTempPath
-        $tempEdgeBatPath = Join-Path -Path $playbookTempPath -ChildPath $edgeBatRelativePath
-        Set-ParentDirectory -Path $tempEdgeBatPath
-        $ProgressPreference = 'SilentlyContinue'
-        Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/ShadowWhisperer/Remove-MS-Edge/main/Batch/Edge.bat' -OutFile $tempEdgeBatPath -UseBasicParsing -TimeoutSec 15 -ErrorAction Stop
-        Write-Host 'Pre-fetched Edge.bat for offline Edge removal support.' -ForegroundColor Cyan
-    }
-    catch {
-        Write-Warning "Could not pre-fetch Edge.bat: $($_.Exception.Message). Offline Edge removal will fall back to a live download at install time."
-        if ($tempEdgeBatPath -and (Test-Path -LiteralPath $tempEdgeBatPath -ErrorAction SilentlyContinue)) {
-            Remove-Item -LiteralPath $tempEdgeBatPath -Force -ErrorAction SilentlyContinue
-        }
-    }
-    finally {
-        $ProgressPreference = $prevProgressPref
-    }
-
     # skip local script + staged overrides so we dont pack duplicates
     $excludeFiles = @('local-build.*', '*.apbx')
     if ($stagedCustomYml) { $excludeFiles += 'custom.yml' }

@@ -438,33 +438,49 @@ if ($UninstallEdge) {
     if (EdgeInstalled) {
         $legacyRemoved = $false
         try {
-            $legacyTempDirectory = Join-Path ([IO.Path]::GetTempPath()) ([IO.Path]::GetRandomFileName())
-            New-Item -ItemType Directory -Path $legacyTempDirectory -Force | Out-Null
-            $legacyScript = Join-Path $legacyTempDirectory 'Edge.bat'
+            Write-Status 'Trying PowerShell-based Edge removal fallback...'
 
-            # Project originally made by ShadowWhisperer and licensed under CC0-1.0.
-            # https://github.com/ShadowWhisperer/Remove-MS-Edge
-            Write-Status 'Trying legacy Edge removal fallback...'
-            $bundledEdgeBat = Join-Path $PSScriptRoot 'Edge.bat'
-            if (Test-Path -LiteralPath $bundledEdgeBat -PathType Leaf) {
-                Copy-Item -LiteralPath $bundledEdgeBat -Destination $legacyScript -Force
+            # Attempt winget uninstall first (cleanest path)
+            if ($null -ne (Get-Command winget -ErrorAction SilentlyContinue)) {
+                & winget uninstall --id Microsoft.Edge --silent --accept-source-agreements --disable-interactivity 2>&1 | Out-Null
+                KillEdgeProcesses
             }
-            elseif ($null -ne (Get-Command curl.exe -ErrorAction SilentlyContinue)) {
-                & curl.exe -LSs "https://raw.githubusercontent.com/ShadowWhisperer/Remove-MS-Edge/main/Batch/Edge.bat" -o "$legacyScript"
+
+            if (-not (EdgeInstalled)) {
+                $legacyRemoved = $true
             }
             else {
-                Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/ShadowWhisperer/Remove-MS-Edge/main/Batch/Edge.bat' -OutFile $legacyScript -UseBasicParsing -ErrorAction Stop
-            }
+                # Force-remove Edge installation directories via takeown + icacls
+                foreach ($edgeRoot in @(
+                    "$([Environment]::GetFolderPath('ProgramFilesx86'))\Microsoft\Edge",
+                    "$([Environment]::GetFolderPath('ProgramFiles'))\Microsoft\Edge",
+                    "$([Environment]::GetFolderPath('ProgramFilesx86'))\Microsoft\EdgeUpdate",
+                    "$([Environment]::GetFolderPath('ProgramFiles'))\Microsoft\EdgeUpdate"
+                )) {
+                    if (Test-Path $edgeRoot) {
+                        & takeown.exe /f "$edgeRoot" /r /d Y 2>&1 | Out-Null
+                        & icacls.exe "$edgeRoot" /grant 'Administrators:F' /t /c /q 2>&1 | Out-Null
+                        Remove-Item -Path $edgeRoot -Force -Recurse -ErrorAction SilentlyContinue
+                    }
+                }
 
-            if (Test-Path $legacyScript) {
-                Start-Process -FilePath $legacyScript -WindowStyle Hidden -Wait -ArgumentList '-auto' | Out-Null
+                # Remove Edge registry artifacts
+                foreach ($regPath in @(
+                    'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Microsoft Edge',
+                    'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Microsoft Edge',
+                    'HKLM:\SOFTWARE\Microsoft\EdgeUpdate',
+                    'HKLM:\SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate'
+                )) {
+                    Remove-Item -Path $regPath -Recurse -Force -ErrorAction SilentlyContinue
+                }
+
                 KillEdgeProcesses
                 $legacyRemoved = -not (EdgeInstalled)
             }
         }
         catch {
             if (EdgeInstalled) {
-                Write-Status "Legacy fallback failed: $($_.Exception.Message)" -Level Warning
+                Write-Status "PowerShell Edge removal fallback failed: $($_.Exception.Message)" -Level Warning
             }
         }
 
