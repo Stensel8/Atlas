@@ -1,0 +1,9 @@
+---
+title: Prevent Automatic Device Encryption
+description: Prevents Windows from automatically enabling BitLocker device encryption on capable hardware, supplementing AME Wizard's DisableBitLocker flag for upgrade scenarios
+actions:
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\Microsoft\FVE'
+    value: 'PreventDeviceEncryption'
+    data: '1'
+    type: REG_DWORD

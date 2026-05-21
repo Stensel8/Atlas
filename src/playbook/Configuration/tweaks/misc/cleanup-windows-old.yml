@@ -1,0 +1,8 @@
+---
+title: Remove Windows.old
+description: Deletes the Windows.old folder left by in-place upgrades to reclaim disk space; no effect on fresh installs
+actions:
+  - !cmd:
+    command: 'if exist "%SystemDrive%\Windows.old" (rd /s /q "%SystemDrive%\Windows.old" > nul 2>&1) else (exit /b 0)'
+    runas: currentUserElevated
+    wait: true

@@ -16,8 +16,6 @@ if (-not (Test-Path -LiteralPath $initScript -PathType Leaf)) {
 
 . $initScript
 
-$script:CurlTimeouts = @('--connect-timeout', '10', '--retry', '5', '--retry-delay', '0', '--retry-all-errors')
-$script:MsiArgs = '/qn /quiet /norestart ALLUSERS=1 REBOOT=ReallySuppress'
 $script:IsArm64 = ((Get-CimInstance -Class Win32_ComputerSystem).SystemType -match 'ARM64') -or ($env:PROCESSOR_ARCHITECTURE -eq 'ARM64')
 $script:TempDir = Join-Path -Path $env:TEMP -ChildPath ([guid]::NewGuid().ToString())
 
@@ -27,15 +25,15 @@ function Remove-AtlasTempDirectory {
     }
 }
 
+# Used only for components not available on winget (DirectX, Atlas Toolbox)
 function Invoke-AtlasDownload {
     param(
-        [Parameter(Mandatory = $true)][string]$Uri,
-        [Parameter(Mandatory = $true)][string]$Destination,
-        [Parameter(Mandatory = $true)][string]$Description
+        [Parameter(Mandatory)][string]$Uri,
+        [Parameter(Mandatory)][string]$Destination,
+        [Parameter(Mandatory)][string]$Description
     )
-
     Write-Output "Downloading $Description..."
-    & curl.exe -LSs $Uri -o $Destination @script:CurlTimeouts
+    & curl.exe -LSs $Uri -o $Destination --connect-timeout 10 --retry 3 --retry-all-errors
     if ($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath $Destination -PathType Leaf)) {
         throw "Downloading $Description from '$Uri' failed with exit code $LASTEXITCODE."
     }
@@ -43,12 +41,11 @@ function Invoke-AtlasDownload {
 
 function Start-AtlasInstaller {
     param(
-        [Parameter(Mandatory = $true)][string]$FilePath,
-        [Parameter(Mandatory = $true)][string]$ArgumentList,
-        [Parameter(Mandatory = $true)][string]$Description,
+        [Parameter(Mandatory)][string]$FilePath,
+        [Parameter(Mandatory)][string]$ArgumentList,
+        [Parameter(Mandatory)][string]$Description,
         [int[]]$SuccessExitCode = @(0)
     )
-
     Write-Output "Installing $Description..."
     $process = Start-Process -FilePath $FilePath -WindowStyle Hidden -ArgumentList $ArgumentList -Wait -PassThru
     if ($process.ExitCode -notin $SuccessExitCode) {
@@ -56,182 +53,142 @@ function Start-AtlasInstaller {
     }
 }
 
-function Start-AtlasOptionalInstaller {
-    param(
-        [Parameter(Mandatory = $true)][string]$FilePath,
-        [Parameter(Mandatory = $true)][string]$ArgumentList,
-        [Parameter(Mandatory = $true)][string]$Description,
-        [int[]]$SuccessExitCode = @(0)
-    )
+# ── Connectivity & winget readiness ─────────────────────────────────────────
 
+function Test-AtlasInternetConnectivity {
     try {
-        Start-AtlasInstaller -FilePath $FilePath -ArgumentList $ArgumentList -Description $Description -SuccessExitCode $SuccessExitCode
+        $ping = [System.Net.NetworkInformation.Ping]::new()
+        return ($ping.Send('8.8.8.8', 2000)).Status -eq [System.Net.NetworkInformation.IPStatus]::Success
+    } catch {
+        return $false
     }
-    catch {
-        Write-Warning $_.Exception.Message
+}
+
+function Assert-AtlasWingetReady {
+    # Ensure NuGet provider is available (needed for Install-Script)
+    if (-not (Get-PackageProvider -Name NuGet -ErrorAction SilentlyContinue | Where-Object { $_.Version -ge '2.8.5.201' })) {
+        Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -Scope CurrentUser | Out-Null
+    }
+
+    # Use asheroto/winget-install to bootstrap/repair winget if needed
+    # Credits: https://github.com/asheroto/winget-install
+    if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
+        Write-Output 'winget not found — bootstrapping via asheroto/winget-install...'
+        try {
+            Install-Script -Name winget-install -Force -Scope CurrentUser -ErrorAction Stop | Out-Null
+            $installed = Get-InstalledScript 'winget-install' -ErrorAction SilentlyContinue
+            if ($installed) {
+                $scriptFile = Join-Path $installed.InstalledLocation 'winget-install.ps1'
+                $ps = if (Get-Command pwsh -ErrorAction SilentlyContinue) { 'pwsh' } else { 'powershell' }
+                $proc = Start-Process $ps `
+                    -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$scriptFile`" -Force" `
+                    -Wait -PassThru
+                if ($proc.ExitCode -ne 0) {
+                    Write-Warning "winget-install exited with code $($proc.ExitCode)."
+                }
+            }
+        } catch {
+            Write-Warning "winget bootstrap failed: $($_.Exception.Message)"
+        }
+    }
+
+    if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
+        throw 'winget is not available and could not be bootstrapped.'
+    }
+
+    # Refresh sources quietly
+    & winget source update --disable-interactivity 2>&1 | Out-Null
+    Write-Output 'winget is ready.'
+}
+
+# ── winget install helper ────────────────────────────────────────────────────
+
+function Invoke-WingetInstall {
+    param(
+        [Parameter(Mandatory)][string]$Id,
+        [string]$Description = $Id
+    )
+    Write-Output "Installing $Description..."
+    & winget install --id $Id --silent --accept-package-agreements --accept-source-agreements --no-upgrade 2>&1 | Out-Null
+    # Treat "already installed" / "no upgrade" exit codes as success
+    if ($LASTEXITCODE -notin @(0, -1978335189, -1978335147, -1978335212)) {
+        Write-Warning "$Description (winget id: $Id) returned exit code $LASTEXITCODE."
     }
 }
 
-function Install-AtlasToolbox {
-    if ($env:PATH -like '*Atlas Toolbox*') { return }
-    $toolboxPath = Join-Path -Path $script:TempDir -ChildPath 'toolbox.exe'
-    Invoke-AtlasDownload -Uri 'https://github.com/Atlas-OS/atlas-toolbox/releases/latest/download/AtlasToolbox-Setup.exe' -Destination $toolboxPath -Description 'Toolbox'
-    Start-AtlasInstaller -FilePath $toolboxPath -ArgumentList '/verysilent /install /MERGETASKS="desktopicon"' -Description 'Toolbox'
-}
-
-function Install-BraveBrowser {
-    $installerPath = Join-Path -Path $script:TempDir -ChildPath 'BraveSetup.exe'
-    Invoke-AtlasDownload -Uri 'https://laptop-updates.brave.com/latest/winx64' -Destination $installerPath -Description 'Brave'
-    Start-AtlasInstaller -FilePath $installerPath -ArgumentList '/silent /install' -Description 'Brave'
-    Stop-Process -Name 'brave' -Force -ErrorAction SilentlyContinue
-}
-
-function Install-FirefoxBrowser {
-    $firefoxArch = if ($script:IsArm64) { 'win64-aarch64' } else { 'win64' }
-    $installerPath = Join-Path -Path $script:TempDir -ChildPath 'firefox.exe'
-    Invoke-AtlasDownload -Uri "https://download.mozilla.org/?product=firefox-latest-ssl&os=$firefoxArch&lang=en-US" -Destination $installerPath -Description 'Firefox'
-    Start-AtlasInstaller -FilePath $installerPath -ArgumentList '/S /ALLUSERS=1' -Description 'Firefox'
-}
-
-function Install-ChromeBrowser {
-    $chromeArch = if ($script:IsArm64) { '_Arm64' } else { '64' }
-    $installerPath = Join-Path -Path $script:TempDir -ChildPath 'chrome.msi'
-    Invoke-AtlasDownload -Uri "https://dl.google.com/dl/chrome/install/googlechromestandaloneenterprise$chromeArch.msi" -Destination $installerPath -Description 'Google Chrome'
-    Start-AtlasInstaller -FilePath $installerPath -ArgumentList '/qn' -Description 'Google Chrome'
-}
+# ── Software installers ──────────────────────────────────────────────────────
 
 function Install-VisualCppRuntimes {
-    $legacyArgs = '/q /norestart'
-    $modernArgs = '/install /quiet /norestart'
-    $vcredists = [ordered] @{
-        'https://download.microsoft.com/download/8/B/4/8B42259F-5D70-43F4-AC2E-4B208FD8D66A/vcredist_x64.exe'                = @('2005-x64', '/c /q /t:')
-        'https://download.microsoft.com/download/8/B/4/8B42259F-5D70-43F4-AC2E-4B208FD8D66A/vcredist_x86.exe'                = @('2005-x86', '/c /q /t:')
-        'https://download.microsoft.com/download/5/D/8/5D8C65CB-C849-4025-8E95-C3966CAFD8AE/vcredist_x64.exe'                = @('2008-x64', $legacyArgs)
-        'https://download.microsoft.com/download/5/D/8/5D8C65CB-C849-4025-8E95-C3966CAFD8AE/vcredist_x86.exe'                = @('2008-x86', $legacyArgs)
-        'https://download.microsoft.com/download/1/6/5/165255E7-1014-4D0A-B094-B6A430A6BFFC/vcredist_x64.exe'                = @('2010-x64', $legacyArgs)
-        'https://download.microsoft.com/download/1/6/5/165255E7-1014-4D0A-B094-B6A430A6BFFC/vcredist_x86.exe'                = @('2010-x86', $legacyArgs)
-        'https://download.microsoft.com/download/1/6/B/16B06F60-3B20-4FF2-B699-5E9B7962F9AE/VSU_4/vcredist_x64.exe'          = @('2012-x64', $modernArgs)
-        'https://download.microsoft.com/download/1/6/B/16B06F60-3B20-4FF2-B699-5E9B7962F9AE/VSU_4/vcredist_x86.exe'          = @('2012-x86', $modernArgs)
-        'https://download.visualstudio.microsoft.com/download/pr/10912041/cee5d6bca2ddbcd039da727bf4acb48a/vcredist_x64.exe' = @('2013-x64', $modernArgs)
-        'https://download.visualstudio.microsoft.com/download/pr/10912113/5da66ddebb0ad32ebd4b922fd82e8e25/vcredist_x86.exe' = @('2013-x86', $modernArgs)
-        'https://aka.ms/vs/17/release/vc_redist.x64.exe'                                                                     = @('2015+-x64', $modernArgs)
-        'https://aka.ms/vs/17/release/vc_redist.x86.exe'                                                                     = @('2015+-x86', $modernArgs)
-    }
-
-    foreach ($entry in $vcredists.GetEnumerator()) {
-        $vcName = $entry.Value[0]
-        $vcArgs = $entry.Value[1]
-        $vcExePath = Join-Path -Path $script:TempDir -ChildPath "vcredist-$vcName.exe"
-        Invoke-AtlasDownload -Uri $entry.Name -Destination $vcExePath -Description "Visual C++ Runtime $vcName"
-
-        if ($vcArgs -match ':') {
-            $msiDir = Join-Path -Path $script:TempDir -ChildPath "vcredist-$vcName"
-            Start-AtlasInstaller -FilePath $vcExePath -ArgumentList ($vcArgs + '"' + $msiDir + '"') -Description "Visual C++ Runtime $vcName extractor"
-            $msiPaths = @(Get-ChildItem -LiteralPath $msiDir -Filter '*.msi' -ErrorAction SilentlyContinue)
-            if (-not $msiPaths) {
-                Write-Output "Failed to extract MSI for $vcName, not installing."
-                continue
-            }
-            foreach ($msi in $msiPaths) {
-                $msiArguments = '/log "' + (Join-Path -Path $msiDir -ChildPath 'logfile.log') + '" /i "' + $msi.FullName + '" ' + $script:MsiArgs
-                Start-AtlasOptionalInstaller -FilePath 'msiexec.exe' -ArgumentList $msiArguments -Description "Visual C++ Runtime $vcName MSI"
-            }
-        }
-        else {
-            Start-AtlasOptionalInstaller -FilePath $vcExePath -ArgumentList $vcArgs -Description "Visual C++ Runtime $vcName"
-        }
-    }
-}
-
-function Install-7Zip {
-    $website = 'https://7-zip.org/'
-    $sevenZipArch = if ($script:IsArm64) { 'arm64' } else { 'x64' }
-    $installerHref = (Invoke-WebRequest $website -UseBasicParsing).Links.href | Where-Object { $_ -like "a/7z*-$sevenZipArch.exe" } | Select-Object -First 1
-    if (-not $installerHref) {
-        throw "Could not find a 7-Zip $sevenZipArch installer link on '$website'."
-    }
-    $installerPath = Join-Path -Path $script:TempDir -ChildPath '7zip.exe'
-    Invoke-AtlasDownload -Uri ($website + $installerHref) -Destination $installerPath -Description '7-Zip'
-    Start-AtlasInstaller -FilePath $installerPath -ArgumentList '/S' -Description '7-Zip'
-}
-
-function Install-NanaZip {
-    param([string[]]$Assets)
-
-    $nanaZipPath = New-Item -Path (Join-Path -Path $script:TempDir -ChildPath 'nanazip') -ItemType Directory -Force
-    foreach ($asset in $Assets) {
-        $filename = $asset -split '/' | Select-Object -Last 1
-        Invoke-AtlasDownload -Uri $asset -Destination (Join-Path -Path $nanaZipPath.FullName -ChildPath $filename) -Description $filename
-    }
-
-    try {
-        $appxArgs = @{
-            PackagePath = (Get-ChildItem -LiteralPath $nanaZipPath.FullName -Filter '*.msixbundle' | Select-Object -First 1).FullName
-            LicensePath = (Get-ChildItem -LiteralPath $nanaZipPath.FullName -Filter '*.xml' | Select-Object -First 1).FullName
-        }
-        Add-AppxProvisionedPackage -Online @appxArgs | Out-Null
-        Write-Output 'Installed NanaZip!'
-    }
-    catch {
-        Write-Warning "Failed to install NanaZip! Getting 7-Zip instead. $($_.Exception.Message)"
-        Install-7Zip
+    $vcRedists = @(
+        @('Microsoft.VCRedist.2005.x86',  '2005 x86'),
+        @('Microsoft.VCRedist.2005.x64',  '2005 x64'),
+        @('Microsoft.VCRedist.2008.x86',  '2008 x86'),
+        @('Microsoft.VCRedist.2008.x64',  '2008 x64'),
+        @('Microsoft.VCRedist.2010.x86',  '2010 x86'),
+        @('Microsoft.VCRedist.2010.x64',  '2010 x64'),
+        @('Microsoft.VCRedist.2012.x86',  '2012 x86'),
+        @('Microsoft.VCRedist.2012.x64',  '2012 x64'),
+        @('Microsoft.VCRedist.2013.x86',  '2013 x86'),
+        @('Microsoft.VCRedist.2013.x64',  '2013 x64'),
+        @('Microsoft.VCRedist.2015+.x86', '2015+ x86'),
+        @('Microsoft.VCRedist.2015+.x64', '2015+ x64')
+    )
+    foreach ($vc in $vcRedists) {
+        Invoke-WingetInstall -Id $vc[0] -Description "Visual C++ Runtime $($vc[1])"
     }
 }
 
 function Install-ArchiveTool {
-    $githubApi = Invoke-RestMethod 'https://api.github.com/repos/M2Team/NanaZip/releases/latest' -ErrorAction SilentlyContinue
-    $assets = @($githubApi.Assets.browser_download_url | Select-String '.xml', '.msixbundle' | Select-Object -Unique -First 2)
     $nanaZipInstalled = Get-AppxProvisionedPackage -Online | Where-Object { $_.DisplayName -like '*NanaZip*' }
-
     if ($nanaZipInstalled) {
-        Write-Output 'NanaZip is already installed, skipping installation.'
+        Write-Output 'NanaZip is already installed, skipping.'
         return
     }
 
-    if ($assets.Count -eq 2) {
-        $sevenZipRegistry = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\7-Zip'
-        if (Test-Path -LiteralPath $sevenZipRegistry) {
-            $message = @'
-Would you like to uninstall 7-Zip and replace it with NanaZip?
-
-NanaZip is a fork of 7-Zip with an updated user interface and extra features.
-'@
-            if ((Read-MessageBox -Title 'Installing NanaZip - Atlas' -Body $message -Icon Question) -eq 'Yes') {
-                $sevenZipUninstall = (Get-ItemProperty -Path $sevenZipRegistry -Name 'QuietUninstallString' -ErrorAction SilentlyContinue).QuietUninstallString
-                if ($sevenZipUninstall) {
-                    Start-AtlasInstaller -FilePath 'cmd.exe' -ArgumentList ("/c $sevenZipUninstall") -Description '7-Zip removal'
-                }
-                Install-NanaZip -Assets $assets
-            }
-            else {
-                Write-Output 'Keeping existing 7-Zip installation.'
-            }
-        }
-        else {
-            Install-NanaZip -Assets $assets
-        }
-    }
-    else {
-        Write-Warning "Can't access GitHub API, downloading 7-Zip instead of NanaZip."
-        Install-7Zip
+    Invoke-WingetInstall -Id 'M2Team.NanaZip' -Description 'NanaZip'
+    if ($LASTEXITCODE -notin @(0, -1978335189, -1978335147, -1978335212)) {
+        Write-Warning 'NanaZip via winget failed; falling back to 7-Zip.'
+        Invoke-WingetInstall -Id '7zip.7zip' -Description '7-Zip'
     }
 }
 
 function Install-DirectXRuntime {
+    # Legacy DirectX is not available on winget — direct download required
     $installerPath = Join-Path -Path $script:TempDir -ChildPath 'directx.exe'
-    $extractPath = Join-Path -Path $script:TempDir -ChildPath 'directx'
+    $extractPath   = Join-Path -Path $script:TempDir -ChildPath 'directx'
     Invoke-AtlasDownload -Uri 'https://download.microsoft.com/download/8/4/A/84A35BF1-DAFE-4AE8-82AF-AD2AE20B6B14/directx_Jun2010_redist.exe' -Destination $installerPath -Description 'legacy DirectX runtimes'
     Start-AtlasInstaller -FilePath $installerPath -ArgumentList ('/q /c /t:"' + $extractPath + '"') -Description 'legacy DirectX runtime extractor'
     Start-AtlasInstaller -FilePath (Join-Path -Path $extractPath -ChildPath 'dxsetup.exe') -ArgumentList '/silent' -Description 'legacy DirectX runtimes'
 }
 
+function Install-AtlasToolbox {
+    # Atlas Toolbox is not yet on winget — direct download from GitHub
+    if ($env:PATH -like '*Atlas Toolbox*') { return }
+    $toolboxPath = Join-Path -Path $script:TempDir -ChildPath 'toolbox.exe'
+    Invoke-AtlasDownload -Uri 'https://github.com/Atlas-OS/atlas-toolbox/releases/latest/download/AtlasToolbox-Setup.exe' -Destination $toolboxPath -Description 'Atlas Toolbox'
+    Start-AtlasInstaller -FilePath $toolboxPath -ArgumentList '/verysilent /install /MERGETASKS="desktopicon"' -Description 'Atlas Toolbox'
+}
+
+function Install-BraveBrowser  { Invoke-WingetInstall -Id 'Brave.Brave'       -Description 'Brave Browser'    }
+function Install-FirefoxBrowser { Invoke-WingetInstall -Id 'Mozilla.Firefox'   -Description 'Mozilla Firefox'  }
+function Install-ChromeBrowser  { Invoke-WingetInstall -Id 'Google.Chrome'     -Description 'Google Chrome'    }
+
+# ── Entry point ──────────────────────────────────────────────────────────────
+
 New-Item -ItemType Directory -Path $script:TempDir -Force | Out-Null
 try {
-    if ($Toolbox) { Install-AtlasToolbox; return }
-    if ($Brave) { Install-BraveBrowser; return }
-    if ($Firefox) { Install-FirefoxBrowser; return }
-    if ($Chrome) { Install-ChromeBrowser; return }
+    if ($Toolbox)  { Install-AtlasToolbox;    return }
+    if ($Brave)    { Install-BraveBrowser;    return }
+    if ($Firefox)  { Install-FirefoxBrowser;  return }
+    if ($Chrome)   { Install-ChromeBrowser;   return }
 
+    # Default: base software (VC++, archive tool, DirectX)
+    if (-not (Test-AtlasInternetConnectivity)) {
+        Write-Warning 'No internet connection detected. Skipping base software installation (VC++ runtimes, NanaZip, DirectX). These can be installed manually from the Atlas Toolbox once online.'
+        exit 0
+    }
+
+    Assert-AtlasWingetReady
     Install-VisualCppRuntimes
     Install-ArchiveTool
     Install-DirectXRuntime

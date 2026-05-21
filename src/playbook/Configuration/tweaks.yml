@@ -35,6 +35,7 @@ actions:
   - !task: {path: 'tweaks\networking\shares\restrict-anonymous-access.yml'}
   - !task: {path: 'tweaks\networking\shares\restrict-anonymous-enumeration.yml'}
   - !task: {path: 'tweaks\networking\shares\disable-smb-bandwidth-throttling.yml'}
+  - !task: {path: 'tweaks\networking\shares\disable-smb1.yml'}
 
 
 
@@ -81,7 +82,6 @@ actions:
   # -----------------------------------------------------
   - !writeStatus: {status: 'Running privacy tweaks'}
   - !task: {path: 'tweaks\privacy\config-app-permissions.yml'}
-  - !task: {path: 'tweaks\privacy\config-windows-media-player.yml'}
   - !task: {path: 'tweaks\privacy\disable-activity-feed.yml'}
   - !task: {path: 'tweaks\privacy\disable-app-launch-tracking.yml'}
   - !task: {path: 'tweaks\privacy\disable-experimentation.yml'}
@@ -205,12 +205,9 @@ actions:
   - !task: {path: 'tweaks\qol\taskbar\disable-cloud-optimized-content.yml'}
   - !task: {path: 'tweaks\qol\taskbar\disable-desktop-peek.yml'}
   - !task: {path: 'tweaks\qol\taskbar\disable-news-and-interests.yml'}
-  - !task: {path: 'tweaks\qol\taskbar\disable-tablet-mode.yml'}
-  - !task: {path: 'tweaks\qol\taskbar\hide-meet-now.yml'}
   - !task: {path: 'tweaks\qol\taskbar\hide-task-view.yml'}
   - !task: {path: 'tweaks\qol\taskbar\config-pins.yml'}
   - !task: {path: 'tweaks\qol\taskbar\disable-copilot.yml'}
-  - !task: {path: 'tweaks\qol\taskbar\disable-windows-chat.yml'}
   - !task: {path: 'tweaks\qol\taskbar\set-to-left.yml'}
   - !task: {path: 'tweaks\qol\taskbar\end-task.yml'}
 
@@ -309,6 +306,8 @@ actions:
   - !writeStatus: {status: 'Running security tweaks'}
   - !task: {path: 'tweaks\security\block-anonymous-enum-sam.yml'}
   - !task: {path: 'tweaks\security\disable-remote-assistance.yml'}
+  - !task: {path: 'tweaks\security\disable-ie-mode.yml'}
+  - !task: {path: 'tweaks\security\prevent-device-encryption.yml'}
 
 
 
@@ -358,6 +357,7 @@ actions:
   # categories.
   # -----------------------------------------------------
   - !writeStatus: {status: 'Running miscellaneous tweaks'}
+  - !task: {path: 'tweaks\misc\cleanup-windows-old.yml'}
   - !task: {path: 'tweaks\misc\config-time.yml'}
   - !task: {path: 'tweaks\misc\delete-windows-specific-files.yml'}
   - !task: {path: 'tweaks\misc\rebuild-perf-counters.yml'}

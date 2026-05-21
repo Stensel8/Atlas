@@ -17,7 +17,7 @@ fltmc > nul 2>&1 || (
 reg add "HKLM\SOFTWARE\AtlasOS\Services\%settingName%" /v state /t REG_DWORD /d %stateValue% /f > nul
 reg add "HKLM\SOFTWARE\AtlasOS\Services\%settingName%" /v path /t REG_SZ /d "%scriptPath%" /f > nul
 
-call "%windir%\AtlasModules\Scripts\wingetCheck.cmd"
+powershell -NoP -EP Bypass -File "%windir%\AtlasModules\Scripts\WingetCheck.ps1"
 if %errorlevel% neq 0 exit /b 1
 
 echo Enabling Web Search ^& Search Highlights...

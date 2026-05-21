@@ -49,7 +49,10 @@ actions:
     # OneDrive
     # The actual OneDrive setup in Windows is stripped at a component-level in the miscellaneous package
   - !writeStatus: {status: 'Removing OneDrive'}
-  - !run: {exeDir: true, exe: 'ONED.cmd'}
+  - !powerShell:
+    command: '& """.\AtlasModules\Scripts\Internal\OneDrive.ps1"""'
+    exeDir: true
+    wait: true
 
     # Windows components and Telemetry
   - !writeStatus: {status: 'Removing components'}

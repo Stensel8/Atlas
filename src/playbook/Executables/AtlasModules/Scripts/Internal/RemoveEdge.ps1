@@ -445,7 +445,11 @@ if ($UninstallEdge) {
             # Project originally made by ShadowWhisperer and licensed under CC0-1.0.
             # https://github.com/ShadowWhisperer/Remove-MS-Edge
             Write-Status 'Trying legacy Edge removal fallback...'
-            if ($null -ne (Get-Command curl.exe -ErrorAction SilentlyContinue)) {
+            $bundledEdgeBat = Join-Path $PSScriptRoot 'Edge.bat'
+            if (Test-Path -LiteralPath $bundledEdgeBat -PathType Leaf) {
+                Copy-Item -LiteralPath $bundledEdgeBat -Destination $legacyScript -Force
+            }
+            elseif ($null -ne (Get-Command curl.exe -ErrorAction SilentlyContinue)) {
                 & curl.exe -LSs "https://raw.githubusercontent.com/ShadowWhisperer/Remove-MS-Edge/main/Batch/Edge.bat" -o "$legacyScript"
             }
             else {

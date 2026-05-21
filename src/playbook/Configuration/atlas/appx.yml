@@ -36,7 +36,7 @@ actions:
   - !appx: {name: 'Disney.37853FC22B2CE*', type: family}
   - !appx: {name: 'SpotifyAB.SpotifyMusic*', type: family}
   - !appx: {name: 'Microsoft.549981C3F5F10*', type: family} # Cortana
-  - !appx: {name: 'Microsoft.XboxApp*', type: family} # Xbox Console Companion (deprecated)
+  - !appx: {name: 'Microsoft.XboxApp*', type: family} # Xbox Console Companion (removed in 23H2)
   - !appx: {name: 'microsoft.windowscommunicationsapps*', type: family} # Mail and Calendar
   - !appx: {name: 'Microsoft.MSPaint*', type: family} # Paint 3D
   - !appx: {name: 'Microsoft.Paint*', type: family}
@@ -46,7 +46,6 @@ actions:
   - !appx: {name: 'Microsoft.ZuneMusic*', type: family} # Media Player
   - !appx: {name: 'MicrosoftCorporationII.MicrosoftFamily*', type: family}
   - !appx: {name: 'MicrosoftCorporationII.QuickAssist*', type: family}
-  - !appx: {name: 'Microsoft.MixedReality.Portal*', type: family}
   - !appx: {name: 'Microsoft.Windows.DevHome*', type: family}
   - !appx: {name: 'Microsoft.BingWeather*', type: family}
   - !appx: {name: 'Microsoft.BingNews*', type: family}
@@ -55,7 +54,6 @@ actions:
   - !appx: {name: 'Microsoft.BingSearch*', type: family}
   - !appx: {name: 'Microsoft.OutlookForWindows*', type: family}
   - !appx: {name: 'Microsoft.GetHelp*', type: family}
-  - !appx: {name: 'Microsoft.Microsoft3DViewer*', type: family}
   - !appx: {name: 'Microsoft.MicrosoftOfficeHub*', type: family}
   - !appx: {name: 'Microsoft.MicrosoftSolitaireCollection*', type: family}
   - !appx: {name: 'Microsoft.MicrosoftStickyNotes*', type: family}

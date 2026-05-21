@@ -23,7 +23,7 @@ reg add "HKLM\SOFTWARE\AtlasOS\Services\%settingName%" /v path /t REG_SZ /d "%sc
 :: End of state and path update
 
 :: Check if WinGet is functional or not
-call "%windir%\AtlasModules\Scripts\wingetCheck.cmd"
+powershell -NoP -EP Bypass -File "%windir%\AtlasModules\Scripts\WingetCheck.ps1"
 if %ERRORLEVEL% NEQ 0 exit /b 1
 
 echo Installing Process Explorer...

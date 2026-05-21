@@ -60,9 +60,9 @@ if (($null -eq $ids) -or ($ids.Count -le 0)) {
 # Not done in PowerShell as it's too complicated, it's just easiest to use the actual tool
 $viveZip = Get-ChildItem "ViVeTool-*.zip" -Name
 if ($arm) {
-    $viveZip = $viveZip | Where-Object { $_ -match '-ARM64CLR' }
+    $viveZip = $viveZip | Where-Object { $_ -match '-SnapdragonArm64' }
 } else {
-    $viveZip = $viveZip | Where-Object { $_ -notmatch '-ARM64CLR' }
+    $viveZip = $viveZip | Where-Object { $_ -notmatch '-SnapdragonArm64' }
 }
 
 # Extract & setup ViVeTool

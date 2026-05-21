@@ -2,22 +2,57 @@
 title: Disable Scheduled Tasks
 description: Disables scheduled tasks to prevent automatic tasks from running at startup, consuming resources and collecting user data
 actions:
-    # Updates compatibility database
+    # Application Experience / compatibility telemetry
   - !scheduledTask: {path: '\Microsoft\Windows\Application Experience\PcaPatchDbTask', operation: disable, ignoreErrors: true}
+  - !scheduledTask: {path: '\Microsoft\Windows\Application Experience\Microsoft Compatibility Appraiser', operation: disable, ignoreErrors: true}
+  - !scheduledTask: {path: '\Microsoft\Windows\Application Experience\ProgramDataUpdater', operation: disable, ignoreErrors: true}
+  - !scheduledTask: {path: '\Microsoft\Windows\Application Experience\StartupAppTask', operation: disable, ignoreErrors: true}
 
-    # UCPD - might not exist on all installs, so ignore errors
+    # AppX deployment
   - !scheduledTask: {path: '\Microsoft\Windows\AppxDeploymentClient\UCPD velocity', operation: disable, ignoreErrors: true}
 
-    # Data collection
+    # Disk diagnostic data collection
   - !scheduledTask: {path: '\Microsoft\Windows\DiskDiagnostic\Microsoft-Windows-DiskDiagnosticDataCollector', operation: disable, ignoreErrors: true}
+  - !scheduledTask: {path: '\Microsoft\Windows\Autochk\Proxy', operation: disable, ignoreErrors: true}
 
-    # CEIP - safety measure
+    # CEIP
   - !scheduledTask: {path: '\Microsoft\Windows\Customer Experience Improvement Program\Consolidator', operation: disable, ignoreErrors: true}
-  - !scheduledTask: {path: '\Microsoft\Windows\Customer Experience Improvement Program\UsbCeip', operation: disable, ignoreErrors: true} 
+  - !scheduledTask: {path: '\Microsoft\Windows\Customer Experience Improvement Program\UsbCeip', operation: disable, ignoreErrors: true}
+  - !scheduledTask: {path: '\Microsoft\Windows\Customer Experience Improvement Program\BthSQM', operation: disable, ignoreErrors: true}
+  - !scheduledTask: {path: '\Microsoft\Windows\Customer Experience Improvement Program\Uploader', operation: disable, ignoreErrors: true}
+
+    # Cloud experience / device info telemetry
+  - !scheduledTask: {path: '\Microsoft\Windows\CloudExperienceHost\CreateObjectTask', operation: disable, ignoreErrors: true}
+  - !scheduledTask: {path: '\Microsoft\Windows\Device Information\Device', operation: disable, ignoreErrors: true}
+  - !scheduledTask: {path: '\Microsoft\Windows\Device Information\Device User', operation: disable, ignoreErrors: true}
+
+    # Feedback / SIUF surveys
+  - !scheduledTask: {path: '\Microsoft\Windows\Feedback\Siuf\DmClient', operation: disable, ignoreErrors: true}
+  - !scheduledTask: {path: '\Microsoft\Windows\Feedback\Siuf\DmClientOnScenarioDownload', operation: disable, ignoreErrors: true}
+
+    # Network info collection
+  - !scheduledTask: {path: '\Microsoft\Windows\NetTrace\GatherNetworkInfo', operation: disable, ignoreErrors: true}
+
+    # Windows Error Reporting queue (complements registry disable)
+  - !scheduledTask: {path: '\Microsoft\Windows\Windows Error Reporting\QueueReporting', operation: disable, ignoreErrors: true}
+
+    # WinSAT benchmark — runs periodically, spikes CPU/disk for no benefit on Atlas
+  - !scheduledTask: {path: '\Microsoft\Windows\Maintenance\WinSAT', operation: disable, ignoreErrors: true}
+
+    # WaaS Medic — tries to undo Windows Update policy changes
+  - !scheduledTask: {path: '\Microsoft\Windows\WaaSMedic\PlugScheduler', operation: disable, ignoreErrors: true}
+
+    # Location
+  - !scheduledTask: {path: '\Microsoft\Windows\Location\Notifications', operation: disable, ignoreErrors: true}
+  - !scheduledTask: {path: '\Microsoft\Windows\Location\WindowsActionDialog', operation: disable, ignoreErrors: true}
+
+    # Family safety (not relevant for most Atlas users)
+  - !scheduledTask: {path: '\Microsoft\Windows\Shell\FamilySafetyMonitor', operation: disable, ignoreErrors: true}
+  - !scheduledTask: {path: '\Microsoft\Windows\Shell\FamilySafetyRefreshTask', operation: disable, ignoreErrors: true}
 
     # A/B testing usage reports
   - !scheduledTask: {path: '\Microsoft\Windows\Flighting\FeatureConfig\UsageDataReporting', operation: disable, ignoreErrors: true}
   - !registryValue:
     path: 'HKLM\System\CurrentControlSet\Control\Ubpm'
-    value: 'CriticalMaintenance_UsageDataReporting' # Remove from automatic maintenance
+    value: 'CriticalMaintenance_UsageDataReporting'
     operation: delete

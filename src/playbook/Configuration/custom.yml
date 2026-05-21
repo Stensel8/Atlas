@@ -36,8 +36,8 @@ actions:
     handleExitCodes: { "!0": halt }
 
   # Prevent annoying notifications during deployment
-  - !cmd:
-    command: "DISABLENOTIFS.cmd"
+  - !powerShell:
+    command: '& """.\AtlasModules\Scripts\Internal\Notifications.ps1""" -Mode Disable'
     exeDir: true
     wait: true
     runas: currentUserElevated
