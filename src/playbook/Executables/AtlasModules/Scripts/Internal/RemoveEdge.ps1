@@ -181,7 +181,10 @@ function DisableEdgeUpdateInfrastructure {
             'MicrosoftEdgeUpdateTaskMachineCore',
             'MicrosoftEdgeUpdateTaskMachineUA'
         )) {
-        & schtasks.exe /delete /tn $taskName /f 1>$null 2>$null
+        $task = Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue
+        if ($task) {
+            Unregister-ScheduledTask -InputObject $task -Confirm:$false
+        }
     }
 }
 
