@@ -32,7 +32,8 @@ actions:
   - !writeStatus: {status: 'Disabling Location'}
   - !powerShell:
     command: |
-      Start-Process -FilePath (Join-Path $env:windir 'AtlasDesktop\3. General Configuration\Location\Disable Location (default).cmd') -ArgumentList '/silent' -Wait
+      $script = Join-Path $env:windir 'AtlasDesktop\3. General Configuration\Location\Disable Location (default).ps1'
+      & $script -Silent
     exeDir: true
     wait: true
     runas: currentUserElevated

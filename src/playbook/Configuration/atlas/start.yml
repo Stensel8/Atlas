@@ -49,6 +49,16 @@ actions:
     option: 'install-toolbox'
     runas: currentUserElevated
 
+    #UniGetUI
+  - !writeStatus: {status: 'Installing UniGetUI', option: 'install-unigetui'}
+  - !powerShell:
+    command: '.\SOFTWARE.ps1 -UniGetUI'
+    exeDir: true
+    wait: true
+    weight: 100
+    option: 'install-unigetui'
+    runas: currentUserElevated
+
     # Browsers
   - !writeStatus: {status: 'Installing Brave', option: 'browser-brave'}
   - !powerShell:

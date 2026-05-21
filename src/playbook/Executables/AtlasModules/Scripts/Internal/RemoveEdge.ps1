@@ -503,6 +503,20 @@ if ($UninstallEdge) {
         Write-Status 'Edge is already uninstalled.' -Level Success
     }
 
+    # Remove stale Edge shortcuts from common Start Menu and public Desktop
+    foreach ($dir in @(
+        [Environment]::GetFolderPath('CommonPrograms'),
+        [Environment]::GetFolderPath('CommonDesktopDirectory')
+    )) {
+        if (-not (Test-Path $dir)) { continue }
+        Get-ChildItem -Path $dir -Filter '*.lnk' -Recurse -ErrorAction SilentlyContinue |
+            Where-Object { $_.BaseName -match '\bEdge\b' } |
+            ForEach-Object {
+                Write-Status "Removing Edge shortcut: $($_.Name)" -Level Info
+                Remove-Item -LiteralPath $_.FullName -Force -ErrorAction SilentlyContinue
+            }
+    }
+
     Write-Output ""
 }
 

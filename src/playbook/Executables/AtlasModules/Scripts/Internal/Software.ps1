@@ -3,7 +3,8 @@ param (
     [switch]$Chrome,
     [switch]$Brave,
     [switch]$Firefox,
-    [switch]$Toolbox
+    [switch]$Toolbox,
+    [switch]$UniGetUI
 )
 
 $ErrorActionPreference = 'Stop'
@@ -111,7 +112,7 @@ function Invoke-WingetInstall {
     Write-Output "Installing $Description..."
     & winget install --id $Id --silent --accept-package-agreements --accept-source-agreements --no-upgrade 2>&1 | Out-Null
     # Treat "already installed" / "no upgrade" exit codes as success
-    if ($LASTEXITCODE -notin @(0, -1978335189, -1978335147, -1978335212)) {
+    if ($LASTEXITCODE -notin @(0, -1978335135, -1978335189, -1978335147, -1978335212)) {
         Write-Warning "$Description (winget id: $Id) returned exit code $LASTEXITCODE."
     }
 }
@@ -119,7 +120,6 @@ function Invoke-WingetInstall {
 # ── Software installers ──────────────────────────────────────────────────────
 
 function Install-VisualCppRuntimes {
-    Invoke-WingetInstall -Id 'Microsoft.VCRedist.2015+.x86' -Description 'Visual C++ Runtime 2015+ x86'
     Invoke-WingetInstall -Id 'Microsoft.VCRedist.2015+.x64' -Description 'Visual C++ Runtime 2015+ x64'
 }
 
@@ -154,18 +154,20 @@ function Install-AtlasToolbox {
     Start-AtlasInstaller -FilePath $toolboxPath -ArgumentList '/verysilent /install /MERGETASKS="desktopicon"' -Description 'Atlas Toolbox'
 }
 
-function Install-BraveBrowser  { Invoke-WingetInstall -Id 'Brave.Brave'       -Description 'Brave Browser'    }
-function Install-FirefoxBrowser { Invoke-WingetInstall -Id 'Mozilla.Firefox'   -Description 'Mozilla Firefox'  }
-function Install-ChromeBrowser  { Invoke-WingetInstall -Id 'Google.Chrome'     -Description 'Google Chrome'    }
+function Install-BraveBrowser   { Invoke-WingetInstall -Id 'Brave.Brave'          -Description 'Brave Browser'    }
+function Install-FirefoxBrowser { Invoke-WingetInstall -Id 'Mozilla.Firefox'      -Description 'Mozilla Firefox'  }
+function Install-ChromeBrowser  { Invoke-WingetInstall -Id 'Google.Chrome'        -Description 'Google Chrome'    }
+function Install-UniGetUI       { Invoke-WingetInstall -Id 'Devolutions.UniGetUI' -Description 'UniGetUI'         }
 
 # ── Entry point ──────────────────────────────────────────────────────────────
 
 New-Item -ItemType Directory -Path $script:TempDir -Force | Out-Null
 try {
-    if ($Toolbox)  { Install-AtlasToolbox;    return }
-    if ($Brave)    { Install-BraveBrowser;    return }
-    if ($Firefox)  { Install-FirefoxBrowser;  return }
-    if ($Chrome)   { Install-ChromeBrowser;   return }
+    if ($Toolbox)   { Install-AtlasToolbox;    return }
+    if ($UniGetUI)  { Install-UniGetUI;        return }
+    if ($Brave)     { Install-BraveBrowser;    return }
+    if ($Firefox)   { Install-FirefoxBrowser;  return }
+    if ($Chrome)    { Install-ChromeBrowser;   return }
 
     # Default: base software (VC++, archive tool, DirectX)
     if (-not (Test-AtlasInternetConnectivity)) {
