@@ -3,7 +3,7 @@
 
 function Set-AtlasTheme {
     & "$windir\AtlasModules\initPowerShell.ps1"
-    Set-Theme -Path "$([Environment]::GetFolderPath('Windows'))\Resources\Themes\atlas-v0.4.x-dark.theme"
+    Set-Theme -Path "$([Environment]::GetFolderPath('Windows'))\Resources\Themes\atlas-v0.5.x-dark.theme"
     Set-ThemeMRU
 
     # Disable the Windows Spotlight overlay on the lock screen via machine policy
@@ -24,7 +24,7 @@ function Set-AtlasTheme {
 
     # Store literal %windir% so Windows expands it at runtime (same behavior as reg.exe REG_SZ)
     $null = New-Item -Path 'HKCU:\Software\Policies\Microsoft\Windows\Personalization' -Force -ErrorAction SilentlyContinue
-    Set-ItemProperty -Path 'HKCU:\Software\Policies\Microsoft\Windows\Personalization' -Name 'ThemeFile' -Value '%windir%\Resources\Themes\atlas-v0.4.x-dark.theme' -Type String -Force
+    Set-ItemProperty -Path 'HKCU:\Software\Policies\Microsoft\Windows\Personalization' -Name 'ThemeFile' -Value '%windir%\Resources\Themes\atlas-v0.5.x-dark.theme' -Type String -Force
 }
 
 # Function to change the tooltip color to blue
