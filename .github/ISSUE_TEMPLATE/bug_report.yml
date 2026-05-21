@@ -57,6 +57,8 @@ body:
     label: Atlas Version
     description: 'If you''re on v0.4.0, see the workarounds page first: https://github.com/orgs/Atlas-OS/projects/7/views/5'
     options:
+    - Atlas v0.5.1 for Windows 11 25H2 (build 26200)
+    - Atlas v0.5.1 for Windows 11 26H2 (build 26300)
     - Atlas v0.5.0 for Windows 11 24H2
     - Atlas v0.5.0 for Windows 11 25H2
   validations:
@@ -73,6 +75,14 @@ body:
       - GPU [include brand, specs, driver version]
   validations:
     required: true
+
+- type: textarea
+  attributes:
+    label: Atlas Diagnostics
+    description: |
+      Run **Check Atlas Installation.ps1** from `C:\Windows\AtlasDesktop\9. Troubleshooting\` and paste the full output here.
+      This helps us diagnose your Atlas installation state quickly.
+    placeholder: Paste the full output of Check Atlas Installation.ps1 here...
 
 - type: textarea
   attributes:
