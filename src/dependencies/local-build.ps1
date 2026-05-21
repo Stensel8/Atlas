@@ -324,19 +324,6 @@ try {
         $stagedPlaybookConf = Test-Path -LiteralPath $tempPlaybookConfPath
     }
 
-    # Patch UniqueId so AME Wizard Beta doesn't flag this as a tampered official playbook.
-    # The committed playbook.conf keeps the upstream value; only the packed .apbx gets a test UUID.
-    $localTestUniqueId = [System.Guid]::NewGuid().ToString()
-    $pbConfTempPath = Join-Path -Path (Get-PlaybookTempPath) -ChildPath 'playbook.conf'
-    if (-not (Test-Path -LiteralPath $pbConfTempPath)) {
-        Copy-Item -Path 'playbook.conf' -Destination $pbConfTempPath -Force
-    }
-    $pbConfContent = Get-Content -Path $pbConfTempPath -Raw -Encoding UTF8
-    $pbConfContent = $pbConfContent -replace '<UniqueId>[^<]+</UniqueId>', "<UniqueId>$localTestUniqueId</UniqueId>"
-    [System.IO.File]::WriteAllText($pbConfTempPath, $pbConfContent, [System.Text.Encoding]::UTF8)
-    $stagedPlaybookConf = $true
-    Write-Host "Local build: patched UniqueId to '$localTestUniqueId'." -ForegroundColor DarkGray
-
     $customYmlRelativePath = Join-Path -Path 'Configuration' -ChildPath 'custom.yml'
     # copy custom.yml so we can sneak in live log entry without touching real file
     $stagedCustomYml = $false
