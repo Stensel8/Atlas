@@ -2,7 +2,8 @@
 title: Defaults
 description: Run default AtlasFolder scripts
 actions:
-  - !writeStatus: {status: 'Applying default Atlas Folder settings'}
+  # writeStatus strings are truncated by AME Wizard at ~28 characters — keep them short
+  - !writeStatus: {status: 'Applying Atlas Folder defaults'}
   - !cmd:
     command: 'cmd /c "reg import .\DEFAULT.reg > nul 2>&1"'
     exeDir: true

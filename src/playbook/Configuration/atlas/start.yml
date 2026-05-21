@@ -9,7 +9,8 @@ actions:
 
   ################ NO LOCAL BUILD ################
 
-  - !writeStatus: {status: 'Disabling legacy Windows features'}
+  # writeStatus strings are truncated by AME Wizard at ~28 characters — keep them short
+  - !writeStatus: {status: 'Disabling legacy features'}
   - !run: {exe: 'DISM.exe', args: '/Online /Disable-Feature /FeatureName:VBScript /NoRestart', weight: 30, ignoreErrors: true}
   - !run: {exe: 'DISM.exe', args: '/Online /Disable-Feature /FeatureName:WindowsMediaPlayer /NoRestart', weight: 30, ignoreErrors: true}
 
