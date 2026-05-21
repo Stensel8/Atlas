@@ -35,28 +35,14 @@ if ($Browser -and $browserMap.ContainsKey($Browser)) {
     $associations += $browserMap[$Browser]
 }
 
-# UCPD bypass: copy powershell.exe to a random temp name so UCPD does not block UserChoice writes
-# https://hitco.at/blog/windows-userchoice-protection-driver-ucpd/
-Write-Output 'Making temporary PowerShell...'
-$powershellPath = (Get-Command powershell.exe -ErrorAction Stop).Source
-$powershellDir  = Split-Path -Parent $powershellPath
-$randSuffix     = -join ((1..16) | ForEach-Object { [char](Get-Random -Minimum 97 -Maximum 123) })
-$powershellTemp = Join-Path $powershellDir "powershell$randSuffix.exe"
-Copy-Item -LiteralPath $powershellPath -Destination $powershellTemp -Force
+$hkuSids = (& reg query HKU 2>&1) |
+    Where-Object { $_ -match '^HKEY_USERS\\(S-[\d-]+|AME_UserHive_\w+)$' } |
+    ForEach-Object { ($_ -replace '^HKEY_USERS\\', '') }
 
-try {
-    $hkuSids = (& reg query HKU 2>&1) |
-        Where-Object { $_ -match '^HKEY_USERS\\(S-[\d-]+|AME_UserHive_\w+)$' } |
-        ForEach-Object { ($_ -replace '^HKEY_USERS\\', '') }
+foreach ($sid in $hkuSids) {
+    $subkeys = (& reg query "HKU\$sid" 2>&1) -join "`n"
+    if ($subkeys -notmatch '(Volatile Environment|AME_UserHive_)') { continue }
 
-    foreach ($sid in $hkuSids) {
-        $subkeys = (& reg query "HKU\$sid" 2>&1) -join "`n"
-        if ($subkeys -notmatch '(Volatile Environment|AME_UserHive_)') { continue }
-
-        Write-Output "Setting associations for $sid..."
-        & $powershellTemp -NoP -NonI -EP Bypass -File $assocScript 'Placeholder' $sid @associations
-    }
-} finally {
-    Write-Output 'Deleting temporary PowerShell...'
-    Remove-Item -LiteralPath $powershellTemp -Force -ErrorAction SilentlyContinue
+    Write-Output "Setting associations for $sid..."
+    & $assocScript 'Placeholder' $sid @associations
 }

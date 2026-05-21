@@ -158,36 +158,34 @@ function Get-Time {
   Write-Output $dateTimeHex
 }
 
-function Remove-UserChoiceKey {
-  param (
-    [Parameter( Position = 0, Mandatory = $True )]
-    [String]
-    $Key
-  )
-  $code = @'
-  using System;
-  using System.Runtime.InteropServices;
-  using Microsoft.Win32;
+# Bypass UCPD by deleting the UserChoice key entirely (removes the DENY ACL) via regini.exe,
+# then immediately recreating it with the correct ProgId and Hash before Windows re-applies the ACL.
+# regini.exe is a signed Windows tool not on UCPD's enforcement list.
+# Technique: https://github.com/feiglein74/FTA-Manager
+function Set-UserChoiceViaRegini {
+    param(
+        [Parameter(Mandatory)][string]$RegPath,
+        [Parameter(Mandatory)][string]$ProgId,
+        [Parameter(Mandatory)][string]$Hash
+    )
 
-  namespace Registry {
-    public class Utils {
-      [DllImport("advapi32.dll", SetLastError = true)]
-      private static extern int RegOpenKeyEx(UIntPtr hKey, string subKey, int ulOptions, int samDesired, out UIntPtr hkResult);
+    $tempDir = Join-Path $env:TEMP ([System.IO.Path]::GetRandomFileName().Replace('.', ''))
+    New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
 
-      [DllImport("advapi32.dll", SetLastError=true, CharSet = CharSet.Unicode)]
-      private static extern uint RegDeleteKey(UIntPtr hKey, string subKey);
+    try {
+        $deleteIni = Join-Path $tempDir 'delete.ini'
+        [System.IO.File]::WriteAllText($deleteIni, "$RegPath [DELETE]`r`n", [System.Text.Encoding]::ASCII)
+        & regini.exe $deleteIni 2>&1 | Out-Null
 
-      public static void DeleteKey(string key) {
-        UIntPtr hKey = UIntPtr.Zero;
-        RegOpenKeyEx((UIntPtr)0x80000003u, key, 0, 0x20019, out hKey);
-        RegDeleteKey((UIntPtr)0x80000003u, key);
-      }
-     }
-   }
-'@
-  Add-Type -TypeDefinition $code
+        Start-Sleep -Milliseconds 100
 
-  [Registry.Utils]::DeleteKey($Key)
+        $setIni = Join-Path $tempDir 'set.ini'
+        $setContent = "$RegPath`r`nProgId=`"$ProgId`"`r`nHash=`"$Hash`"`r`n0`r`n"
+        [System.IO.File]::WriteAllText($setIni, $setContent, [System.Text.Encoding]::ASCII)
+        & regini.exe $setIni 2>&1 | Out-Null
+    } finally {
+        Remove-Item -LiteralPath $tempDir -Recurse -Force -ErrorAction SilentlyContinue
+    }
 }
 
 $Hive = $args[1]
@@ -230,9 +228,6 @@ for ($i = 2; $i -lt $args.Length; $i++) {
     If (-NOT (Test-Path "HKU:\$Hive\SOFTWARE\Microsoft\Windows\Shell\Associations\UrlAssociations\$($splitArg[1])")) {
     New-Item -Path "HKU:\$Hive\SOFTWARE\Microsoft\Windows\Shell\Associations\UrlAssociations\$($splitArg[1])" -Force | Out-Null
     }
-    If (Test-Path "HKU:\$Hive\SOFTWARE\Microsoft\Windows\Shell\Associations\UrlAssociations\$($splitArg[1])\UserChoice") {
-    Remove-UserChoiceKey "$Hive\SOFTWARE\Microsoft\Windows\Shell\Associations\UrlAssociations\$($splitArg[1])\UserChoice"
-    }
     If (-NOT (Test-Path "HKU:\$Hive\SOFTWARE\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts")) {
     New-Item -Path "HKU:\$Hive\SOFTWARE\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts" -Force | Out-Null
     }
@@ -240,15 +235,13 @@ for ($i = 2; $i -lt $args.Length; $i++) {
 
     $dateTimeHex = Get-Time
     $hash = Get-Hash "$($splitArg[1])$Hive$($splitArg[2])$dateTimeHex$userExperience".ToLower()
-    [Microsoft.Win32.Registry]::SetValue("HKEY_USERS\$Hive\SOFTWARE\Microsoft\Windows\Shell\Associations\UrlAssociations\$($splitArg[1])\UserChoice", "Hash", $hash)
 
-    [Microsoft.Win32.Registry]::SetValue("HKEY_USERS\$Hive\SOFTWARE\Microsoft\Windows\Shell\Associations\UrlAssociations\$($splitArg[1])\UserChoice", "ProgId", "$($splitArg[2])")
+    $regPath = "\Registry\User\$Hive\Software\Microsoft\Windows\Shell\Associations\UrlAssociations\$($splitArg[1])\UserChoice"
+    Set-UserChoiceViaRegini -RegPath $regPath -ProgId $splitArg[2] -Hash $hash
+
   } else {
     If (-NOT (Test-Path "HKU:\$Hive\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FileExts\$($splitArg[0])")) {
     New-Item -Path "HKU:\$Hive\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FileExts\$($splitArg[0])" -Force | Out-Null
-    }
-    If (Test-Path "HKU:\$Hive\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FileExts\$($splitArg[0])\UserChoice") {
-    Remove-UserChoiceKey "$Hive\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FileExts\$($splitArg[0])\UserChoice"
     }
     If (-NOT (Test-Path "HKU:\$Hive\SOFTWARE\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts")) {
     New-Item -Path "HKU:\$Hive\SOFTWARE\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts" -Force | Out-Null
@@ -259,8 +252,8 @@ for ($i = 2; $i -lt $args.Length; $i++) {
       $dateTimeHex = Get-Time
       $hash = Get-Hash "$($splitArg[0])$Hive$($splitArg[1])$dateTimeHex$userExperience".ToLower()
 
-      [Microsoft.Win32.Registry]::SetValue("HKEY_USERS\$Hive\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FileExts\$($splitArg[0])\UserChoice", "Hash", $hash)
-      [Microsoft.Win32.Registry]::SetValue("HKEY_USERS\$Hive\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FileExts\$($splitArg[0])\UserChoice", "ProgId", "$($splitArg[1])")
+      $regPath = "\Registry\User\$Hive\Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\$($splitArg[0])\UserChoice"
+      Set-UserChoiceViaRegini -RegPath $regPath -ProgId $splitArg[1] -Hash $hash
     }
 
     [Microsoft.Win32.Registry]::SetValue("HKEY_CLASSES_ROOT\$($splitArg[0])", "", "$($splitArg[1])")
