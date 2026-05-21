@@ -1,0 +1,42 @@
+---
+title: Disable Paint AI Features
+description: Disables AI features in Paint (Cocreator, Generative Fill, Image Creator, Generative Erase, Remove Background) and sets WSAIFabricSvc to manual start.
+actions:
+  - !registryKey:
+    path: 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Paint'
+    operation: add
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Paint'
+    value: 'DisableCocreator'
+    data: '1'
+    type: REG_DWORD
+
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Paint'
+    value: 'DisableGenerativeFill'
+    data: '1'
+    type: REG_DWORD
+
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Paint'
+    value: 'DisableImageCreator'
+    data: '1'
+    type: REG_DWORD
+
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Paint'
+    value: 'DisableGenerativeErase'
+    data: '1'
+    type: REG_DWORD
+
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Paint'
+    value: 'DisableRemoveBackground'
+    data: '1'
+    type: REG_DWORD
+
+  - !registryValue:
+    path: 'HKLM\SYSTEM\CurrentControlSet\Services\WSAIFabricSvc'
+    value: 'Start'
+    data: '3'
+    type: REG_DWORD

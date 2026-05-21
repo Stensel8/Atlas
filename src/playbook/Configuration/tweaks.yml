@@ -111,6 +111,7 @@ actions:
   - !task: {path: 'tweaks\privacy\apps\edge-debloat.yml'}
   - !task: {path: 'tweaks\privacy\apps\brave-debloat.yml'}
   - !task: {path: 'tweaks\privacy\apps\disable-notepad-ai.yml'}
+  - !task: {path: 'tweaks\privacy\apps\disable-paint-ai.yml'}
 
   # -------------------------------------------------------------------------- #
   #  privacy\advertising                                                       #
