@@ -1,3 +1,5 @@
+#Requires -Version 5.1
+$ErrorActionPreference = 'Stop'
 # speeds up powershell startup time by 10x
 Set-StrictMode -Version 3.0
 

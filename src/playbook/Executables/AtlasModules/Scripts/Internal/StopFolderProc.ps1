@@ -1,3 +1,4 @@
+#Requires -Version 5.1
 $ErrorActionPreference = 'Stop'
 
 $executablesRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))

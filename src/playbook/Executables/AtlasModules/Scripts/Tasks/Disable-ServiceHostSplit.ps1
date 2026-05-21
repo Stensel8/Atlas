@@ -1,3 +1,4 @@
+#Requires -Version 5.1
 $ErrorActionPreference = 'Stop'
 
 # SvcHostSplitDisable reduces the process count on memory-rich systems. Xbox services are

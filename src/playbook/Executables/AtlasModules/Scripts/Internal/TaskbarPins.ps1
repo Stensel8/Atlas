@@ -1,8 +1,10 @@
+#Requires -Version 5.1
 param (
     [string]$Browser,
     [switch]$CurrentUserOnly,
     [switch]$NoExplorerStop
 )
+$ErrorActionPreference = 'Stop'
 $windir = [Environment]::GetFolderPath('Windows')
 Set-Location "$windir\AtlasModules\Scripts"
 ..\initPowerShell.ps1

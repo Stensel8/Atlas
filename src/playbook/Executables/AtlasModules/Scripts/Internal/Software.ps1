@@ -1,3 +1,4 @@
+#Requires -Version 5.1
 param (
     [switch]$Chrome,
     [switch]$Brave,

@@ -1,3 +1,4 @@
+#Requires -Version 5.1
 $ErrorActionPreference = 'Stop'
 
 $uninstallScript = Join-Path -Path ([Environment]::GetFolderPath('Windows')) -ChildPath 'AtlasDesktop\6. Advanced Configuration\Process Explorer\Uninstall Process Explorer.cmd'

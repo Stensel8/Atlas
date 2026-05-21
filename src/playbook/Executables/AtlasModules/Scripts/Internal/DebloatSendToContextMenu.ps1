@@ -1,7 +1,9 @@
+#Requires -Version 5.1
 param (
     [array]$Disable,
     [array]$Enable
 )
+$ErrorActionPreference = 'Stop'
 
 $removableDrivePath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer"
 $removableDriveValue = "NoDrivesInSendToMenu"

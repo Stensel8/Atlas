@@ -1,3 +1,5 @@
+#Requires -Version 5.1
+$ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.Drawing
 $img = [System.Drawing.Image]::FromFile((Get-Item '.\user.png'))
 

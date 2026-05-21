@@ -1,3 +1,4 @@
+#Requires -Version 5.1
 Param(
     [switch]$AddLiveLog,
     [switch]$ReplaceOldPlaybook,

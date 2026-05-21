@@ -1,7 +1,9 @@
+#Requires -Version 5.1
 param (
 	[Parameter( Mandatory = $True )]
 	[string]$FilePath
 )
+$ErrorActionPreference = 'Stop'
 
 Set-StrictMode -Version 3.0
 

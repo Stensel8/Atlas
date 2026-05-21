@@ -1,6 +1,8 @@
+#Requires -Version 5.1
 param (
     [string]$Browser
 )
+$ErrorActionPreference = 'Stop'
 if (!$Browser) {
     $ArgString = "`"${Env:WinDir}\AtlasModules\Scripts\taskbarPins.ps1`""
     $Action = New-ScheduledTaskAction -Execute "powershell.exe" `

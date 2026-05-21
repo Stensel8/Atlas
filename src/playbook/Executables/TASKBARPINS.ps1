@@ -1,6 +1,8 @@
+#Requires -Version 5.1
 param (
     [string]$Browser
 )
+$ErrorActionPreference = 'Stop'
 
 $scriptPath = Join-Path $PSScriptRoot 'AtlasModules\Scripts\taskbarPins.ps1'
 if (!(Test-Path $scriptPath -PathType Leaf)) {

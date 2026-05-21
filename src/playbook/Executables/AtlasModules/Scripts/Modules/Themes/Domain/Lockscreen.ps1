@@ -1,3 +1,4 @@
+#Requires -Version 5.1
 function Set-LockscreenImage {
     param (
         [ValidateNotNullOrEmpty()]

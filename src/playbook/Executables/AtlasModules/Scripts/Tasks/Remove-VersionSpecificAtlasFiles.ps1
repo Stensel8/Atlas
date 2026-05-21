@@ -1,3 +1,4 @@
+#Requires -Version 5.1
 $ErrorActionPreference = 'Stop'
 
 $target = Join-Path -Path ([Environment]::GetFolderPath('Windows')) -ChildPath 'AtlasDesktop\4. Interface Tweaks\Start Menu'

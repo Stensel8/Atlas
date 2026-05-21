@@ -1,3 +1,4 @@
+#Requires -Version 5.1
 $ErrorActionPreference = 'Stop'
 
 $razerPath = Join-Path -Path ([Environment]::GetFolderPath('Windows')) -ChildPath 'Installer\Razer'

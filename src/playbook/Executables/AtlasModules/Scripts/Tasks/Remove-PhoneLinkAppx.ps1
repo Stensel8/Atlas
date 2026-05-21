@@ -1,3 +1,4 @@
+#Requires -Version 5.1
 $ErrorActionPreference = 'Stop'
 
 Get-AppxPackage -Name 'Microsoft.YourPhone*' | Remove-AppxPackage -ErrorAction Stop

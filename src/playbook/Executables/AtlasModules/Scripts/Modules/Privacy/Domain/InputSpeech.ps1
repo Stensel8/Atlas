@@ -1,3 +1,4 @@
+#Requires -Version 5.1
 function Disable-NETCLITelemetry {
     # 'User' scope writes to HKCU and persists across sessions without needing a restart
     [Environment]::SetEnvironmentVariable('DOTNET_CLI_TELEMETRY_OPTOUT', '1', 'User')

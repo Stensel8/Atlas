@@ -1,6 +1,7 @@
+#Requires -Version 5.1
 .\AtlasModules\initPowerShell.ps1
-$ProgressPreference = "SilentlyContinue"
-$ErrorActionPreference = "Stop"
+$ProgressPreference = 'SilentlyContinue'
+$ErrorActionPreference = 'Stop'
 $timeouts = @("--connect-timeout", "10", "--retry", "5", "--retry-delay", "0", "--retry-all-errors")
 
 # Initial variables

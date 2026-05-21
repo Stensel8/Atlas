@@ -1,0 +1,17 @@
+---
+title: Disable SMBv1
+description: Explicitly disables the legacy SMBv1 protocol, which is a major security vulnerability superseded by SMBv2/v3
+actions:
+    # Disable SMBv1 server-side
+  - !registryValue:
+    path: 'HKLM\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters'
+    value: 'SMB1'
+    data: '0'
+    type: REG_DWORD
+
+    # Disable SMBv1 client driver (mrxsmb10) — Start 4 = disabled
+  - !registryValue:
+    path: 'HKLM\SYSTEM\CurrentControlSet\Services\mrxsmb10'
+    value: 'Start'
+    data: '4'
+    type: REG_DWORD

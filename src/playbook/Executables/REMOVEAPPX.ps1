@@ -1,9 +1,11 @@
+#Requires -Version 5.1
 param (
     [Parameter(Mandatory = $true)]
     [string[]]$Packages,
     [Parameter(Mandatory = $false)]
     [switch]$Unregister = $false
 )
+$ErrorActionPreference = 'Stop'
 
 $basePath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore"
 $allPackages = Get-AppxPackage -AllUsers | Select-Object PackageFullName, PackageFamilyName, PackageUserInformation, NonRemovable

@@ -1,3 +1,4 @@
+@echo off
 taskkill /f /im OneDrive.exe > nul 2>&1
 for %%a in (
 	"%windir%\System32\OneDriveSetup.exe"

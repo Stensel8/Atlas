@@ -1,3 +1,5 @@
+#Requires -Version 5.1
+$ErrorActionPreference = 'Stop'
 $registryPath = 'HKLM:\SOFTWARE\AtlasOS\Services'
 
 if (-not (Test-Path $registryPath)) {

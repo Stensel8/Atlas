@@ -1,6 +1,8 @@
+#Requires -Version 5.1
 param (
     [string]$Browser
 )
+$ErrorActionPreference = 'Stop'
 
 $internalScript = Join-Path -Path $PSScriptRoot -ChildPath 'Internal\TaskbarPins.ps1'
 if (-not (Test-Path -LiteralPath $internalScript -PathType Leaf)) {

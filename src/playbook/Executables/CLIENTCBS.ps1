@@ -1,3 +1,5 @@
+#Requires -Version 5.1
+$ErrorActionPreference = 'Stop'
 # --------------------------------------------------------------
 # Remove ads from the 'Accounts' page in Immersive Control Panel
 # --------------------------------------------------------------

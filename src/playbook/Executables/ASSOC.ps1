@@ -1,3 +1,4 @@
+#Requires -Version 5.1
 function Get-Hash {
     [CmdletBinding()]
     param (
@@ -5,6 +6,7 @@ function Get-Hash {
       [string]
       $BaseInfo
     )
+$ErrorActionPreference = 'Stop'
 
 
     function local:Get-ShiftRight {

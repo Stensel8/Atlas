@@ -1,9 +1,11 @@
+#Requires -Version 5.1
 param (
     [switch]$Chrome,
     [switch]$Brave,
     [switch]$Firefox,
     [switch]$Toolbox
 )
+$ErrorActionPreference = 'Stop'
 
 $internalScript = Join-Path -Path $PSScriptRoot -ChildPath 'AtlasModules\Scripts\Internal\Software.ps1'
 if (-not (Test-Path -LiteralPath $internalScript -PathType Leaf)) {

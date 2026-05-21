@@ -1,3 +1,4 @@
+#Requires -Version 5.1
 function Disable-DeviceSetupSuggestions {
     # ScoobeSystemSettingEnabled controls the post-OOBE setup suggestions prompt
     $null = New-Item -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\UserProfileEngagement' -Force -ErrorAction SilentlyContinue

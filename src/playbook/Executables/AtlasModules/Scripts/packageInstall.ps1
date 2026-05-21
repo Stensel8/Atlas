@@ -1,4 +1,4 @@
-#Requires -RunAsAdministrator
+#Requires -Version 5.1 -RunAsAdministrator
 
 # GPL-3.0-only license
 # 🦆 Modified from: https://github.com/he3als/online-sxs

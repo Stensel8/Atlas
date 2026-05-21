@@ -1,4 +1,5 @@
-#Requires -RunAsAdministrator
+#Requires -Version 5.1 -RunAsAdministrator
+$ErrorActionPreference = 'Stop'
 
 Set-StrictMode -Version 3.0
 

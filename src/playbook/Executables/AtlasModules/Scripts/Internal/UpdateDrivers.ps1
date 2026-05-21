@@ -1,8 +1,10 @@
+#Requires -Version 5.1
 [CmdletBinding()]
 param (
     [switch]$RestartAfterUpdate,
     [switch]$Silent
 )
+$ErrorActionPreference = 'Stop'
 
 function Test-Admin {
     $currentUser = [System.Security.Principal.WindowsIdentity]::GetCurrent()

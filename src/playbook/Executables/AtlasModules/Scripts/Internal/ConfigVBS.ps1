@@ -1,8 +1,10 @@
+#Requires -Version 5.1
 [CmdletBinding()]
 param (
     [Parameter()][Switch]$DisableAllVBS,
     [Parameter()][Switch]$EnableMemoryIntegrity
 )
+$ErrorActionPreference = 'Stop'
 
 # https://learn.microsoft.com/en-us/windows/security/threat-protection/device-guard/enable-virtualization-based-protection-of-code-integrity#validate-enabled-vbs-and-memory-integrity-features
 

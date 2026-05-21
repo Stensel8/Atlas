@@ -1,3 +1,4 @@
+#Requires -Version 5.1
 $ErrorActionPreference = 'Stop'
 
 # Keep chipset/platform detection devices enabled while AMD installer detection remains under investigation.

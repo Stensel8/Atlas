@@ -9,9 +9,10 @@ actions:
 
   ################ NO LOCAL BUILD ################
 
-  - !writeStatus: {status: 'Enabling DirectPlay'}
-  - !run: {exe: 'DISM.exe', args: '/Online /Enable-Feature /FeatureName:"DirectPlay" /NoRestart /All', weight: 30}
-  
+  - !writeStatus: {status: 'Disabling legacy Windows features'}
+  - !run: {exe: 'DISM.exe', args: '/Online /Disable-Feature /FeatureName:VBScript /NoRestart', weight: 30}
+  - !run: {exe: 'DISM.exe', args: '/Online /Disable-Feature /FeatureName:WindowsMediaPlayer /NoRestart', weight: 30}
+
   - !run: {exe: 'DISM.exe', args: '/Online /Remove-Capability /CapabilityName:"App.StepsRecorder~~~~0.0.1.0" /NoRestart', weight: 30, onUpgrade: false}
 
   - !writeStatus: {status: 'Cleaning the component store'}

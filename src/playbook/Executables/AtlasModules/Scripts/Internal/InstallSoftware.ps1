@@ -1,3 +1,4 @@
+#Requires -Version 5.1
 $windir = [Environment]::GetFolderPath('Windows')
 & "$windir\AtlasModules\initPowerShell.ps1"
 & "$windir\AtlasModules\Scripts\wingetCheck.cmd"

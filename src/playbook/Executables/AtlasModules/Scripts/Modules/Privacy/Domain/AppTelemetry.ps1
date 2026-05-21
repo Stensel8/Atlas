@@ -1,3 +1,4 @@
+#Requires -Version 5.1
 function Disable-NvidiaTelemetry {
     # OptInOrOutPreference 0 means opted out of NVIDIA telemetry collection
     $null = New-Item -Path 'HKCU:\Software\NVIDIA Corporation\NVControlPanel2\Client' -Force -ErrorAction SilentlyContinue

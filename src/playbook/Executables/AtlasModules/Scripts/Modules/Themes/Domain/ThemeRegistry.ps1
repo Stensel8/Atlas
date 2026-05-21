@@ -1,3 +1,4 @@
+#Requires -Version 5.1
 function Set-ThemeMRU {
     if ([System.Environment]::OSVersion.Version.Build -ge 22000) {
         Stop-ThemeProcesses

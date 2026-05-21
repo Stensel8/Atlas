@@ -1,3 +1,5 @@
+#Requires -Version 5.1
+$ErrorActionPreference = 'Stop'
 $configurationFolder = Join-Path $PSScriptRoot "..\Configuration\tweaks"
 $yamlFiles = Get-ChildItem -Path $configurationFolder -Filter *.yml -Recurse -File
 

@@ -1,3 +1,4 @@
+#Requires -Version 5.1
 .\AtlasModules\initPowerShell.ps1
 
 function Get-ProfilePathFromSid {
@@ -5,6 +6,7 @@ function Get-ProfilePathFromSid {
         [Parameter(Mandatory = $true)]
         [string]$Sid
     )
+$ErrorActionPreference = 'Stop'
 
     $profileListPath = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList\$Sid"
     $profilePath = (Get-ItemProperty -Path $profileListPath -Name ProfileImagePath -ErrorAction SilentlyContinue).ProfileImagePath

@@ -1,3 +1,4 @@
+#Requires -Version 5.1
 # On Windows 24H2/25H2, a sleep/wake cycle can cause Windows to recreate an existing user profile
 # from the Default template. This re-triggers the RunOnce entry and runs this script a second time,
 # which forces a logoff and wipes the user's settings.

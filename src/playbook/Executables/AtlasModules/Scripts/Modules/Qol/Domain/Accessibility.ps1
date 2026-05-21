@@ -1,3 +1,4 @@
+#Requires -Version 5.1
 # QOL domain functions: Accessibility
 
 function Disable-ReadAndScan {

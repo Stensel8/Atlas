@@ -1,3 +1,5 @@
+#Requires -Version 5.1
+$ErrorActionPreference = 'Stop'
 $internalScript = Join-Path -Path ([Environment]::GetFolderPath('Windows')) -ChildPath 'AtlasModules\Scripts\Internal\UpdateDrivers.ps1'
 if (-not (Test-Path -LiteralPath $internalScript -PathType Leaf)) {
     Write-Error "Atlas internal script '$internalScript' is missing."

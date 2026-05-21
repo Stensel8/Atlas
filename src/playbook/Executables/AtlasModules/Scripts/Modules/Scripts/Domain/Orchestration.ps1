@@ -1,3 +1,4 @@
+#Requires -Version 5.1
 # System script domain functions: Orchestration
 
 function Invoke-AllSystemScripts {

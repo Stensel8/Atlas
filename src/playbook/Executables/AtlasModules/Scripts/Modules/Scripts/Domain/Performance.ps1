@@ -1,3 +1,4 @@
+#Requires -Version 5.1
 # System script domain functions: Performance
 
 function Optimize-PowerShellStartup {

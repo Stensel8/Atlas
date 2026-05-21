@@ -1,3 +1,4 @@
+#Requires -Version 5.1
 # Utility domain functions: Processes
 
 function Stop-ProcessesUnderRoots {

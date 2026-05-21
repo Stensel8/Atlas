@@ -1,3 +1,5 @@
+#Requires -Version 5.1
+$ErrorActionPreference = 'Stop'
 if (Test-Path -Path "$env:HOMEDRIVE\Program Files\Atlas Toolbox\AtlasToolbox.exe") {
     Write-Host "AtlasOS Toolbox is already installed.";
     Write-Host "Press any key to exit..."

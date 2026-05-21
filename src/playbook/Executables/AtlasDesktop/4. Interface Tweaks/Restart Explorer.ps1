@@ -1,4 +1,5 @@
 #Requires -Version 5.1
+$ErrorActionPreference = 'Stop'
 # ============================================================================
 # AtlasOS -- Restart Explorer
 # Restarts Windows Explorer to apply pending UI changes.

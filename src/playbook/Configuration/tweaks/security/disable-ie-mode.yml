@@ -1,0 +1,17 @@
+---
+title: Disable Internet Explorer Mode
+description: Disables IE compatibility mode in Microsoft Edge via policy, preventing the use of the deprecated IE rendering engine
+actions:
+    # InternetExplorerIntegrationLevel 0 = None (IE mode disabled)
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\Microsoft\Edge'
+    value: 'InternetExplorerIntegrationLevel'
+    data: '0'
+    type: REG_DWORD
+
+    # Prevent users from reloading sites in IE mode
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\Microsoft\Edge'
+    value: 'InternetExplorerIntegrationReloadInIEModeAllowed'
+    data: '0'
+    type: REG_DWORD
