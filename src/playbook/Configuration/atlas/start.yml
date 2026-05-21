@@ -28,8 +28,7 @@ actions:
   - !writeStatus: {status: 'Cleaning the component store'}
   - !run: {exe: 'DISM.exe', args: '/Online /Cleanup-Image /StartComponentCleanup', weight: 50}
 
-    # Initial software
-    # 7-Zip, Visual C++ Runtimes, DirectX
+    # Initial software — VC++ Runtimes, NanaZip
   - !writeStatus: {status: 'Installing utilities'}
   - !powerShell:
     command: '.\SOFTWARE.ps1'
@@ -38,6 +37,19 @@ actions:
     onUpgrade: false
     weight: 150
     runas: currentUserElevated
+
+    # Legacy gaming SDKs (optional)
+  - !writeStatus: {status: 'Installing legacy DirectX', option: 'legacy-directx'}
+  - !powerShell:
+    command: '.\SOFTWARE.ps1 -DirectX'
+    exeDir: true
+    wait: true
+    weight: 120
+    option: 'legacy-directx'
+    runas: currentUserElevated
+  - !writeStatus: {status: 'Enabling DirectPlay', option: 'legacy-directplay'}
+  - !run: {exe: 'DISM.exe', args: '/Online /Enable-Feature /FeatureName:LegacyComponents /NoRestart', weight: 30, option: 'legacy-directplay', ignoreErrors: true}
+  - !run: {exe: 'DISM.exe', args: '/Online /Enable-Feature /FeatureName:DirectPlay /NoRestart', weight: 30, option: 'legacy-directplay', ignoreErrors: true}
 
     #Toolbox
   - !writeStatus: {status: 'Installing AtlasOS Toolbox'}

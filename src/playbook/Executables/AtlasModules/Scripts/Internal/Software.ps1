@@ -4,7 +4,8 @@ param (
     [switch]$Brave,
     [switch]$Firefox,
     [switch]$Toolbox,
-    [switch]$UniGetUI
+    [switch]$UniGetUI,
+    [switch]$DirectX
 )
 
 $ErrorActionPreference = 'Stop'
@@ -165,20 +166,20 @@ New-Item -ItemType Directory -Path $script:TempDir -Force | Out-Null
 try {
     if ($Toolbox)   { Install-AtlasToolbox;    return }
     if ($UniGetUI)  { Install-UniGetUI;        return }
+    if ($DirectX)   { Install-DirectXRuntime;  return }
     if ($Brave)     { Install-BraveBrowser;    return }
     if ($Firefox)   { Install-FirefoxBrowser;  return }
     if ($Chrome)    { Install-ChromeBrowser;   return }
 
-    # Default: base software (VC++, archive tool, DirectX)
+    # Default: base software (VC++ runtimes, NanaZip)
     if (-not (Test-AtlasInternetConnectivity)) {
-        Write-Warning 'No internet connection detected. Skipping base software installation (VC++ runtimes, NanaZip, DirectX). These can be installed manually from the Atlas Toolbox once online.'
+        Write-Warning 'No internet connection detected. Skipping base software installation (VC++ runtimes, NanaZip). These can be installed manually from the Atlas Toolbox once online.'
         exit 0
     }
 
     Assert-AtlasWingetReady
     Install-VisualCppRuntimes
     Install-ArchiveTool
-    Install-DirectXRuntime
 }
 finally {
     Remove-AtlasTempDirectory
