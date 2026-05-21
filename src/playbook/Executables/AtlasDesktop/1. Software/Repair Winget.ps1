@@ -38,13 +38,18 @@ function Test-WingetWorking {
 try {
     if (Test-WingetWorking) {
         if (-not $Silent) {
-            Write-Host '[OK] winget is already working.' -ForegroundColor Green
-            Read-Host 'Press Enter to exit'
+            Write-Host '[OK] winget is working.' -ForegroundColor Green
+            $choice = Read-Host 'Reinstall winget anyway? (y/N)'
+            if ($choice -notmatch '^[Yy]') {
+                exit 0
+            }
+            Write-Host '[..] Proceeding with reinstall...' -ForegroundColor Yellow
+        } else {
+            exit 0
         }
-        exit 0
+    } else {
+        Write-Host '[..] winget not working — attempting repair...' -ForegroundColor Yellow
     }
-
-    Write-Host '[..] winget not working — attempting repair...' -ForegroundColor Yellow
 
     # Step 1: re-register the AppX package (fast, no internet needed)
     try {

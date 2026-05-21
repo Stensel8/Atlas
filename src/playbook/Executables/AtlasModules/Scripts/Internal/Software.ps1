@@ -119,23 +119,8 @@ function Invoke-WingetInstall {
 # ── Software installers ──────────────────────────────────────────────────────
 
 function Install-VisualCppRuntimes {
-    $vcRedists = @(
-        @('Microsoft.VCRedist.2005.x86',  '2005 x86'),
-        @('Microsoft.VCRedist.2005.x64',  '2005 x64'),
-        @('Microsoft.VCRedist.2008.x86',  '2008 x86'),
-        @('Microsoft.VCRedist.2008.x64',  '2008 x64'),
-        @('Microsoft.VCRedist.2010.x86',  '2010 x86'),
-        @('Microsoft.VCRedist.2010.x64',  '2010 x64'),
-        @('Microsoft.VCRedist.2012.x86',  '2012 x86'),
-        @('Microsoft.VCRedist.2012.x64',  '2012 x64'),
-        @('Microsoft.VCRedist.2013.x86',  '2013 x86'),
-        @('Microsoft.VCRedist.2013.x64',  '2013 x64'),
-        @('Microsoft.VCRedist.2015+.x86', '2015+ x86'),
-        @('Microsoft.VCRedist.2015+.x64', '2015+ x64')
-    )
-    foreach ($vc in $vcRedists) {
-        Invoke-WingetInstall -Id $vc[0] -Description "Visual C++ Runtime $($vc[1])"
-    }
+    Invoke-WingetInstall -Id 'Microsoft.VCRedist.2015+.x86' -Description 'Visual C++ Runtime 2015+ x86'
+    Invoke-WingetInstall -Id 'Microsoft.VCRedist.2015+.x64' -Description 'Visual C++ Runtime 2015+ x64'
 }
 
 function Install-ArchiveTool {
