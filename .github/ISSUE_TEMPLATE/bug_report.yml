@@ -59,8 +59,6 @@ body:
     options:
     - Atlas v0.5.1 for Windows 11 25H2 (build 26200)
     - Atlas v0.5.1 for Windows 11 26H2 (build 26300)
-    - Atlas v0.5.0 for Windows 11 24H2
-    - Atlas v0.5.0 for Windows 11 25H2
   validations:
     required: true
 
