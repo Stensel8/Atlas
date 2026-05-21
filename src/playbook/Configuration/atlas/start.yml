@@ -11,8 +11,17 @@ actions:
 
   # writeStatus strings are truncated by AME Wizard at ~28 characters — keep them short
   - !writeStatus: {status: 'Disabling legacy features'}
-  - !run: {exe: 'DISM.exe', args: '/Online /Disable-Feature /FeatureName:VBScript /NoRestart', weight: 30, ignoreErrors: true}
+  # VBScript is a capability on 26200+ (not an optional feature) — use Remove-Capability
+  - !run: {exe: 'DISM.exe', args: '/Online /Remove-Capability /CapabilityName:"VBSCRIPT~~~~" /NoRestart', weight: 30, ignoreErrors: true}
   - !run: {exe: 'DISM.exe', args: '/Online /Disable-Feature /FeatureName:WindowsMediaPlayer /NoRestart', weight: 30, ignoreErrors: true}
+  - !run: {exe: 'DISM.exe', args: '/Online /Remove-Capability /CapabilityName:"Media.WindowsMediaPlayer~~~~0.0.12.0" /NoRestart', weight: 30, ignoreErrors: true}
+  - !run: {exe: 'DISM.exe', args: '/Online /Disable-Feature /FeatureName:WorkFolders-Client /NoRestart', weight: 30, ignoreErrors: true}
+  - !run: {exe: 'DISM.exe', args: '/Online /Disable-Feature /FeatureName:MicrosoftWindowsPowerShellISE /NoRestart', weight: 30, ignoreErrors: true}
+  - !run: {exe: 'DISM.exe', args: '/Online /Remove-Capability /CapabilityName:"Microsoft.Windows.PowerShell.ISE~~~~0.0.1.0" /NoRestart', weight: 30, ignoreErrors: true}
+  - !run: {exe: 'DISM.exe', args: '/Online /Remove-Capability /CapabilityName:"Microsoft.Windows.Notepad.System~~~~0.0.1.0" /NoRestart', weight: 30, ignoreErrors: true}
+  - !run: {exe: 'DISM.exe', args: '/Online /Remove-Capability /CapabilityName:"Browser.InternetExplorer~~~~0.0.11.0" /NoRestart', weight: 30, ignoreErrors: true}
+  - !run: {exe: 'DISM.exe', args: '/Online /Remove-Capability /CapabilityName:"Microsoft.Windows.Extended.Themes~~~~0.0.1.0" /NoRestart', weight: 30, ignoreErrors: true}
+  - !run: {exe: 'DISM.exe', args: '/Online /Remove-Capability /CapabilityName:"MathRecognizer~~~~0.0.1.0" /NoRestart', weight: 30, ignoreErrors: true}
 
   - !run: {exe: 'DISM.exe', args: '/Online /Remove-Capability /CapabilityName:"App.StepsRecorder~~~~0.0.1.0" /NoRestart', weight: 30, onUpgrade: false}
 
