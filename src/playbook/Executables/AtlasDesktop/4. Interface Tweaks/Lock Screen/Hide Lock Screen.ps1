@@ -20,7 +20,8 @@ if (-not $isAdmin) {
     if ($Silent) { $argList += ' -Silent' }
     try {
         Start-Process -FilePath 'powershell.exe' -ArgumentList $argList -Verb RunAs -Wait
-    } catch {
+    }
+    catch {
         Write-Host '[!!] Administrator privileges are required.' -ForegroundColor Red
         if (-not $Silent) { Read-Host 'Press Enter to exit' }
         exit 1
@@ -29,8 +30,8 @@ if (-not $isAdmin) {
 }
 
 $settingName = 'LockScreen'
-$stateValue  = 0
-$scriptPath  = $PSCommandPath
+$stateValue = 0
+$scriptPath = $PSCommandPath
 
 try {
     $atlasKey = "HKLM:\SOFTWARE\AtlasOS\Services\$settingName"
@@ -47,7 +48,8 @@ try {
         Write-Host '[OK] Lock screen hidden.' -ForegroundColor Green
         Read-Host 'Press Enter to exit'
     }
-} catch {
+}
+catch {
     Write-Host "[!!] Failed to hide lock screen: $_" -ForegroundColor Red
     exit 1
 }
