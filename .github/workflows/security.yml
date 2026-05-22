@@ -34,23 +34,57 @@ jobs:
   # ----------------------------------------------------------
   powershell-lint:
     name: PowerShell lint (PSScriptAnalyzer)
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     permissions:
       contents: read
       security-events: write
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - name: Run PSScriptAnalyzer (SARIF output)
-        uses: microsoft/psscriptanalyzer-action@6b2948b1944407914a58661c49941824d149734f # v1.1
-        with:
-          path: ./src
-          recurse: true
-          settings: .github/linters/PSScriptAnalyzerSettings.psd1
-          output: psscriptanalyzer-results.sarif
+      - name: Run PSScriptAnalyzer and generate SARIF
+        shell: pwsh
+        run: |
+          Install-Module -Name PSScriptAnalyzer -RequiredVersion 1.25.0 -Force -Scope CurrentUser
+          $settings = '.github/linters/PSScriptAnalyzerSettings.psd1'
+          $results = Get-ChildItem -Path 'src' -Recurse -Include '*.ps1', '*.psm1' |
+              Invoke-ScriptAnalyzer -Settings $settings
+
+          $repoRoot = (Get-Location).Path.Replace('\', '/')
+          $sarifResults = foreach ($r in $results) {
+              $uri = $r.ScriptPath.Replace('\', '/') -replace "^$([regex]::Escape($repoRoot))/", ''
+              @{
+                  ruleId    = $r.RuleName
+                  level     = switch ($r.Severity) { 'Error' { 'error' } 'Warning' { 'warning' } default { 'note' } }
+                  message   = @{ text = $r.Message }
+                  locations = @(@{
+                      physicalLocation = @{
+                          artifactLocation = @{ uri = $uri; uriBaseId = '%SRCROOT%' }
+                          region           = @{ startLine = $r.Line; startColumn = $r.Column }
+                      }
+                  })
+              }
+          }
+
+          $sarif = @{
+              '$schema' = 'https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json'
+              version   = '2.1.0'
+              runs      = @(@{
+                  tool    = @{ driver = @{ name = 'PSScriptAnalyzer'; version = '1.25.0'; informationUri = 'https://github.com/PowerShell/PSScriptAnalyzer'; rules = @() } }
+                  results = @($sarifResults)
+              })
+          }
+          $sarif | ConvertTo-Json -Depth 20 -Compress | Set-Content 'psscriptanalyzer-results.sarif' -Encoding utf8
+
+          if ($results.Count -gt 0) {
+              $results | Format-Table -AutoSize
+              Write-Host "::warning::PSScriptAnalyzer found $($results.Count) issue(s) — see Security tab for details."
+          } else {
+              Write-Host "No issues found."
+          }
 
       - name: Upload PSScriptAnalyzer results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@9e0d7b8d25671d64c341c19c0152d693099fb5ba # v4
+        if: always()
         with:
           sarif_file: psscriptanalyzer-results.sarif
           category: psscriptanalyzer
