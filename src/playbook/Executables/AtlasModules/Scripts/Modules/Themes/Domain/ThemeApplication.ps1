@@ -1,4 +1,5 @@
 #Requires -Version 5.1
+$ErrorActionPreference = 'Stop'
 function Stop-ThemeProcesses {
     Get-Process 'SystemSettings', 'control' -EA 0 | Stop-Process -Force -EA 0
 }

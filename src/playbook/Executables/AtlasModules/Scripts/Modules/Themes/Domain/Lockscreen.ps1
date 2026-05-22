@@ -1,4 +1,5 @@
 #Requires -Version 5.1
+$ErrorActionPreference = 'Stop'
 function Set-LockscreenImage {
     param (
         [ValidateNotNullOrEmpty()]
@@ -8,7 +9,7 @@ function Set-LockscreenImage {
     if (!(Test-Path $Path)) {
         throw "Path ('$Path') for lockscreen not found."
     }
-    $newImagePath = [System.IO.Path]::GetTempPath() + (New-Guid).Guid + [System.IO.Path]::GetExtension($Path)
+    $newImagePath = Join-Path $env:TEMP ((New-Guid).Guid + [System.IO.Path]::GetExtension($Path))
     Copy-Item $Path $newImagePath
 
     # setup WinRT namespaces

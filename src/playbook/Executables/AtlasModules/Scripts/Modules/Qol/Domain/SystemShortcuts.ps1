@@ -1,4 +1,5 @@
 #Requires -Version 5.1
+$ErrorActionPreference = 'Stop'
 # QOL domain functions: SystemShortcuts
 
 function Add-NetworkSharingShortcut {

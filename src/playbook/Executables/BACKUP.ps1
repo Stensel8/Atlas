@@ -39,4 +39,4 @@ foreach ($serviceKey in (Get-ChildItem "HKLM:\SYSTEM\CurrentControlSet\Services"
 }
 
 # Set-Content can only do UTF8 with BOM, which doesn't work with reg.exe
-[System.IO.File]::WriteAllLines($FilePath, $content, (New-Object System.Text.UTF8Encoding $false))
+[System.IO.File]::WriteAllLines($FilePath, $content, [System.Text.UTF8Encoding]::new($false))

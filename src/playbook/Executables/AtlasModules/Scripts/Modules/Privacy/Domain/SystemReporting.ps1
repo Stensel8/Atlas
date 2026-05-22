@@ -1,4 +1,5 @@
 #Requires -Version 5.1
+$ErrorActionPreference = 'Stop'
 function Disable-RecallSnapshots {
     # reg.exe import is the only reliable way to apply a .reg file from PowerShell
     & reg.exe import "AtlasDesktop\3. General Configuration\AI Features\Recall\Disable Recall Support (default).reg"

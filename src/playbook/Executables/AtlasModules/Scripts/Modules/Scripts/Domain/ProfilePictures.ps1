@@ -1,4 +1,5 @@
 #Requires -Version 5.1
+$ErrorActionPreference = 'Stop'
 # System script domain functions: ProfilePictures
 
 function Set-ProfilePictures {

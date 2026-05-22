@@ -58,9 +58,8 @@ powercfg /setacvalueindex scheme_current 54533251-82be-4824-96c1-47b60b740d00 4d
 powercfg /setactive scheme_current
 
 Write-Host "Disabling power-saving ACPI devices..." -ForegroundColor Yellow
-$toggleDevice = Join-Path -Path $windir -ChildPath 'AtlasModules\Scripts\Internal\ToggleDevice.ps1'
 foreach ($device in @("ACPI Processor Aggregator", "Microsoft Windows Management Interface for ACPI")) {
-    & $toggleDevice -Silent -Devices "$device" | Out-Null
+    Get-PnpDevice -FriendlyName $device -ErrorAction SilentlyContinue | Disable-PnpDevice -Confirm:$false -ErrorAction SilentlyContinue
 }
 
 Write-Host "Disabling network adapter power-saving..." -ForegroundColor Yellow

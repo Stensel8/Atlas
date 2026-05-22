@@ -1,4 +1,5 @@
 #Requires -Version 5.1
+$ErrorActionPreference = 'Stop'
 # Utility domain functions: ScheduledTasks
 
 function Stop-TasksUnderRoots {
@@ -64,7 +65,5 @@ function Stop-TasksUnderRoots {
         }
     }
 
-    foreach ($candidate in @('Force Timer Resolution', '\Force Timer Resolution')) {
-        & schtasks.exe /End /TN $candidate 1>$null 2>$null
-    }
+    Stop-ScheduledTask -TaskName 'Force Timer Resolution' -TaskPath '\' -ErrorAction SilentlyContinue
 }

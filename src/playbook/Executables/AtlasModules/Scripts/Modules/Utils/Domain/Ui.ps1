@@ -1,4 +1,5 @@
 #Requires -Version 5.1
+$ErrorActionPreference = 'Stop'
 # Utility domain functions: Ui
 
 function Write-Title {

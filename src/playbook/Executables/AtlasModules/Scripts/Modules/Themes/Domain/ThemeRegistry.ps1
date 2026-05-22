@@ -1,4 +1,5 @@
 #Requires -Version 5.1
+$ErrorActionPreference = 'Stop'
 function Set-ThemeMRU {
     if ([System.Environment]::OSVersion.Version.Build -ge 22000) {
         Stop-ThemeProcesses

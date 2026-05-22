@@ -1,4 +1,5 @@
 #Requires -Version 5.1
+$ErrorActionPreference = 'Stop'
 # AtlasOS domain functions: Admin
 
 function Assert-AtlasAdminPrivilege {
