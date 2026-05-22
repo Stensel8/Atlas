@@ -12,11 +12,13 @@
   "github-actions": {
     "fileMatch": ["^\\.github/workflows/[^/]+\\.ya?ml$"]
   },
+  "pinDigests": true,
   "packageRules": [
     {
       "matchManagers": ["github-actions"],
       "groupName": "GitHub Actions",
-      "automerge": false
+      "automerge": false,
+      "pinDigests": true
     }
   ],
   "customManagers": [
