@@ -6,11 +6,11 @@ function Set-FileAssociations {
         [string]$Browser
     )
 
-    # Uninstall Edge (if applicable)
-    Start-Process -FilePath ".\fileAssoc.cmd" -NoNewWindow -Wait
+    $fileAssoc = Join-Path $env:windir 'AtlasModules\Scripts\fileAssoc.ps1'
 
-    # Set default browser
     if ($Browser -in @("Brave", "LibreWolf", "Firefox", "Google Chrome")) {
-        Start-Process -FilePath ".\fileAssoc.cmd" -ArgumentList "`"$Browser`"" -NoNewWindow -Wait
+        & $fileAssoc -Browser $Browser
+    } else {
+        & $fileAssoc
     }
 }

@@ -35,13 +35,14 @@ if ($Browser -and $browserMap.ContainsKey($Browser)) {
     $associations += $browserMap[$Browser]
 }
 
-$hkuSids = (& reg query HKU 2>&1) |
-    Where-Object { $_ -match '^HKEY_USERS\\(S-[\d-]+|AME_UserHive_\w+)$' } |
-    ForEach-Object { ($_ -replace '^HKEY_USERS\\', '') }
+$hkuSids = Get-ChildItem 'Registry::HKEY_USERS' |
+    Where-Object { $_.PSChildName -match '^(S-[\d-]+|AME_UserHive_\w+)$' } |
+    Select-Object -ExpandProperty PSChildName
 
 foreach ($sid in $hkuSids) {
-    $subkeys = (& reg query "HKU\$sid" 2>&1) -join "`n"
-    if ($subkeys -notmatch '(Volatile Environment|AME_UserHive_)') { continue }
+    $subkeyNames = Get-ChildItem "Registry::HKEY_USERS\$sid" -ErrorAction SilentlyContinue |
+        Select-Object -ExpandProperty PSChildName
+    if ($subkeyNames -notcontains 'Volatile Environment' -and $sid -notmatch 'AME_UserHive_') { continue }
 
     Write-Output "Setting associations for $sid..."
     & $assocScript 'Placeholder' $sid @associations

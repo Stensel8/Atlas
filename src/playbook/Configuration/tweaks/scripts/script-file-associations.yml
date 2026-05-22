@@ -3,27 +3,27 @@ title: Set File Associations
 description: Sets file associations for the user-selected web browser and other apps
 actions:
   - !powerShell:
-    command: '.\fileAssoc.ps1'
+    command: '.\AtlasModules\Scripts\fileAssoc.ps1'
     exeDir: true
     wait: true
     option: '!uninstall-edge'
   - !powerShell:
-    command: '.\fileAssoc.ps1 -Browser "Brave"'
+    command: '.\AtlasModules\Scripts\fileAssoc.ps1 -Browser "Brave"'
     exeDir: true
     wait: true
     option: 'browser-brave'
   - !powerShell:
-    command: '.\fileAssoc.ps1 -Browser "LibreWolf"'
+    command: '.\AtlasModules\Scripts\fileAssoc.ps1 -Browser "LibreWolf"'
     exeDir: true
     wait: true
     option: 'browser-librewolf'
   - !powerShell:
-    command: '.\fileAssoc.ps1 -Browser "Firefox"'
+    command: '.\AtlasModules\Scripts\fileAssoc.ps1 -Browser "Firefox"'
     exeDir: true
     wait: true
     option: 'browser-firefox'
   - !powerShell:
-    command: '.\fileAssoc.ps1 -Browser "Google Chrome"'
+    command: '.\AtlasModules\Scripts\fileAssoc.ps1 -Browser "Google Chrome"'
     exeDir: true
     wait: true
     option: 'browser-chrome'
