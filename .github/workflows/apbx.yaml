@@ -14,13 +14,46 @@ on:
         default: 'main'
         type: string
 
+# Default minimal permissions — build job overrides to contents: write.
+permissions:
+  contents: read
+  actions: read
+
 env:
   SXSC_REPO: "https://github.com/Atlas-OS/sxsc"
   SXSC_REF: "a351a94f0feeab200032a41d7577bd150b0c05e2"
 
 jobs:
+  # ------------------------------------------------------------------
+  # Checks whether RUNNER_SECRET is configured in this repository.
+  # The build job requires a bot token to check out and push changes.
+  # Without it, the build job is skipped (grey) rather than failed.
+  # ------------------------------------------------------------------
+  check-token:
+    name: Check build prerequisites
+    runs-on: ubuntu-latest
+    outputs:
+      has_token: ${{ steps.check.outputs.has_token }}
+    steps:
+      - name: Check for RUNNER_SECRET
+        id: check
+        env:
+          SECRET: ${{ secrets.RUNNER_SECRET }}
+        run: |
+          if [ -n "$SECRET" ]; then
+            echo "has_token=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice title=Build skipped::RUNNER_SECRET is not configured in this repository. Configure it in Settings → Secrets to enable the build job."
+            echo "has_token=false" >> "$GITHUB_OUTPUT"
+          fi
+
   build:
+    name: Build
+    needs: check-token
+    if: needs.check-token.outputs.has_token == 'true'
     runs-on: windows-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout code

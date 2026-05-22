@@ -1,0 +1,68 @@
+name: Validate scripts
+
+on:
+  push:
+    paths:
+      - "src/**/*.ps1"
+      - "src/**/*.psm1"
+  pull_request:
+    paths:
+      - "src/**/*.ps1"
+      - "src/**/*.psm1"
+  workflow_dispatch:
+
+permissions: read-all
+
+# ============================================================
+# Validates that all PowerShell scripts in src/ parse without
+# syntax errors. Catches broken scripts before they reach an
+# actual AtlasOS installation.
+# ============================================================
+
+jobs:
+
+  # ----------------------------------------------------------
+  # SYNTAX CHECK
+  # Parses every .ps1/.psm1 file with PowerShell without
+  # executing it. Fails if any file has a syntax error.
+  # ----------------------------------------------------------
+  syntax-check:
+    name: PowerShell syntax check
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Check PowerShell version
+        shell: pwsh
+        run: |
+          Write-Host "PowerShell $($PSVersionTable.PSVersion)" -ForegroundColor Cyan
+
+      - name: Syntax-check all .ps1/.psm1 files
+        shell: pwsh
+        run: |
+          $errors = @()
+          $files = Get-ChildItem -Path 'src' -Recurse -Include '*.ps1', '*.psm1'
+
+          foreach ($file in $files) {
+              $parseErrors = $null
+              $null = [System.Management.Automation.Language.Parser]::ParseFile(
+                  $file.FullName, [ref]$null, [ref]$parseErrors
+              )
+              if ($parseErrors.Count -gt 0) {
+                  foreach ($err in $parseErrors) {
+                      $errors += "$($file.FullName):$($err.Extent.StartLineNumber) — $($err.Message)"
+                  }
+              }
+          }
+
+          Write-Host "Checked $($files.Count) script(s)."
+
+          if ($errors.Count -gt 0) {
+              Write-Host "`nSyntax errors found:" -ForegroundColor Red
+              $errors | ForEach-Object { Write-Host "  $_" -ForegroundColor Red }
+              exit 1
+          }
+
+          Write-Host "All scripts passed syntax check." -ForegroundColor Green

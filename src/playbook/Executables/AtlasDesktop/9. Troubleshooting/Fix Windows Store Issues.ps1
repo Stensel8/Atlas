@@ -34,7 +34,9 @@ function Get-DependentServiceNames([string[]]$serviceNames) {
             if ($svc) {
                 $svc.DependentServices | ForEach-Object { $deps += $_.ServiceName }
             }
-        } catch {}
+        } catch {
+            Write-Verbose "Could not query dependents for '$name': $_"
+        }
     }
     return $deps | Sort-Object -Unique
 }
@@ -42,7 +44,9 @@ function Get-DependentServiceNames([string[]]$serviceNames) {
 function Set-ServiceStartSafe([string]$name, [string]$startType) {
     try {
         Set-Service -Name $name -StartupType $startType -ErrorAction SilentlyContinue
-    } catch {}
+    } catch {
+        Write-Verbose "Could not set startup type for '$name': $_"
+    }
 }
 
 function Stop-ServiceSafe([string]$name) {
@@ -51,7 +55,9 @@ function Stop-ServiceSafe([string]$name) {
         if ($svc -and $svc.Status -ne 'Stopped') {
             Stop-Service -Name $name -Force -ErrorAction SilentlyContinue
         }
-    } catch {}
+    } catch {
+        Write-Verbose "Could not stop '$name': $_"
+    }
 }
 
 function Start-ServiceSafe([string]$name) {
@@ -60,7 +66,9 @@ function Start-ServiceSafe([string]$name) {
         if ($svc -and $svc.Status -ne 'Running') {
             Start-Service -Name $name -ErrorAction SilentlyContinue
         }
-    } catch {}
+    } catch {
+        Write-Verbose "Could not start '$name': $_"
+    }
 }
 
 Write-Host '[..] Collecting dependent services...' -ForegroundColor Yellow
@@ -73,7 +81,9 @@ foreach ($name in $allServices) {
     try {
         $svc = Get-Service -Name $name -ErrorAction SilentlyContinue
         if ($svc) { $backup[$name] = $svc.StartType }
-    } catch {}
+    } catch {
+        Write-Verbose "Could not read startup type for '$name': $_"
+    }
 }
 Write-Host "[OK] Backed up startup types for $($backup.Count) services." -ForegroundColor Green
 

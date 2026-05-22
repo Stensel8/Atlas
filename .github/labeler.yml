@@ -1,27 +1,37 @@
 readme:
-- '**/README.md'
+  - changed-files:
+    - any-glob-to-any-file: '**/README.md'
 
 actions:
-- .github/workflows/**/*
-- .github/labeler.yml
+  - changed-files:
+    - any-glob-to-any-file:
+      - '.github/workflows/**/*'
+      - '.github/labeler.yml'
 
 # Playbook
 
 playbook:
-- src/playbook/**/*
+  - changed-files:
+    - any-glob-to-any-file: 'src/playbook/**/*'
 
 appx:
-- src/playbook/Configuration/atlas/appx.yml
+  - changed-files:
+    - any-glob-to-any-file: 'src/playbook/Configuration/atlas/appx.yml'
 
 components:
-- src/playbook/Configuration/atlas/components.yml
+  - changed-files:
+    - any-glob-to-any-file: 'src/playbook/Configuration/atlas/components.yml'
 
 services:
-- src/playbook/Configuration/atlas/services.yml
+  - changed-files:
+    - any-glob-to-any-file: 'src/playbook/Configuration/atlas/services.yml'
 
 tweaks:
-- src/playbook/Configuration/tweaks.yml
-- src/playbook/Configuration/tweaks/**/*
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'src/playbook/Configuration/tweaks.yml'
+      - 'src/playbook/Configuration/tweaks/**/*'
 
 desktop folder:
-- src/playbook/Executables/AtlasDesktop/**/*
+  - changed-files:
+    - any-glob-to-any-file: 'src/playbook/Executables/AtlasDesktop/**/*'
