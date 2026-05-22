@@ -7,25 +7,35 @@
   ],
   "forkProcessing": "enabled",
   "timezone": "Europe/Amsterdam",
-  "schedule": ["before 9am on monday"],
-  "labels": ["dependencies"],
+  "schedule": [
+    "before 9am on monday"
+  ],
+  "labels": [
+    "dependencies"
+  ],
   "github-actions": {
-    "fileMatch": ["^\\.github/workflows/[^/]+\\.ya?ml$"]
+    "managerFilePatterns": [
+      "/^\\.github/workflows/[^/]+\\.ya?ml$/"
+    ]
   },
-  "pinDigests": true,
   "packageRules": [
     {
-      "matchManagers": ["github-actions"],
+      "matchManagers": [
+        "github-actions"
+      ],
       "groupName": "GitHub Actions",
-      "automerge": false,
-      "pinDigests": true
+      "automerge": false
     }
   ],
   "customManagers": [
     {
       "customType": "regex",
-      "managerFilePatterns": ["/^\\.github/workflows/lint-powershell\\.yml$/"],
-      "matchStrings": ["RequiredVersion\\s+(?<currentValue>[\\d.]+)"],
+      "managerFilePatterns": [
+        "/^\\.github/workflows/lint-powershell\\.yml$/"
+      ],
+      "matchStrings": [
+        "RequiredVersion\\s+(?<currentValue>[\\d.]+)"
+      ],
       "depNameTemplate": "PowerShell/PSScriptAnalyzer",
       "datasourceTemplate": "github-releases",
       "extractVersionTemplate": "^v?(?<version>.+)$"
