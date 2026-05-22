@@ -54,8 +54,9 @@ $ErrorActionPreference = 'Stop'
     [Byte[]] $bytesBaseInfo = [System.Text.Encoding]::Unicode.GetBytes($baseInfo)
     $bytesBaseInfo += 0x00, 0x00
 
-    $MD5 = New-Object -TypeName System.Security.Cryptography.MD5CryptoServiceProvider
-    [Byte[]] $bytesMD5 = $MD5.ComputeHash($bytesBaseInfo)
+    # MD5 is mandated by Windows' own UserChoice hash algorithm — cannot be replaced. # DevSkim: ignore DS126858
+    $hashProvider = New-Object -TypeName System.Security.Cryptography.MD5CryptoServiceProvider
+    [Byte[]] $initialHash = $hashProvider.ComputeHash($bytesBaseInfo)
 
     $lengthBase = ($baseInfo.Length * 2) + 2
     $length = (($lengthBase -band 4) -le 1) + (Get-ShiftRight $lengthBase  2) - 1
@@ -63,15 +64,15 @@ $ErrorActionPreference = 'Stop'
 
     if ($length -gt 1) {
 
-      $map = @{PDATA = 0; CACHE = 0; COUNTER = 0 ; INDEX = 0; MD51 = 0; MD52 = 0; OUTHASH1 = 0; OUTHASH2 = 0;
+      $map = @{PDATA = 0; CACHE = 0; COUNTER = 0 ; INDEX = 0; Seed1 = 0; Seed2 = 0; OUTHASH1 = 0; OUTHASH2 = 0;
         R0 = 0; R1 = @(0, 0); R2 = @(0, 0); R3 = 0; R4 = @(0, 0); R5 = @(0, 0); R6 = @(0, 0); R7 = @(0, 0)
       }
 
       $map.CACHE = 0
       $map.OUTHASH1 = 0
       $map.PDATA = 0
-      $map.MD51 = (((Get-Long $bytesMD5) -bor 1) + 0x69FB0000L)
-      $map.MD52 = ((Get-Long $bytesMD5 4) -bor 1) + 0x13DB0000L
+      $map.Seed1 = (((Get-Long $initialHash) -bor 1) + 0x69FB0000L)
+      $map.Seed2 = ((Get-Long $initialHash 4) -bor 1) + 0x13DB0000L
       $map.INDEX = Get-ShiftRight ($length - 2) 1
       $map.COUNTER = $map.INDEX + 1
 
@@ -79,12 +80,12 @@ $ErrorActionPreference = 'Stop'
         $map.R0 = Convert-Int32 ((Get-Long $bytesBaseInfo $map.PDATA) + [long]$map.OUTHASH1)
         $map.R1[0] = Convert-Int32 (Get-Long $bytesBaseInfo ($map.PDATA + 4))
         $map.PDATA = $map.PDATA + 8
-        $map.R2[0] = Convert-Int32 (($map.R0 * ([long]$map.MD51)) - (0x10FA9605L * ((Get-ShiftRight $map.R0 16))))
+        $map.R2[0] = Convert-Int32 (($map.R0 * ([long]$map.Seed1)) - (0x10FA9605L * ((Get-ShiftRight $map.R0 16))))
         $map.R2[1] = Convert-Int32 ((0x79F8A395L * ([long]$map.R2[0])) + (0x689B6B9FL * (Get-ShiftRight $map.R2[0] 16)))
         $map.R3 = Convert-Int32 ((0xEA970001L * $map.R2[1]) - (0x3C101569L * (Get-ShiftRight $map.R2[1] 16) ))
         $map.R4[0] = Convert-Int32 ($map.R3 + $map.R1[0])
         $map.R5[0] = Convert-Int32 ($map.CACHE + $map.R3)
-        $map.R6[0] = Convert-Int32 (($map.R4[0] * [long]$map.MD52) - (0x3CE8EC25L * (Get-ShiftRight $map.R4[0] 16)))
+        $map.R6[0] = Convert-Int32 (($map.R4[0] * [long]$map.Seed2) - (0x3CE8EC25L * (Get-ShiftRight $map.R4[0] 16)))
         $map.R6[1] = Convert-Int32 ((0x59C3AF2DL * $map.R6[0]) - (0x2232E0F1L * (Get-ShiftRight $map.R6[0] 16)))
         $map.OUTHASH1 = Convert-Int32 ((0x1EC90001L * $map.R6[1]) + (0x35BD1EC9L * (Get-ShiftRight $map.R6[1] 16)))
         $map.OUTHASH2 = Convert-Int32 ([long]$map.R5[0] + [long]$map.OUTHASH1)
@@ -98,27 +99,27 @@ $ErrorActionPreference = 'Stop'
       $buffer = [BitConverter]::GetBytes($map.OUTHASH2)
       $buffer.CopyTo($outHash, 4)
 
-      $map = @{PDATA = 0; CACHE = 0; COUNTER = 0 ; INDEX = 0; MD51 = 0; MD52 = 0; OUTHASH1 = 0; OUTHASH2 = 0;
+      $map = @{PDATA = 0; CACHE = 0; COUNTER = 0 ; INDEX = 0; Seed1 = 0; Seed2 = 0; OUTHASH1 = 0; OUTHASH2 = 0;
         R0 = 0; R1 = @(0, 0); R2 = @(0, 0); R3 = 0; R4 = @(0, 0); R5 = @(0, 0); R6 = @(0, 0); R7 = @(0, 0)
       }
 
       $map.CACHE = 0
       $map.OUTHASH1 = 0
       $map.PDATA = 0
-      $map.MD51 = ((Get-Long $bytesMD5) -bor 1)
-      $map.MD52 = ((Get-Long $bytesMD5 4) -bor 1)
+      $map.Seed1 = ((Get-Long $initialHash) -bor 1)
+      $map.Seed2 = ((Get-Long $initialHash 4) -bor 1)
       $map.INDEX = Get-ShiftRight ($length - 2) 1
       $map.COUNTER = $map.INDEX + 1
 
       while ($map.COUNTER) {
         $map.R0 = Convert-Int32 ((Get-Long $bytesBaseInfo $map.PDATA) + ([long]$map.OUTHASH1))
         $map.PDATA = $map.PDATA + 8
-        $map.R1[0] = Convert-Int32 ($map.R0 * [long]$map.MD51)
+        $map.R1[0] = Convert-Int32 ($map.R0 * [long]$map.Seed1)
         $map.R1[1] = Convert-Int32 ((0xB1110000L * $map.R1[0]) - (0x30674EEFL * (Get-ShiftRight $map.R1[0] 16)))
         $map.R2[0] = Convert-Int32 ((0x5B9F0000L * $map.R1[1]) - (0x78F7A461L * (Get-ShiftRight $map.R1[1] 16)))
         $map.R2[1] = Convert-Int32 ((0x12CEB96DL * (Get-ShiftRight $map.R2[0] 16)) - (0x46930000L * $map.R2[0]))
         $map.R3 = Convert-Int32 ((0x1D830000L * $map.R2[1]) + (0x257E1D83L * (Get-ShiftRight $map.R2[1] 16)))
-        $map.R4[0] = Convert-Int32 ([long]$map.MD52 * ([long]$map.R3 + (Get-Long $bytesBaseInfo ($map.PDATA - 4))))
+        $map.R4[0] = Convert-Int32 ([long]$map.Seed2 * ([long]$map.R3 + (Get-Long $bytesBaseInfo ($map.PDATA - 4))))
         $map.R4[1] = Convert-Int32 ((0x16F50000L * $map.R4[0]) - (0x5D8BE90BL * (Get-ShiftRight $map.R4[0] 16)))
         $map.R5[0] = Convert-Int32 ((0x96FF0000L * $map.R4[1]) - (0x2C7C6901L * (Get-ShiftRight $map.R4[1] 16)))
         $map.R5[1] = Convert-Int32 ((0x2B890000L * $map.R5[0]) + (0x7C932B89L * (Get-ShiftRight $map.R5[0] 16)))
