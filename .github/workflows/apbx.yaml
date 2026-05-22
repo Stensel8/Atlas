@@ -23,6 +23,10 @@ env:
   SXSC_REPO: "https://github.com/Atlas-OS/sxsc"
   SXSC_REF: "a351a94f0feeab200032a41d7577bd150b0c05e2"
 
+permissions:
+  contents: read
+  actions: read
+
 jobs:
   # ------------------------------------------------------------------
   # Checks whether RUNNER_SECRET is configured in this repository.
