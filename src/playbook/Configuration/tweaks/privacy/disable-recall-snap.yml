@@ -3,8 +3,8 @@ title: Disable Recall Snapshots
 description: Disables snapshots of Recall (24H2+)
 builds: [ '>=22000' ]
 actions:
-  - !cmd:
-    command: '"AtlasDesktop\3. General Configuration\AI Features\Recall\Disable Recall Support (default).cmd" /silent'
+  - !powerShell:
+    command: '& (Join-Path $env:windir ''AtlasDesktop\3. General Configuration\AI Features\Recall\Disable Recall Support (default).ps1'') -Silent'
     exeDir: true
     wait: true
     runas: currentUserElevated

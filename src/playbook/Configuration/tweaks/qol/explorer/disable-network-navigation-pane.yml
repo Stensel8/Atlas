@@ -8,8 +8,8 @@ actions:
   #   value: 'System.IsPinnedToNameSpaceTree'
   #   data: '0'
   #   type: REG_DWORD
-  - !cmd:
-    command: '"AtlasDesktop\3. General Configuration\File Sharing\Network Navigation Pane\Disable Network Navigation Pane (default).cmd" /silent'
+  - !powerShell:
+    command: '& (Join-Path $env:windir ''AtlasDesktop\3. General Configuration\File Sharing\Network Navigation Pane\Disable Network Navigation Pane (default).ps1'') -Silent'
     exeDir: true
     wait: true
     runas: currentUserElevated

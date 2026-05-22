@@ -3,8 +3,8 @@ title: Disable WU Auto-Updates
 description: Disables Windows Update from automatically updating Windows for QoL, at the cost of security.
 actions:
     # Disable auto-updates
-  - !cmd:
-    command: '"AtlasDesktop\3. General Configuration\Automatic Updates\Disable Automatic Updates (default).cmd" /silent'
+  - !powerShell:
+    command: '& (Join-Path $env:windir ''AtlasDesktop\3. General Configuration\Automatic Updates\Disable Automatic Updates (default).ps1'') -Silent'
     exeDir: true
     wait: true
     runas: currentUserElevated

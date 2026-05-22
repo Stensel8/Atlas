@@ -2,8 +2,8 @@
 title: Remove 'Printing' from Context Menus
 description: Removes printing from context menus as users normally print from apps anyways
 actions:
-  - !cmd:
-    command: '"AtlasDesktop\6. Advanced Configuration\Services\Printing\Disable Printing.cmd" /justcontext'
+  - !powerShell:
+    command: '& (Join-Path $env:windir ''AtlasDesktop\6. Advanced Configuration\Services\Printing\Disable Printing.ps1'') -JustContext'
     exeDir: true
     wait: true
     runas: currentUserElevated

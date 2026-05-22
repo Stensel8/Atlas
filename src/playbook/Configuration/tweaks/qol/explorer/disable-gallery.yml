@@ -9,8 +9,8 @@ actions:
   #   value: 'System.IsPinnedToNameSpaceTree'
   #   data: '0'
   #   type: REG_DWORD
-  - !cmd:
-    command: '"AtlasDesktop\4. Interface Tweaks\File Explorer Customization\Gallery\Disable Gallery (default).cmd" /silent'
+  - !powerShell:
+    command: '& (Join-Path $env:windir ''AtlasDesktop\4. Interface Tweaks\File Explorer Customization\Gallery\Disable Gallery (default).ps1'') -Silent'
     exeDir: true
     wait: true
     runas: currentUserElevated
