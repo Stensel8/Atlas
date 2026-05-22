@@ -28,6 +28,7 @@ actions:
   # Needed for compatibility
   # - !task: {path: 'tweaks\networking\disable-llmnr.yml'}
   - !task: {path: 'tweaks\networking\atlas-network-settings.yml'}
+  - !task: {path: 'tweaks\networking\optimize-wifi.yml'}
 
   # -------------------------------------------------------------------------- #
   #  networking\shares                                                         #

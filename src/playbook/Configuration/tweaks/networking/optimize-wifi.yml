@@ -1,0 +1,9 @@
+---
+title: Optimize Wi-Fi Adapter
+description: Applies performance-oriented settings to Wi-Fi adapters (cross-vendor). Silently skips settings not available on the installed adapter.
+actions:
+  - !powerShell:
+    command: '& (Join-Path $env:windir ''AtlasDesktop\3. General Configuration\WiFi Adapter\Optimize WiFi Adapter.ps1'') -Silent'
+    exeDir: true
+    wait: true
+    runas: currentUserElevated
