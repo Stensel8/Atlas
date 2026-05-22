@@ -10,6 +10,11 @@ $activeArgs = @($PSBoundParameters.GetEnumerator() |
     ForEach-Object { "-$($_.Key)" })
 Assert-AtlasAdminPrivilege -ScriptPath $PSCommandPath -ScriptArgs $activeArgs
 
+# HKCR: is not a built-in PowerShell drive (unlike HKLM: and HKCU:), map it explicitly.
+if (-not (Get-PSDrive -Name HKCR -ErrorAction SilentlyContinue)) {
+    New-PSDrive -Name HKCR -PSProvider Registry -Root HKEY_CLASSES_ROOT | Out-Null
+}
+
 Set-AtlasSettingState -SettingName 'Printing' -State 0 -ScriptPath $PSCommandPath
 
 if (-not $Silent -and -not $JustContext) { Show-AtlasServiceWarning }

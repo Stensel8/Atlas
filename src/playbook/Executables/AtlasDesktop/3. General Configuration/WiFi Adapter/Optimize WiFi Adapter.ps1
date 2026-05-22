@@ -13,7 +13,7 @@ Assert-AtlasAdminPrivilege -ScriptPath $PSCommandPath -ScriptArgs $activeArgs
 # -------------------------------------------------------------------
 # Tweaks: each entry lists RegistryKeyword variants to try (first
 # match wins) and DisplayValue candidates in preference order.
-# DisplayValue matching is vendor-agnostic — avoids hardcoding
+# DisplayValue matching is vendor-agnostic, avoids hardcoding
 # integers that differ between Intel, MediaTek, Qualcomm, etc.
 # -------------------------------------------------------------------
 $tweaks = @(
@@ -120,7 +120,7 @@ $wifiAdapters = Get-NetAdapter -Physical -ErrorAction SilentlyContinue |
 
 if (-not $wifiAdapters) {
     if (-not $Silent) {
-        Write-Output 'No Wi-Fi adapters found — nothing to do.'
+        Write-Output 'No Wi-Fi adapters found, nothing to do.'
         $null = Read-Host 'Press Enter to exit'
     }
     exit 0
@@ -140,7 +140,7 @@ foreach ($adapter in $wifiAdapters) {
             'skipped'   { $totalSkipped++; continue }
             'no-match'  { $totalSkipped++; continue }
             'error: *'  {
-                if (-not $Silent) { Write-Output "  FAIL  $($tweak.Name) — $($result.Substring(7))" }
+                if (-not $Silent) { Write-Output "  FAIL  $($tweak.Name) - $($result.Substring(7))" }
                 $totalSkipped++
             }
             default     {

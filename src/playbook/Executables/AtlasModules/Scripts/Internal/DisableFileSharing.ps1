@@ -37,7 +37,8 @@ Get-NetFirewallRule | Where-Object {
     ($_.Profile -like "*Private*")
 } | Disable-NetFirewallRule
 
-& "$fileSharingConfigPath\Network Navigation Pane\Disable Network Navigation Pane (default).cmd" /silent
+# .cmd was removed; only the .ps1 exists for Network Navigation Pane.
+& "$fileSharingConfigPath\Network Navigation Pane\Disable Network Navigation Pane (default).ps1" -Silent
 & "$fileSharingConfigPath\Give Access To Menu\Disable Give Access To Menu (default).cmd" /silent
 
 if ($Silent) { exit }

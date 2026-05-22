@@ -176,7 +176,10 @@ function Set-UserChoiceViaRegini {
     try {
         $deleteIni = Join-Path $tempDir 'delete.ini'
         [System.IO.File]::WriteAllText($deleteIni, "$RegPath [DELETE]`r`n", [System.Text.Encoding]::ASCII)
-        & regini.exe $deleteIni 2>&1 | Out-Null
+        # UserChoice key may not exist yet (e.g. protocol never opened before).
+        # regini returns error 161 in that case; with $ErrorActionPreference = 'Stop'
+        # the NativeCommandError from 2>&1 becomes terminating; swallow it.
+        try { & regini.exe $deleteIni 2>&1 | Out-Null } catch { }
 
         Start-Sleep -Milliseconds 100
 

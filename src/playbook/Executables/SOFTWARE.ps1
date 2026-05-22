@@ -3,7 +3,9 @@ param (
     [switch]$Chrome,
     [switch]$Brave,
     [switch]$Firefox,
-    [switch]$Toolbox
+    [switch]$Toolbox,
+    [switch]$UniGetUI,
+    [switch]$DirectX
 )
 $ErrorActionPreference = 'Stop'
 

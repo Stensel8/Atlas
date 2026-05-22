@@ -53,7 +53,9 @@ if ($CleanPolicies) {
         'HKLM:\Software\Microsoft\Windows Search\Gather\Windows\SystemIndex\Sites\LocalHost\Exclusions'
     )) {
         Remove-Item -LiteralPath $key -Recurse -Force -ErrorAction SilentlyContinue
-        New-Item -Path $key -Force | Out-Null
+        # Sites\LocalHost subtree has restricted ACLs, creation may be denied even as admin.
+        # Skipping silently is safe: absence of the key means the indexer uses its default.
+        New-Item -Path $key -Force -ErrorAction SilentlyContinue | Out-Null
     }
     return
 }
