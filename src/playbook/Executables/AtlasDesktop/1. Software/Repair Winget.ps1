@@ -48,7 +48,7 @@ try {
             exit 0
         }
     } else {
-        Write-Host '[..] winget not working — attempting repair...' -ForegroundColor Yellow
+        Write-Host '[..] winget not working, attempting repair...' -ForegroundColor Yellow
     }
 
     # Step 1: re-register the AppX package (fast, no internet needed)

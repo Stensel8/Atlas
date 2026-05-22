@@ -1,6 +1,6 @@
 #Requires -Version 5.1
 # Fixes Windows Store app install failures by rebuilding the App Repository state.
-# Equivalent to TheyCreeper/StoreFixer — stops ClipSVC/AppXSvc/StateRepository,
+# Equivalent to TheyCreeper/StoreFixer; stops ClipSVC/AppXSvc/StateRepository,
 # deletes StateRepository-Deployment.srd, and restores services.
 # Requires Administrator privileges.
 
@@ -102,7 +102,7 @@ try {
         Remove-Item -LiteralPath $targetFile -Force
         Write-Host '[OK] File deleted.' -ForegroundColor Green
     } else {
-        Write-Host '[??] File not found — may already be clean.' -ForegroundColor Yellow
+        Write-Host '[??] File not found, may already be clean.' -ForegroundColor Yellow
     }
 } finally {
     # Always restore services

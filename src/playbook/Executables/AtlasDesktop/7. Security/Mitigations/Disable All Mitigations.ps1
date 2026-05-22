@@ -29,13 +29,13 @@ Set-ProcessMitigation -System -Disable CFG 2>&1 | Out-Null
 
 $mitigationMask = (Get-ItemProperty -LiteralPath $kernelKey -Name 'MitigationAuditOptions' -ErrorAction SilentlyContinue).MitigationAuditOptions
 if ($null -ne $mitigationMask) {
-    # Set every nibble to 0x2 (disabled) — matches the CMD approach of replacing every digit 0-9 with '2'
+    # Set every nibble to 0x2 (disabled), matches the CMD approach of replacing every digit 0-9 with '2'
     $newMask = [byte[]]($mitigationMask | ForEach-Object { 0x22 })
     Set-ItemProperty -LiteralPath $kernelKey -Name 'MitigationAuditOptions' -Value $newMask -Type Binary
     Set-ItemProperty -LiteralPath $kernelKey -Name 'MitigationOptions'      -Value $newMask -Type Binary
 }
 
-# Fix Valorant with mitigations disabled — enable CFG for specific apps
+# Fix Valorant with mitigations disabled; enable CFG for specific apps
 foreach ($app in @('valorant', 'valorant-win64-shipping', 'vgtray', 'vgc')) {
     Set-ProcessMitigation -Name "$app.exe" -Enable CFG 2>&1 | Out-Null
 }

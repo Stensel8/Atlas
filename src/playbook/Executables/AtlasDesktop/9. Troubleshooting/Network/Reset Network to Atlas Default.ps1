@@ -40,7 +40,7 @@ if ($netKey -and (Test-Path -LiteralPath $netKey)) {
 
     foreach ($setting in @(
         'AutoDisableGigabit'   # Don't disable gigabit
-        'ApCompatMode'         # Access Point Compatibility Mode — 0 = High Performance
+        'ApCompatMode'         # Access Point Compatibility Mode, 0 = High Performance
         'SipsEnabled'          # About reducing link speed
         'ReduceSpeedOnPowerDown'
         'DMACoalescing'        # 'may increase latency'
