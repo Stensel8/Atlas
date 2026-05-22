@@ -5,6 +5,7 @@
     ":semanticCommitTypeAll(chore)",
     ":dependencyDashboard"
   ],
+  "forkProcessing": "enabled",
   "timezone": "Europe/Amsterdam",
   "schedule": ["before 9am on monday"],
   "labels": ["dependencies"],
