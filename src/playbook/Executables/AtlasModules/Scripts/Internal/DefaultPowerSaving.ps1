@@ -13,7 +13,8 @@ powercfg /restoredefaultschemes | Out-Null
 
 Write-Host "Enabling power-saving ACPI devices..." -ForegroundColor Yellow
 foreach ($device in @("ACPI Processor Aggregator", "Microsoft Windows Management Interface for ACPI")) {
-    & "$windir\AtlasModules\Scripts\toggleDev.cmd" -Silent -Enable -Devices "$device" | Out-Null
+    Get-PnpDevice -FriendlyName $device -ErrorAction SilentlyContinue |
+        Enable-PnpDevice -Confirm:$false -ErrorAction SilentlyContinue
 }
 
 Write-Host "Enabling device power-saving..." -ForegroundColor Yellow

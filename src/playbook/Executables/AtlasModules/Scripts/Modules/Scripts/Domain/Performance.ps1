@@ -17,14 +17,18 @@ function Set-PowerSettings {
     )
 
     if ($DisablePowerSaving) {
-        Start-Process -FilePath "AtlasDesktop\3. General Configuration\Power-saving\Disable Power-saving.cmd" -ArgumentList "/silent" -NoNewWindow -Wait
+        & "$script:AtlasWindowsDirectory\AtlasModules\Scripts\Internal\DisablePowerSaving.ps1" -Silent
     }
 
     if ($DisableHibernation) {
-        Start-Process -FilePath "AtlasDesktop\3. General Configuration\Hibernation\Disable Hibernation (default).cmd" -ArgumentList "/silent" -NoNewWindow -Wait
+        & powercfg.exe /h off
+        # ShowHibernateOption 0 removes Hibernate from the power menu
+        $key = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings'
+        $null = New-Item -Path $key -Force -ErrorAction SilentlyContinue
+        Set-ItemProperty -LiteralPath $key -Name 'ShowHibernateOption' -Value 0 -Type DWord
     }
 
     if (-not $DisablePowerSaving) {
-        Start-Process -FilePath "powercfg.exe" -ArgumentList "/setactive `"381b4222-f694-41f0-9685-ff5bb260df2e`"" -NoNewWindow -Wait
+        & powercfg.exe /setactive "381b4222-f694-41f0-9685-ff5bb260df2e"
     }
 }

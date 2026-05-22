@@ -2,13 +2,44 @@
 # QOL domain functions: Explorer
 
 function Remove-ExtractFromContextMenu {
-    & "$windir\AtlasDesktop\4. Interface Tweaks\Context Menus\Extract\Remove Extract (default).cmd" /justcontext
+    $blockedKey = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked'
+    $null = New-Item -Path $blockedKey -Force -ErrorAction SilentlyContinue
+    foreach ($clsid in @(
+        '{b8cdcb65-b1bf-4b42-9428-1dfdb7ee92af}'
+        '{BD472F60-27FA-11cf-B8B4-444553540000}'
+        '{EE07CEF5-3441-4CFB-870A-4002C724783A}'
+        '{D12E3394-DE4B-4777-93E9-DF0AC88F8584}'
+    )) {
+        New-ItemProperty -LiteralPath $blockedKey -Name $clsid -Value '' -PropertyType String -Force | Out-Null
+    }
 }
 
 # Function to remove printing from context menus
 
 function Remove-PrintingFromContextMenus {
-   & "$windir\AtlasDesktop\6. Advanced Configuration\Services\Printing\Disable Printing.cmd" /justcontext
+    # HKCR: is not a built-in PS drive; must be mapped before accessing HKEY_CLASSES_ROOT paths
+    if (-not (Get-PSDrive -Name HKCR -ErrorAction SilentlyContinue)) {
+        New-PSDrive -Name HKCR -PSProvider Registry -Root HKEY_CLASSES_ROOT | Out-Null
+    }
+    $null = New-Item -Path 'HKCR:\SystemFileAssociations\image\shell\print' -Force -ErrorAction SilentlyContinue
+    New-ItemProperty -LiteralPath 'HKCR:\SystemFileAssociations\image\shell\print' -Name 'ProgrammaticAccessOnly' -Value '' -PropertyType String -Force | Out-Null
+    foreach ($class in @(
+        'batfile', 'cmdfile', 'docxfile', 'fonfile', 'htmlfile', 'inffile', 'inifile',
+        'JSEFile', 'otffile', 'pfmfile', 'regfile', 'rtffile', 'ttcfile', 'ttffile',
+        'txtfile', 'VBEFile', 'VBSFile', 'WSFFile'
+    )) {
+        $null = New-Item -Path "HKCR:\$class\shell\print" -Force -ErrorAction SilentlyContinue
+        New-ItemProperty -LiteralPath "HKCR:\$class\shell\print" -Name 'ProgrammaticAccessOnly' -Value '' -PropertyType String -Force | Out-Null
+    }
+    if ([System.Environment]::OSVersion.Version.Build -ge 22000) {
+        foreach ($subKey in @('Print', 'PrintTo')) {
+            $appxKey = "HKCR:\AppX4ztfk9wxr86nxmzzq47px0nh0e58b8fw\Shell\$subKey"
+            $null = New-Item -Path $appxKey -Force -ErrorAction SilentlyContinue
+            New-ItemProperty -LiteralPath $appxKey -Name 'LegacyDisable'          -Value '' -PropertyType String -Force | Out-Null
+            New-ItemProperty -LiteralPath $appxKey -Name 'ProgrammaticAccessOnly' -Value '' -PropertyType String -Force | Out-Null
+            New-ItemProperty -LiteralPath $appxKey -Name 'HideBasedOnVelocityId'  -Value 6527944 -PropertyType DWord -Force | Out-Null
+        }
+    }
 }
 
 # Function to show more details by default on file transfers
@@ -22,7 +53,7 @@ function Show-MoreDetailsOnTransfers {
 # Function to debloat Send-To context menu
 
 function Set-SendToContextMenu {
-    & "$windir\AtlasDesktop\4. Interface Tweaks\Context Menus\Send To\Debloat Send To Context Menu.cmd" -Disable @('Documents', 'Mail Recipient', 'Fax recipient', 'Bluetooth')
+    & "$env:windir\AtlasModules\Scripts\Internal\DebloatSendToContextMenu.ps1" -Disable @('Documents', 'Mail Recipient', 'Fax recipient', 'Bluetooth')
 }
 
 # Function to disable use of check boxes to select items
@@ -35,7 +66,9 @@ function Disable-UseCheckBoxesToSelectItems {
 # Function to hide Gallery in File Explorer
 
 function Hide-GalleryInFileExplorer {
-    & "$windir\AtlasDesktop\4. Interface Tweaks\File Explorer Customization\Gallery\Disable Gallery (default).cmd" /justcontext
+    # IsPinnedToNameSpaceTree 0 hides Gallery from the File Explorer navigation pane
+    $null = New-Item -Path 'HKCU:\Software\Classes\CLSID\{e88865ea-0e1c-4e20-9aa6-edcd0212c87c}' -Force -ErrorAction SilentlyContinue
+    Set-ItemProperty -LiteralPath 'HKCU:\Software\Classes\CLSID\{e88865ea-0e1c-4e20-9aa6-edcd0212c87c}' -Name 'System.IsPinnedToNameSpaceTree' -Value 0 -Type DWord
 }
 
 # Function to disable searching for invalid shortcuts
@@ -51,7 +84,9 @@ function Disable-SearchingForInvalidShortcuts {
 # Function to disable network navigation pane in Explorer
 
 function Disable-NetworkNavigationPaneInExplorer {
-    & "$windir\AtlasDesktop\3. General Configuration\File Sharing\Network Navigation Pane\Disable Network Navigation Pane (default).cmd" /justcontext
+    # IsPinnedToNameSpaceTree 0 hides the Network item from the File Explorer navigation pane
+    $null = New-Item -Path 'HKCU:\SOFTWARE\Classes\CLSID\{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}' -Force -ErrorAction SilentlyContinue
+    Set-ItemProperty -LiteralPath 'HKCU:\SOFTWARE\Classes\CLSID\{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}' -Name 'System.IsPinnedToNameSpaceTree' -Value 0 -Type DWord
 }
 
 # Function to not show Office files in Quick Access

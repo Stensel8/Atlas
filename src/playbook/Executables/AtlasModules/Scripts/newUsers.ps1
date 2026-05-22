@@ -156,8 +156,11 @@ if ($setupMarker -lt 1) {
     try {
         # Disable Windows 11 context menu & 'Gallery' in File Explorer
         if ([System.Environment]::OSVersion.Version.Build -ge 22000) {
-            & "$atlasDesktop\4. Interface Tweaks\Context Menus\Windows 11\Old Context Menu (default).cmd" /silent
-            & "$atlasDesktop\4. Interface Tweaks\File Explorer Customization\Gallery\Disable Gallery (default).cmd" /silent
+            # Empty InprocServer32 default value triggers the legacy shell context menu
+            $null = New-Item -Path 'HKCU:\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32' -Force -ErrorAction SilentlyContinue
+            # IsPinnedToNameSpaceTree 0 hides Gallery from the File Explorer navigation pane
+            $null = New-Item -Path 'HKCU:\Software\Classes\CLSID\{e88865ea-0e1c-4e20-9aa6-edcd0212c87c}' -Force -ErrorAction SilentlyContinue
+            Set-ItemProperty -LiteralPath 'HKCU:\Software\Classes\CLSID\{e88865ea-0e1c-4e20-9aa6-edcd0212c87c}' -Name 'System.IsPinnedToNameSpaceTree' -Value 0 -Type DWord
 
             # Set ThemeMRU (recent themes)
             Set-Theme -Path "$([Environment]::GetFolderPath('Windows'))\Resources\Themes\atlas-v0.5.x-dark.theme"
@@ -172,11 +175,14 @@ if ($setupMarker -lt 1) {
             Write-Warning "Failed to set lockscreen image: $($_.Exception.Message)"
         }
 
-        # Disable 'Network' in navigation pane
-        & "$atlasDesktop\3. General Configuration\File Sharing\Network Navigation Pane\Disable Network Navigation Pane (default).cmd" /silent
+        # IsPinnedToNameSpaceTree 0 hides the Network item from the File Explorer navigation pane
+        $null = New-Item -Path 'HKCU:\SOFTWARE\Classes\CLSID\{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}' -Force -ErrorAction SilentlyContinue
+        Set-ItemProperty -LiteralPath 'HKCU:\SOFTWARE\Classes\CLSID\{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}' -Name 'System.IsPinnedToNameSpaceTree' -Value 0 -Type DWord
 
-        # Disable Automatic Folder Discovery
-        & "$atlasDesktop\4. Interface Tweaks\File Explorer Customization\Automatic Folder Discovery\Disable Automatic Folder Discovery (default).cmd" /silent
+        # Clearing Bags forces Explorer to re-detect folder types; FolderType NotSpecified disables per-folder layout memory
+        Remove-Item -LiteralPath 'HKCU:\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\Bags' -Recurse -Force -ErrorAction SilentlyContinue
+        $null = New-Item -Path 'HKCU:\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\Bags\AllFolders\Shell' -Force -ErrorAction SilentlyContinue
+        Set-ItemProperty -LiteralPath 'HKCU:\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\Bags\AllFolders\Shell' -Name 'FolderType' -Value 'NotSpecified' -Type String
 
         # Set visual effects
         & "$atlasDesktop\4. Interface Tweaks\Visual Effects (Animations)\Atlas Visual Effects (default).cmd" /silent

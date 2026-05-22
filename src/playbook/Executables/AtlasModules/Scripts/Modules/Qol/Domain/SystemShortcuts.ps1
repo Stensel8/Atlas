@@ -27,7 +27,9 @@ function Set-WindowsInkWorkspace {
 # Function to disable automatic Store app archiving
 
 function Disable-AutomaticStoreAppArchiving {
-    & "$windir\AtlasDesktop\3. General Configuration\Store App Archiving\Disable Store App Archiving (default).cmd" /justcontext
+    # AllowAutomaticAppArchiving 0 prevents the Store from offloading unused apps to save disk space
+    $null = New-Item -Path 'HKLM:\Software\Policies\Microsoft\Windows\Appx' -Force -ErrorAction SilentlyContinue
+    Set-ItemProperty -LiteralPath 'HKLM:\Software\Policies\Microsoft\Windows\Appx' -Name 'AllowAutomaticAppArchiving' -Value 0 -Type DWord
 }
 
 # Function to disable dynamic lighting

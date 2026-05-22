@@ -79,7 +79,8 @@ function Disable-StartMenuRecommendations {
 # Function to restore old context menu in Windows 11
 
 function Restore-OldContextMenu {
-    & "$windir\AtlasDesktop\4. Interface Tweaks\Context Menus\Windows 11\Old Context Menu (default).cmd" /justcontext
+    # Empty InprocServer32 default value triggers the legacy shell context menu on Windows 11
+    $null = New-Item -Path 'HKCU:\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32' -Force -ErrorAction SilentlyContinue
 }
 
 # Function to set unpinned control center items

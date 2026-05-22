@@ -79,8 +79,15 @@ if ($Include -or $Exclude) {
         }
         $i++
     }
-    New-Item -Path (Join-Path -Path $root -ChildPath "$i") -Force | Out-Null
-    Set-ItemProperty -LiteralPath (Join-Path -Path $root -ChildPath "$i") -Name 'Path' -Value $Path -Type String
+    # Sites\LocalHost subtree has restricted ACLs; creating subkeys may be denied even as admin.
+    # Skipping silently is safe: the indexer falls back to its compiled-in defaults.
+    $subKeyPath = Join-Path -Path $root -ChildPath "$i"
+    try {
+        New-Item -Path $subKeyPath -Force -ErrorAction Stop | Out-Null
+        Set-ItemProperty -LiteralPath $subKeyPath -Name 'Path' -Value $Path -Type String
+    } catch {
+        Write-Warning "Could not write index path '$Path': $_"
+    }
     return
 }
 
