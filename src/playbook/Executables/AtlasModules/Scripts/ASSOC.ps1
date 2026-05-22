@@ -179,7 +179,7 @@ function Set-UserChoiceViaRegini {
         # UserChoice key may not exist yet (e.g. protocol never opened before).
         # regini returns error 161 in that case; with $ErrorActionPreference = 'Stop'
         # the NativeCommandError from 2>&1 becomes terminating; swallow it.
-        try { & regini.exe $deleteIni 2>&1 | Out-Null } catch { }
+        try { & regini.exe $deleteIni 2>&1 | Out-Null } catch { Write-Verbose "regini delete skipped: key not found" }
 
         Start-Sleep -Milliseconds 100
 

@@ -12,21 +12,21 @@ $script:_fileSharingClasses = @(
     'UserLibraryFolder'
 )
 
-function _Ensure-HkcrDrive {
+function Initialize-HkcrDrive {
     if (-not (Get-PSDrive -Name HKCR -ErrorAction SilentlyContinue)) {
         New-PSDrive -Name HKCR -PSProvider Registry -Root HKEY_CLASSES_ROOT | Out-Null
     }
 }
 
 function Disable-GiveAccessToContextMenu {
-    _Ensure-HkcrDrive
+    Initialize-HkcrDrive
     foreach ($class in $script:_fileSharingClasses) {
         Remove-Item -LiteralPath "HKCR:\$class\shellex\ContextMenuHandlers\Sharing" -Force -ErrorAction SilentlyContinue
     }
 }
 
 function Enable-GiveAccessToContextMenu {
-    _Ensure-HkcrDrive
+    Initialize-HkcrDrive
     foreach ($class in $script:_fileSharingClasses) {
         $path = "HKCR:\$class\shellex\ContextMenuHandlers\Sharing"
         $null = New-Item -Path $path -Force -ErrorAction SilentlyContinue
