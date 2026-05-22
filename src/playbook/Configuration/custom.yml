@@ -37,7 +37,7 @@ actions:
 
   # Prevent annoying notifications during deployment
   - !powerShell:
-    command: '& """.\AtlasModules\Scripts\Internal\Notifications.ps1""" -Mode Disable'
+    command: '& """.\AtlasModules\Scripts\Helpers\Notifications.ps1""" -Mode Disable'
     exeDir: true
     wait: true
     runas: currentUserElevated

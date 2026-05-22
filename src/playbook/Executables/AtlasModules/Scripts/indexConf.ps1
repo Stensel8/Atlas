@@ -13,7 +13,7 @@ param (
 
 $ErrorActionPreference = 'Stop'
 
-$settingsPages = Join-Path -Path $env:windir -ChildPath 'AtlasModules\Scripts\Internal\SettingsPages.ps1'
+$settingsPages = Join-Path -Path $env:windir -ChildPath 'AtlasModules\Scripts\Helpers\SettingsPages.ps1'
 $serviceKey    = 'HKLM:\SYSTEM\CurrentControlSet\Services\WSearch'
 
 if ($Stop) {

@@ -54,7 +54,7 @@ function Show-MoreDetailsOnTransfers {
 # Function to debloat Send-To context menu
 
 function Set-SendToContextMenu {
-    & "$env:windir\AtlasModules\Scripts\Internal\DebloatSendToContextMenu.ps1" -Disable @('Documents', 'Mail Recipient', 'Fax recipient', 'Bluetooth')
+    & "$env:windir\AtlasModules\Scripts\Helpers\DebloatSendToContextMenu.ps1" -Disable @('Documents', 'Mail Recipient', 'Fax recipient', 'Bluetooth')
 }
 
 # Function to disable use of check boxes to select items
@@ -88,6 +88,11 @@ function Disable-NetworkNavigationPaneInExplorer {
     # IsPinnedToNameSpaceTree 0 hides the Network item from the File Explorer navigation pane
     $null = New-Item -Path 'HKCU:\SOFTWARE\Classes\CLSID\{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}' -Force -ErrorAction SilentlyContinue
     Set-ItemProperty -LiteralPath 'HKCU:\SOFTWARE\Classes\CLSID\{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}' -Name 'System.IsPinnedToNameSpaceTree' -Value 0 -Type DWord
+}
+
+function Enable-NetworkNavigationPaneInExplorer {
+    # Removing the override restores Windows default (Network visible in nav pane)
+    Remove-ItemProperty -LiteralPath 'HKCU:\SOFTWARE\Classes\CLSID\{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}' -Name 'System.IsPinnedToNameSpaceTree' -Force -ErrorAction SilentlyContinue
 }
 
 # Function to not show Office files in Quick Access

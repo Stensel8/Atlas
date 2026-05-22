@@ -105,7 +105,7 @@ function Start-DelayedSearchFinalizer {
 function Set-AtlasTaskbarPins {
     param([AllowNull()][string]$Browser)
 
-    $taskbarPinsScript = Join-Path -Path $atlasModules -ChildPath 'Scripts\Internal\TaskbarPins.ps1'
+    $taskbarPinsScript = Join-Path -Path $atlasModules -ChildPath 'Scripts\Helpers\TaskbarPins.ps1'
     if (!(Test-Path -LiteralPath $taskbarPinsScript -PathType Leaf)) {
         throw "Taskbar pins script '$taskbarPinsScript' was not found."
     }

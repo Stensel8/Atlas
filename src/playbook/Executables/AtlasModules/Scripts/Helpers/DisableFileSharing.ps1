@@ -7,10 +7,11 @@ $ErrorActionPreference = 'Stop'
 
 Set-StrictMode -Version 3.0
 
-$fileSharingConfigPath = "$([Environment]::GetFolderPath('Windows'))\AtlasDesktop\3. General Configuration\File Sharing"
+$windir = [Environment]::GetFolderPath('Windows')
+Import-Module (Join-Path $windir 'AtlasModules\Scripts\Modules\Qol\Qol.psm1') -Force
 
 # Disable network items
-Get-NetAdapterBinding -Name "*" -ComponentID ms_msclient, ms_server, ms_lltdio, ms_rspndr -ErrorAction SilentlyContinue |
+Get-NetAdapterBinding -Name '*' -ComponentID ms_msclient, ms_server, ms_lltdio, ms_rspndr -ErrorAction SilentlyContinue |
     Disable-NetAdapterBinding -ErrorAction SilentlyContinue |
     Out-Null
 
@@ -18,7 +19,7 @@ Get-NetAdapterBinding -Name "*" -ComponentID ms_msclient, ms_server, ms_lltdio, 
 $interfaces = Get-ChildItem 'HKLM:\SYSTEM\CurrentControlSet\Services\NetBT\Parameters\Interfaces' -Recurse -ErrorAction SilentlyContinue |
     Where-Object { $_.GetValue('NetbiosOptions') -ne $null }
 foreach ($interface in $interfaces) {
-    Set-ItemProperty -Path $interface.PSPath -Name "NetbiosOptions" -Value 2 | Out-Null
+    Set-ItemProperty -Path $interface.PSPath -Name 'NetbiosOptions' -Value 2 | Out-Null
 }
 
 # Disable NetBIOS service
@@ -29,17 +30,15 @@ Get-NetConnectionProfile | Set-NetConnectionProfile -NetworkCategory Public
 
 # Disable network discovery firewall rules
 Get-NetFirewallRule | Where-Object {
-    # File and Printer Sharing, Network Discovery
     (
-        ($_.Group -eq "@FirewallAPI.dll,-28502" -or $_.Group -eq "@FirewallAPI.dll,-32752") -or
-        ($_.DisplayGroup -eq "File and Printer Sharing" -or $_.DisplayGroup -eq "Network Discovery")
+        ($_.Group -eq '@FirewallAPI.dll,-28502' -or $_.Group -eq '@FirewallAPI.dll,-32752') -or
+        ($_.DisplayGroup -eq 'File and Printer Sharing' -or $_.DisplayGroup -eq 'Network Discovery')
     ) -and
-    ($_.Profile -like "*Private*")
+    ($_.Profile -like '*Private*')
 } | Disable-NetFirewallRule
 
-# .cmd was removed; only the .ps1 exists for Network Navigation Pane.
-& "$fileSharingConfigPath\Network Navigation Pane\Disable Network Navigation Pane (default).ps1" -Silent
-& "$fileSharingConfigPath\Give Access To Menu\Disable Give Access To Menu (default).cmd" /silent
+Disable-NetworkNavigationPaneInExplorer
+Disable-GiveAccessToContextMenu
 
 if ($Silent) { exit }
 

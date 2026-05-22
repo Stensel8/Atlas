@@ -18,7 +18,7 @@ function Set-PowerSettings {
     )
 
     if ($DisablePowerSaving) {
-        & "$script:AtlasWindowsDirectory\AtlasModules\Scripts\Internal\DisablePowerSaving.ps1" -Silent
+        & "$script:AtlasWindowsDirectory\AtlasModules\Scripts\Helpers\DisablePowerSaving.ps1" -Silent
     }
 
     if ($DisableHibernation) {

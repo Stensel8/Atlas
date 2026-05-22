@@ -30,7 +30,7 @@ Set-Service  -Name 'MapsBroker' -StartupType Automatic -ErrorAction SilentlyCont
 Start-Service -Name 'lfsvc'     -ErrorAction SilentlyContinue
 Start-Service -Name 'MapsBroker' -ErrorAction SilentlyContinue
 
-$settingsPages = Join-Path $env:windir 'AtlasModules\Scripts\Internal\SettingsPages.ps1'
+$settingsPages = Join-Path $env:windir 'AtlasModules\Scripts\Helpers\SettingsPages.ps1'
 if (Test-Path -LiteralPath $settingsPages) {
     & $settingsPages -Operation unhide -Page 'privacy-location' -Silent
 }

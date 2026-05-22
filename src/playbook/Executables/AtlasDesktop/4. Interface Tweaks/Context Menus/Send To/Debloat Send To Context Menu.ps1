@@ -11,7 +11,7 @@ Import-Module -Name (Join-Path -Path $env:windir -ChildPath 'AtlasModules\Script
 $activeArgs = @()
 Assert-AtlasAdminPrivilege -ScriptPath $PSCommandPath -ScriptArgs $activeArgs
 
-$internalScript = Join-Path -Path $env:windir -ChildPath 'AtlasModules\Scripts\Internal\DebloatSendToContextMenu.ps1'
+$internalScript = Join-Path -Path $env:windir -ChildPath 'AtlasModules\Scripts\Helpers\DebloatSendToContextMenu.ps1'
 if (-not (Test-Path -LiteralPath $internalScript -PathType Leaf)) {
     throw "Atlas internal script '$internalScript' is missing."
 }

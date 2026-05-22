@@ -1,6 +1,6 @@
 #Requires -Version 5.1
 $ErrorActionPreference = 'Stop'
-$internalScript = Join-Path -Path ([Environment]::GetFolderPath('Windows')) -ChildPath 'AtlasModules\Scripts\Internal\ConfigVBS.ps1'
+$internalScript = Join-Path -Path ([Environment]::GetFolderPath('Windows')) -ChildPath 'AtlasModules\Scripts\Helpers\ConfigVBS.ps1'
 if (-not (Test-Path -LiteralPath $internalScript -PathType Leaf)) {
     Write-Error "Atlas internal script '$internalScript' is missing."
     exit 1

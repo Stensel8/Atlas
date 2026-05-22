@@ -9,7 +9,7 @@ param (
 )
 $ErrorActionPreference = 'Stop'
 
-$internalScript = Join-Path -Path $PSScriptRoot -ChildPath 'AtlasModules\Scripts\Internal\Software.ps1'
+$internalScript = Join-Path -Path $PSScriptRoot -ChildPath 'AtlasModules\Scripts\Helpers\Software.ps1'
 if (-not (Test-Path -LiteralPath $internalScript -PathType Leaf)) {
     Write-Error "Atlas internal software installer '$internalScript' is missing."
     exit 1
