@@ -67,38 +67,28 @@ function Test-AtlasInternetConnectivity {
 }
 
 function Assert-AtlasWingetReady {
-    # Ensure NuGet provider is available (needed for Install-Script)
-    if (-not (Get-PackageProvider -Name NuGet -ErrorAction SilentlyContinue | Where-Object { $_.Version -ge '2.8.5.201' })) {
+    # PSGallery requires NuGet provider
+    if (-not (Get-PackageProvider -Name NuGet -ErrorAction SilentlyContinue |
+              Where-Object { $_.Version -ge '2.8.5.201' })) {
         Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -Scope CurrentUser | Out-Null
     }
 
-    # Use asheroto/winget-install to bootstrap/repair winget if needed
+    # Always pull latest asheroto/winget-install; it handles check, install, and repair internally
     # Credits: https://github.com/asheroto/winget-install
-    if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
-        Write-Output 'winget not found — bootstrapping via asheroto/winget-install...'
-        try {
-            Install-Script -Name winget-install -Force -Scope CurrentUser -ErrorAction Stop | Out-Null
-            $installed = Get-InstalledScript 'winget-install' -ErrorAction SilentlyContinue
-            if ($installed) {
-                $scriptFile = Join-Path $installed.InstalledLocation 'winget-install.ps1'
-                $ps = if (Get-Command pwsh -ErrorAction SilentlyContinue) { 'pwsh' } else { 'powershell' }
-                $proc = Start-Process $ps `
-                    -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$scriptFile`" -Force" `
-                    -Wait -PassThru
-                if ($proc.ExitCode -ne 0) {
-                    Write-Warning "winget-install exited with code $($proc.ExitCode)."
-                }
-            }
-        } catch {
-            Write-Warning "winget bootstrap failed: $($_.Exception.Message)"
-        }
+    Install-Script -Name winget-install -Force -Scope CurrentUser | Out-Null
+
+    # winget-install calls exit internally, must run in a child process
+    $scriptFile = Join-Path (Get-InstalledScript 'winget-install' -ErrorAction Stop).InstalledLocation 'winget-install.ps1'
+    $ps = if (Get-Command pwsh -ErrorAction SilentlyContinue) { 'pwsh' } else { 'powershell' }
+    $result = Start-Process $ps -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$scriptFile`"" -Wait -PassThru
+    if ($result.ExitCode -ne 0) {
+        throw "winget-install exited with code $($result.ExitCode)."
     }
 
     if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
-        throw 'winget is not available and could not be bootstrapped.'
+        throw 'winget is not available after installation attempt.'
     }
 
-    # Refresh sources quietly
     & winget source update --disable-interactivity 2>&1 | Out-Null
     Write-Output 'winget is ready.'
 }
@@ -135,12 +125,12 @@ function Install-ArchiveTool {
 
     Invoke-WingetInstall -Id 'M2Team.NanaZip' -Description 'NanaZip'
     if ($LASTEXITCODE -notin @(0, -1978335135, -1978335189, -1978335147, -1978335212)) {
-        Write-Warning 'NanaZip installation failed — skipping archive tool.'
+        Write-Warning 'NanaZip installation failed, skipping archive tool.'
     }
 }
 
 function Install-DirectXRuntime {
-    # Legacy DirectX is not available on winget — direct download required
+    # Legacy DirectX is not available on winget, direct download required
     $installerPath = Join-Path -Path $script:TempDir -ChildPath 'directx.exe'
     $extractPath   = Join-Path -Path $script:TempDir -ChildPath 'directx'
     Invoke-AtlasDownload -Uri 'https://download.microsoft.com/download/8/4/A/84A35BF1-DAFE-4AE8-82AF-AD2AE20B6B14/directx_Jun2010_redist.exe' -Destination $installerPath -Description 'legacy DirectX runtimes'
@@ -149,7 +139,7 @@ function Install-DirectXRuntime {
 }
 
 function Install-AtlasToolbox {
-    # Atlas Toolbox is not yet on winget — direct download from GitHub
+    # Atlas Toolbox is not yet on winget, direct download from GitHub
     if ($env:PATH -like '*Atlas Toolbox*') { return }
     $toolboxPath = Join-Path -Path $script:TempDir -ChildPath 'toolbox.exe'
     Invoke-AtlasDownload -Uri 'https://github.com/Atlas-OS/atlas-toolbox/releases/latest/download/AtlasToolbox-Setup.exe' -Destination $toolboxPath -Description 'Atlas Toolbox'
