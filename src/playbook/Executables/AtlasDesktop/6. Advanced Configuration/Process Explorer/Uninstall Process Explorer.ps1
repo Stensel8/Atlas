@@ -32,7 +32,7 @@ Remove-ItemProperty -LiteralPath $ifeoKey -Name 'Debugger' -ErrorAction Silently
 $shortcutPath = Join-Path ([Environment]::GetFolderPath('CommonStartMenu')) 'Programs\Process Explorer.lnk'
 Remove-Item -LiteralPath $shortcutPath -Force -ErrorAction SilentlyContinue
 
-$tmgr = & taskmgr.exe 2>$null
+& taskmgr.exe 2>$null | Out-Null
 if ($LASTEXITCODE -ne 0) {
     Write-Output 'Warning: Task Manager is still not working, applying fallback fix...'
     Remove-ItemProperty -LiteralPath $ifeoKey -Name 'Debugger' -ErrorAction SilentlyContinue
