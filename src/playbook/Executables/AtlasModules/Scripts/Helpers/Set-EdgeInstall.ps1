@@ -13,7 +13,7 @@
 	.PARAMETER InstallEdge
 	Installs Edge, leaving the previous Edge user data.
 
-	.PARAMETER Install-WebView
+	.PARAMETER InstallWebView
 	Installs Edge WebView2 using the Evergreen installer.
 
 	.PARAMETER RemoveEdgeData
@@ -32,7 +32,7 @@
 param (
     [switch]$UninstallEdge,
     [switch]$InstallEdge,
-    [switch]$Install-WebView,
+    [switch]$InstallWebView,
     [switch]$RemoveEdgeData,
     [switch]$KeepAppX,
     [switch]$NonInteractive
@@ -51,7 +51,7 @@ $msedgeExePaths = @(
     "$([Environment]::GetFolderPath('ProgramFiles'))\Microsoft\Edge\Application\msedge.exe"
 )
 
-if ($NonInteractive -and (!$UninstallEdge -and !$InstallEdge -and !$Install-WebView)) {
+if ($NonInteractive -and (!$UninstallEdge -and !$InstallEdge -and !$InstallWebView)) {
     $NonInteractive = $false
 }
 if ($InstallEdge -and $UninstallEdge) {
@@ -349,7 +349,7 @@ else {
 }
 
 $edgeInstalled = Test-EdgeInstalled
-if (!$UninstallEdge -and !$InstallEdge -and !$Install-WebView) {
+if (!$UninstallEdge -and !$InstallEdge -and !$InstallWebView) {
     $host.UI.RawUI.WindowTitle = "AtlasOS EdgeRemover"
 
     $continue = $false
@@ -391,12 +391,12 @@ To perform an action, also type its number.
             }
             51 {
                 # reinstall WebView (3)
-                $Install-WebView = $true
+                $InstallWebView = $true
                 $continue = $true
             }
             52 {
                 # reinstall both (4)
-                $Install-WebView = $true
+                $InstallWebView = $true
                 $InstallEdge = $true
                 $continue = $true
             }
@@ -531,7 +531,7 @@ if ($InstallEdge) {
     Install-EdgeChromium
     Write-Output ''
 }
-if ($Install-WebView) {
+if ($InstallWebView) {
     Install-WebView
     Write-Output ''
 }
