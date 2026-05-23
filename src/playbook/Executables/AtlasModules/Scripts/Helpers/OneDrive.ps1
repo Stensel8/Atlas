@@ -1,8 +1,10 @@
 #Requires -Version 5.1
+# Fully removes OneDrive: uninstalls it, cleans registry and file leftovers for all users.
 $ErrorActionPreference = 'SilentlyContinue'
 
 Stop-Process -Name 'OneDrive' -Force
 
+# try the built-in uninstaller first; fall back to winget for Store installs
 foreach ($setupExe in @(
     "$env:windir\System32\OneDriveSetup.exe",
     "$env:windir\SysWOW64\OneDriveSetup.exe"
@@ -30,6 +32,7 @@ function Remove-OneDriveUserKeys ([string]$Sid) {
             Remove-Item -Force -Recurse -ErrorAction SilentlyContinue
     }
 
+    # these CLSIDs register OneDrive as a nav-pane entry in Explorer
     foreach ($clsid in @('{018D5C66-4533-4307-9B53-224DE2ED1FE6}', '{A0A7DEC5-B1A7-4A47-847D-1D005787621E}')) {
         Remove-Item "$root\SOFTWARE\Classes\CLSID\$clsid"                                                            -Force -Recurse -ErrorAction SilentlyContinue
         Remove-Item "$root\SOFTWARE\Classes\WOW6432Node\CLSID\$clsid"                                               -Force -Recurse -ErrorAction SilentlyContinue
@@ -39,6 +42,7 @@ function Remove-OneDriveUserKeys ([string]$Sid) {
     Remove-ItemProperty "$root\Environment"                                          -Name 'OneDrive'      -Force -ErrorAction SilentlyContinue
     Remove-ItemProperty "$root\SOFTWARE\Microsoft\Windows\CurrentVersion\Run"        -Name 'OneDriveSetup' -Force -ErrorAction SilentlyContinue
 
+    # restore shell folder paths that OneDrive may have redirected to its cloud sync dirs
     $sfPath = "$root\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders"
     @{
         '{F42EE2D3-909F-4907-8871-4C22FC0BF756}' = '%USERPROFILE%\Documents'
@@ -51,6 +55,7 @@ function Remove-OneDriveUserKeys ([string]$Sid) {
     }
 }
 
+# process loaded user hives and AME-mounted profiles (have 'Volatile Environment' or AME_UserHive_ prefix)
 foreach ($key in (Get-ChildItem 'Registry::HKEY_USERS' -ErrorAction SilentlyContinue)) {
     $sid = $key.PSChildName
     if ($sid -notmatch '^S-' -and $sid -notmatch '^AME_UserHive_[^_]+$') { continue }

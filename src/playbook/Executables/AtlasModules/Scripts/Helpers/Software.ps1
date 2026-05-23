@@ -55,7 +55,7 @@ function Start-AtlasInstaller {
     }
 }
 
-# ── Connectivity & winget readiness ─────────────────────────────────────────
+# -- Connectivity & winget readiness
 
 function Test-AtlasInternetConnectivity {
     try {
@@ -93,7 +93,7 @@ function Assert-AtlasWingetReady {
     Write-Output 'winget is ready.'
 }
 
-# ── winget install helper ────────────────────────────────────────────────────
+# -- winget install helper
 
 function Invoke-WingetInstall {
     param(
@@ -110,7 +110,7 @@ function Invoke-WingetInstall {
     }
 }
 
-# ── Software installers ──────────────────────────────────────────────────────
+# -- Software installers
 
 function Install-VisualCppRuntimes {
     Invoke-WingetInstall -Id 'Microsoft.VCRedist.2015+.x64' -Description 'Visual C++ Runtime 2015+ x64'
@@ -151,7 +151,7 @@ function Install-FirefoxBrowser { Invoke-WingetInstall -Id 'Mozilla.Firefox'    
 function Install-ChromeBrowser  { Invoke-WingetInstall -Id 'Google.Chrome'        -Description 'Google Chrome'   -MachineScope }
 function Install-UniGetUI       { Invoke-WingetInstall -Id 'Devolutions.UniGetUI' -Description 'UniGetUI'                      }
 
-# ── Entry point ──────────────────────────────────────────────────────────────
+# -- Entry point
 
 New-Item -ItemType Directory -Path $script:TempDir -Force | Out-Null
 try {

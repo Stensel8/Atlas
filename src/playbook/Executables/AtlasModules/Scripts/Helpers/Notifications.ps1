@@ -1,4 +1,5 @@
 #Requires -Version 5.1
+# Toggles Windows notifications: disables/enables Action Center, WPN services, and settings pages.
 [CmdletBinding()]
 param (
     [Parameter(Mandatory = $true)]
@@ -8,6 +9,7 @@ param (
 
 $ErrorActionPreference = 'Stop'
 
+# helper: create key if missing then write value
 function Write-AtlasRegistryValue {
     param (
         [Parameter(Mandatory = $true)][string]$Path,
@@ -23,6 +25,7 @@ function Write-AtlasRegistryValue {
     New-ItemProperty -LiteralPath $Path -Name $Name -Value $Value -PropertyType $Type -Force | Out-Null
 }
 
+# helper: silently remove a value if it exists
 function Invoke-AtlasRegistryValueRemoval {
     param (
         [Parameter(Mandatory = $true)][string]$Path,
@@ -32,6 +35,7 @@ function Invoke-AtlasRegistryValueRemoval {
     Remove-ItemProperty -LiteralPath $Path -Name $Name -Force -ErrorAction SilentlyContinue
 }
 
+# helper: set service start type, uses SetServiceStartup.ps1 if available
 function Invoke-AtlasServiceStartChange {
     param (
         [Parameter(Mandatory = $true)][string]$Name,
@@ -50,6 +54,7 @@ function Invoke-AtlasServiceStartChange {
     }
 }
 
+# helper: hide/unhide pages in the Settings app
 function Invoke-AtlasSettingsPageVisibilityChange {
     param (
         [Parameter(Mandatory = $true)]
@@ -69,6 +74,7 @@ function Invoke-AtlasSettingsPageVisibilityChange {
     }
 }
 
+# WpnUserService has per-session instances with a suffix (_xxxxx), clean those up too
 if ($Mode -eq 'Disable') {
     Write-AtlasRegistryValue -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\userNotificationListener' -Name 'Value' -Value 'Deny' -Type String
     Write-AtlasRegistryValue -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Notifications\Settings' -Name 'NOC_GLOBAL_SETTING_ALLOW_NOTIFICATION_SOUND' -Value 0 -Type DWord

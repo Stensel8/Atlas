@@ -1,4 +1,5 @@
 #Requires -Version 5.1
+# Runs Disk Cleanup (cleanmgr), clears TEMP folders, and deletes VSS shadow copies.
 $ErrorActionPreference = 'Stop'
 
 $executablesRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
@@ -12,6 +13,7 @@ if (-not (Test-Path -LiteralPath $initScript -PathType Leaf)) {
 function Invoke-AtlasDiskCleanup {
     Get-Process -Name cleanmgr -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
 
+    # StateFlags0064 controls which categories cleanmgr /sagerun:64 cleans; 2 = clean, 0 = skip
     $baseKey = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VolumeCaches'
     $regValues = @{
         'Active Setup Temp Folders'             = 2
@@ -94,6 +96,7 @@ function Get-FirstExistingDirectory {
     return $null
 }
 
+# skip Disk Cleanup if another Windows install exists to avoid touching the wrong drive
 if (Test-OtherWindowsInstall) {
     Write-Output 'Not running Disk Cleanup, other Windows drives found.'
 }

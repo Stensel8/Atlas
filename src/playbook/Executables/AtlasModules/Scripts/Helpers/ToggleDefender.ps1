@@ -5,17 +5,6 @@ $ProgressPreference = 'SilentlyContinue'
 $windir = [Environment]::GetFolderPath('Windows')
 & "$windir\AtlasModules\initPowerShell.ps1"
 
-function Restart {
-    Write-Host "`nCompleted!" -ForegroundColor Green
-    choice /c yn /n /m "Would you like to restart now to apply the changes? [Y/N] "
-    if ($lastexitcode -eq 1) {
-        Restart-Computer
-    } else {
-        Write-Host "`nChanges will apply after next restart." -ForegroundColor Yellow
-        Read-Pause
-    }
-}
-
 $packageInstall = "$windir\AtlasModules\Scripts\packageInstall.ps1"
 if (!(Test-Path $packageInstall)) {
     Write-Host "Missing package install script, can't continue."
@@ -40,7 +29,7 @@ if ($null -eq $packages) {
     $DefenderDisabled = '(current)'
 }
 
-function Menu {
+function Show-Menu {
     Clear-Host
     $ColourDisable = $ColourEnable = 'White'
     if ($DefenderDisabled) {$ColourDisable = 'Gray'} else {$ColourEnable = 'Gray'}
@@ -57,7 +46,7 @@ function Menu {
     switch ($pageInput.Character) {
         # Disable Defender
         1 {
-            if ($DefenderDisabled) {Menu}
+            if ($DefenderDisabled) {Show-Menu}
             Clear-Host
 
             $text = "Are you sure that you want to disable Windows Defender?"
@@ -75,7 +64,7 @@ function Menu {
 
         # Enable Defender
         2 {
-            if ($DefenderEnabled) { Menu }
+            if ($DefenderEnabled) { Show-Menu }
             Clear-Host
             Write-Host "After enabling Windows Defender and restarting, it is highly recommended to go through`nthe settings in Windows Security and enabling anything you need.`n" -ForegroundColor Yellow
             Pause "Press Enter to enable Windows Defender"
@@ -90,14 +79,14 @@ function Menu {
         # Documentation
         3 {
             Start-Process "https://docs.atlasos.net/getting-started/post-installation/atlas-folder/security/#defender"
-            Menu
+            Show-Menu
         }
 
         # Do nothing
         default {
-            Menu
+            Show-Menu
         }
     }
 }
 
-Menu
+Show-Menu

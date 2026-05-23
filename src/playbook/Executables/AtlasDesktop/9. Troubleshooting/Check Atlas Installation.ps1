@@ -30,7 +30,7 @@ function Show-PathStatus($label, $path) {
     }
 }
 
-# ── System ────────────────────────────────────────────────────────────────────
+# -- System
 Write-Host "`n=== System Information ===" -ForegroundColor Cyan
 try {
     $os  = Get-CimInstance Win32_OperatingSystem
@@ -54,7 +54,7 @@ Get-PSDrive -PSProvider FileSystem -ErrorAction SilentlyContinue |
         Write-Host "    $($_.Name): $free GB free of $total GB"
     }
 
-# ── AME Wizard ────────────────────────────────────────────────────────────────
+# -- AME Wizard
 Write-Host "`n=== AME Wizard Logs ===" -ForegroundColor Cyan
 Show-PathStatus 'AppData\Local\AME Wizard Beta'   "$env:LOCALAPPDATA\AME Wizard Beta"
 Show-PathStatus 'AppData\Roaming\AME Wizard Beta' "$env:APPDATA\AME Wizard Beta"
@@ -62,12 +62,12 @@ Show-PathStatus 'C:\AME'                          'C:\AME'
 Show-PathStatus 'C:\ProgramData\AME'             'C:\ProgramData\AME'
 Show-PathStatus 'C:\Windows\Temp (AME files)'    'C:\Windows\Temp'
 
-# ── Atlas modules ─────────────────────────────────────────────────────────────
+# -- Atlas modules
 Write-Host "`n=== Atlas Modules ===" -ForegroundColor Cyan
 Show-PathStatus 'C:\Windows\AtlasModules'  'C:\Windows\AtlasModules'
 Show-PathStatus 'C:\Windows\AtlasDesktop'  'C:\Windows\AtlasDesktop'
 
-# ── RunOnce keys ──────────────────────────────────────────────────────────────
+# -- RunOnce keys
 Write-Host "`n=== RunOnce keys ===" -ForegroundColor Cyan
 Write-Host '[HKLM RunOnce]' -ForegroundColor Yellow
 Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce' -ErrorAction SilentlyContinue |
@@ -76,7 +76,7 @@ Write-Host '[HKCU RunOnce]' -ForegroundColor Yellow
 Get-ItemProperty 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce' -ErrorAction SilentlyContinue |
     Select-Object * -ExcludeProperty PS* | Format-List
 
-# ── Atlas version ─────────────────────────────────────────────────────────────
+# -- Atlas version
 Write-Host "`n=== Atlas Version ===" -ForegroundColor Cyan
 $oem = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\OEMInformation' -ErrorAction SilentlyContinue
 if ($oem) {
@@ -87,7 +87,7 @@ if ($oem) {
     Write-Host '    [--] OEM info not set' -ForegroundColor Red
 }
 
-# ── Atlas feature states ──────────────────────────────────────────────────────
+# -- Atlas feature states
 Write-Host "`n=== Atlas Feature States ===" -ForegroundColor Cyan
 if (Test-Path 'HKLM:\SOFTWARE\AtlasOS\Services') {
     Get-ChildItem 'HKLM:\SOFTWARE\AtlasOS\Services' -ErrorAction SilentlyContinue | ForEach-Object {
@@ -112,7 +112,7 @@ if ($setup) {
     Write-Host '    [--] SetupOptions key missing' -ForegroundColor Red
 }
 
-# ── Key optional features ─────────────────────────────────────────────────────
+# -- Key optional features
 Write-Host "`n=== Key Optional Features ===" -ForegroundColor Cyan
 $optFeatures = @(
     'WindowsMediaPlayer',
@@ -149,7 +149,7 @@ foreach ($c in $caps) {
     }
 }
 
-# ── Pending reboot ────────────────────────────────────────────────────────────
+# -- Pending reboot
 Write-Host "`n=== Pending Reboot ===" -ForegroundColor Cyan
 $pending = $false
 if (Test-Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending') { $pending = $true }
@@ -157,13 +157,13 @@ if (Test-Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Aut
 if (Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager' -Name 'PendingFileRenameOperations' -ErrorAction SilentlyContinue) { $pending = $true }
 Write-Host "    Pending reboot : $pending"
 
-# ── Scheduled tasks ───────────────────────────────────────────────────────────
+# -- Scheduled tasks
 Write-Host "`n=== Scheduled Tasks (AME/Atlas) ===" -ForegroundColor Cyan
 Get-ScheduledTask -ErrorAction SilentlyContinue |
     Where-Object { $_.TaskName -match 'AME|Atlas|ame' } |
     Format-Table TaskName, State, TaskPath -AutoSize
 
-# ── Boot entry ────────────────────────────────────────────────────────────────
+# -- Boot entry
 Write-Host "`n=== Boot Entry ===" -ForegroundColor Cyan
 & bcdedit /enum '{current}' 2>&1 | Select-String 'description|safeboot'
 
