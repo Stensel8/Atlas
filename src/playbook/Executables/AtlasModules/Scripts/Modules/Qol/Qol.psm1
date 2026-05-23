@@ -1,3 +1,5 @@
+#Requires -Version 5.1
+
 # Public QOL module surface.
 # Domain implementations live under .\Domain so Atlas can keep stable command names
 # while avoiding a single monolithic maintenance file.

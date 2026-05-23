@@ -1,4 +1,5 @@
 #Requires -Version 5.1 -RunAsAdministrator
+$ErrorActionPreference = 'Stop'
 
 # GPL-3.0-only license
 # 🦆 Modified from: https://github.com/he3als/online-sxs

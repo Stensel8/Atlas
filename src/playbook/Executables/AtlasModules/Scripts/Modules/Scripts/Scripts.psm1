@@ -1,3 +1,5 @@
+#Requires -Version 5.1
+
 # Public system-script orchestration module.
 Set-StrictMode -Version 3.0
 

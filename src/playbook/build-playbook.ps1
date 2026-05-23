@@ -1,4 +1,5 @@
 #Requires -Version 5.1
+$ErrorActionPreference = 'Stop'
 Push-Location -LiteralPath $PSScriptRoot
 try {
     & (Join-Path $PSScriptRoot '..\dependencies\local-build.ps1') -AddLiveLog -ReplaceOldPlaybook -Removals WinverRequirement, Verification -DontOpenPbLocation

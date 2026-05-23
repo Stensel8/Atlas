@@ -1,4 +1,5 @@
 #Requires -Version 5.1
+$ErrorActionPreference = 'Stop'
 $windir = [Environment]::GetFolderPath('Windows')
 
 # Add Atlas' PowerShell modules

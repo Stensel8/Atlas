@@ -1,4 +1,5 @@
 #Requires -Version 5.1
+$ErrorActionPreference = 'Stop'
 # Atlas installation diagnostics
 # Collects system, Atlas, and feature info for issue reporting.
 # Copy the full output and paste it when filing a bug report.

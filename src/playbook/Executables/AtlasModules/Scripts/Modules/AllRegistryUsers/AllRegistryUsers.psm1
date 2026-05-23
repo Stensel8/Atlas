@@ -1,3 +1,5 @@
+#Requires -Version 5.1
+
 function Get-RegUserPaths {
     param (
         [switch]$DontCheckEnv,

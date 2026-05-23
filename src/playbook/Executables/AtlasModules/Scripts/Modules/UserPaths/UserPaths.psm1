@@ -1,3 +1,5 @@
+#Requires -Version 5.1
+
 function Get-UserPath {
     param (
         # https://learn.microsoft.com/windows/win32/shell/knownfolderid

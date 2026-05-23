@@ -1,3 +1,5 @@
+#Requires -Version 5.1
+
 # Optimizes NTFS for performance
 function Optimize-NTFS {
     # Stop tracking last-access timestamps on files; reduces unnecessary disk writes

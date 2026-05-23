@@ -1,3 +1,5 @@
+#Requires -Version 5.1
+
 # Public utility module surface.
 $domainRoot = Join-Path -Path $PSScriptRoot -ChildPath 'Domain'
 

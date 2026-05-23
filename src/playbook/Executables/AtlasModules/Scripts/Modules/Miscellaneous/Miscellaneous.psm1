@@ -1,3 +1,5 @@
+#Requires -Version 5.1
+
 # Add Music & Videos to Home (Fix missing folders in Quick Access)
 function Add-MusicVideosToHome {
     $o = New-Object -ComObject shell.application

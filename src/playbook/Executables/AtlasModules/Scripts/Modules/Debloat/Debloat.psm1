@@ -1,3 +1,5 @@
+#Requires -Version 5.1
+
 function Set-ContentDelivery {
     Write-Host "Setting Content Delivery"
     # ContentDeliveryManager controls Windows suggestions, sponsored apps, and lock screen ads.

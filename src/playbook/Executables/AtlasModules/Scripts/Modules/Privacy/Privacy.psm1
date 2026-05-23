@@ -1,3 +1,5 @@
+#Requires -Version 5.1
+
 # Privacy module surface.
 # Domain implementations live under .\Domain. This module intentionally keeps
 # its previous empty export surface; current playbook YAML does not call these
