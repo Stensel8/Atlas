@@ -15,7 +15,7 @@ $ErrorActionPreference = 'SilentlyContinue'
 [array] $script:items = @()
 [bool] $script:install = $false
 
-function init_item{
+function Initialize-ListItem{
     param(
         [string]$checkboxText,
         [string]$package
@@ -23,7 +23,7 @@ function init_item{
     $script:items += , @($checkboxText, $package)
 }
 
-function generate_checkbox {
+function New-Checkbox {
     param(
         [string]$checkboxText,
         [string]$package,
@@ -72,128 +72,128 @@ $Form.Controls.Add($Label)
 
 
 # https://winstall.app/apps/eloston.ungoogled-chromium
-init_item "Ungoogled Chromium" "eloston.ungoogled-chromium"
+Initialize-ListItem "Ungoogled Chromium" "eloston.ungoogled-chromium"
 
 # https://winstall.app/apps/Mozilla.Firefox
-init_item "Mozilla Firefox" "Mozilla.Firefox"
+Initialize-ListItem "Mozilla Firefox" "Mozilla.Firefox"
 
 # https://winstall.app/apps/Waterfox.Waterfox
-init_item "Waterfox" "Waterfox.Waterfox"
+Initialize-ListItem "Waterfox" "Waterfox.Waterfox"
 
 # https://winstall.app/apps/Brave.brave
-init_item "Brave Browser" "Brave.Brave"
+Initialize-ListItem "Brave Browser" "Brave.Brave"
 
 # https://winstall.app/apps/Google.Chrome
-init_item "Google Chrome" "Google.Chrome"
+Initialize-ListItem "Google Chrome" "Google.Chrome"
 
 # https://winstall.app/apps/LibreWolf.LibreWolf
-init_item "LibreWolf" "LibreWolf.LibreWolf"
+Initialize-ListItem "LibreWolf" "LibreWolf.LibreWolf"
 
 # https://winstall.app/apps/TorProject.TorBrowser
-init_item "Tor Browser" "TorProject.TorBrowser"
+Initialize-ListItem "Tor Browser" "TorProject.TorBrowser"
 
 # https://winstall.app/apps/Discord.Discord
-init_item "Discord" "Discord.Discord"
+Initialize-ListItem "Discord" "Discord.Discord"
 
 # https://winstall.app/apps/Discord.Discord.Canary
-init_item "Discord Canary" "Discord.Discord.Canary"
+Initialize-ListItem "Discord Canary" "Discord.Discord.Canary"
 
 # https://winstall.app/apps/Valve.Steam
-init_item "Steam" "Valve.Steam"
+Initialize-ListItem "Steam" "Valve.Steam"
 
 # https://winstall.app/apps/Playnite.Playnite
-init_item "Playnite" "Playnite.Playnite"
+Initialize-ListItem "Playnite" "Playnite.Playnite"
 
 # https://winstall.app/apps/HeroicGamesLauncher.HeroicGamesLauncher
-init_item "Heroic" "HeroicGamesLauncher.HeroicGamesLauncher"
+Initialize-ListItem "Heroic" "HeroicGamesLauncher.HeroicGamesLauncher"
 
 # https://winstall.app/apps/voidtools.Everything
-init_item "Everything" "voidtools.Everything"
+Initialize-ListItem "Everything" "voidtools.Everything"
 
 # https://winstall.app/apps/Mozilla.Thunderbird
-init_item "Mozilla Thunderbird" "Mozilla.Thunderbird"
+Initialize-ListItem "Mozilla Thunderbird" "Mozilla.Thunderbird"
 
 # https://winstall.app/apps/PeterPawlowski.foobar2000
-init_item "foobar2000" "PeterPawlowski.foobar2000"
+Initialize-ListItem "foobar2000" "PeterPawlowski.foobar2000"
 
 # https://winstall.app/apps/IrfanSkiljan.IrfanView
-init_item "IrfanView" "IrfanSkiljan.IrfanView"
+Initialize-ListItem "IrfanView" "IrfanSkiljan.IrfanView"
 
 # https://winstall.app/apps/Git.Git
-init_item "Git" "Git.Git"
+Initialize-ListItem "Git" "Git.Git"
 
 # https://winstall.app/apps/VideoLAN.VLC
-init_item "VLC" "VideoLAN.VLC"
+Initialize-ListItem "VLC" "VideoLAN.VLC"
 
 # https://winstall.app/apps/PuTTY.PuTTY
-init_item "PuTTY" "PuTTY.PuTTY"
+Initialize-ListItem "PuTTY" "PuTTY.PuTTY"
 
 # https://winstall.app/apps/Ditto.Ditto
-init_item "Ditto" "Ditto.Ditto"
+Initialize-ListItem "Ditto" "Ditto.Ditto"
 
 # https://winstall.app/apps/7zip.7zip
-init_item "7-Zip" "7zip.7zip"
+Initialize-ListItem "7-Zip" "7zip.7zip"
 
 # https://winstall.app/apps/TeamSpeakSystems.TeamSpeakClient
-init_item "Teamspeak" "TeamSpeakSystems.TeamSpeakClient"
+Initialize-ListItem "Teamspeak" "TeamSpeakSystems.TeamSpeakClient"
 
 # https://winstall.app/apps/Spotify.Spotify
-init_item "Spotify" "Spotify.Spotify"
+Initialize-ListItem "Spotify" "Spotify.Spotify"
 
 # https://winstall.app/apps/OBSProject.OBSStudio
-init_item "OBS Studio" "OBSProject.OBSStudio"
+Initialize-ListItem "OBS Studio" "OBSProject.OBSStudio"
 
 # https://winstall.app/apps/Guru3D.Afterburner
-init_item "MSI Afterburner" "Guru3D.Afterburner"
+Initialize-ListItem "MSI Afterburner" "Guru3D.Afterburner"
 
 # https://winstall.app/apps/TechPowerUp.NVCleanstall
-init_item "NVCleanstall" "TechPowerUp.NVCleanstall"
+Initialize-ListItem "NVCleanstall" "TechPowerUp.NVCleanstall"
 
 # https://winstall.app/apps/CPUID.CPU-Z
-init_item "CPU-Z" "CPUID.CPU-Z"
+Initialize-ListItem "CPU-Z" "CPUID.CPU-Z"
 
 # https://winstall.app/apps/TechPowerUp.GPU-Z
-init_item "GPU-Z" "TechPowerUp.GPU-Z"
+Initialize-ListItem "GPU-Z" "TechPowerUp.GPU-Z"
 
 # https://winstall.app/apps/Notepad++.Notepad++
-init_item "Notepad++" "Notepad++.Notepad++"
+Initialize-ListItem "Notepad++" "Notepad++.Notepad++"
 
 # https://winstall.app/apps/Microsoft.VisualStudioCode
-init_item "VSCode" "Microsoft.VisualStudioCode"
+Initialize-ListItem "VSCode" "Microsoft.VisualStudioCode"
 
 # https://winstall.app/apps/VSCodium.VSCodium
-init_item "VSCodium" "VSCodium.VSCodium"
+Initialize-ListItem "VSCodium" "VSCodium.VSCodium"
 
 # https://winstall.app/apps/Klocman.BulkCrapUninstaller
-init_item "BCUninstaller" "Klocman.BulkCrapUninstaller"
+Initialize-ListItem "BCUninstaller" "Klocman.BulkCrapUninstaller"
 
 # https://winstall.app/apps/REALiX.HWiNFO
-init_item "HWiNFO" "REALiX.HWiNFO"
+Initialize-ListItem "HWiNFO" "REALiX.HWiNFO"
 
 # https://winstall.app/apps/Skillbrains.Lightshot
-init_item "Lightshot" "Skillbrains.Lightshot"
+Initialize-ListItem "Lightshot" "Skillbrains.Lightshot"
 
 # https://winstall.app/apps/ShareX.ShareX
-init_item "ShareX" "ShareX.ShareX"
+Initialize-ListItem "ShareX" "ShareX.ShareX"
 
 # https://www.microsoft.com/store/productId/9MZ95KL8MR0L?ocid=pdpshare
-init_item "Snipping Tool" "9MZ95KL8MR0L"
+Initialize-ListItem "Snipping Tool" "9MZ95KL8MR0L"
 
 # https://winstall.app/apps/valinet.ExplorerPatcher
-init_item "ExplorerPatcher" "valinet.ExplorerPatcher"
+Initialize-ListItem "ExplorerPatcher" "valinet.ExplorerPatcher"
 
 # https://winstall.app/apps/Microsoft.PowerShell
-init_item "Powershell 7" "Microsoft.PowerShell"
+Initialize-ListItem "Powershell 7" "Microsoft.PowerShell"
 
 #https://winstall.app/apps/MartiCliment.UniGetUI
-init_item "UniGetUI" "MartiCliment.UniGetUI"
+Initialize-ListItem "UniGetUI" "MartiCliment.UniGetUI"
 
 if ([System.Environment]::OSVersion.Version.Build -ge 22000) {
     # https://winget.run/pkg/StartIsBack/StartAllBack
-    init_item "StartAllBack" "StartIsBack.StartAllBack"
+    Initialize-ListItem "StartAllBack" "StartIsBack.StartAllBack"
 } else {
     # https://winget.run/pkg/StartIsBack/StartAllBack
-    init_item "StartIsBack" "StartIsBack.StartIsBack"
+    Initialize-ListItem "StartIsBack" "StartIsBack.StartIsBack"
 }
 
 $script:item_count = $script:items.Length
@@ -203,7 +203,7 @@ foreach($item in $script:items){
     if($script:index -eq ($script:item_count / 2)){
         $script:column = 1
     }
-    $Form.Controls.Add((generate_checkbox $item[0] $item[1]))
+    $Form.Controls.Add((New-Checkbox $item[0] $item[1]))
     $script:index ++
 }
 
@@ -220,14 +220,14 @@ $ToggleBtn.Size = New-Object System.Drawing.Size(80, 23)
 $ToggleBtn.Add_Click({
 if ($this.Text -eq "Dark Mode") {
     $this.Text = "Light Mode"
-    dark_mode
+    Set-DarkMode
 } else {
     $this.Text = "Dark Mode"
-    light_mode
+    Set-LightMode
 }
 })
 # Changed into functions
-function dark_mode {
+function Set-DarkMode {
     $Form.BackColor = [System.Drawing.Color]::FromArgb(26, 26, 26)
     $Form.ForeColor = [System.Drawing.Color]::White
     foreach ($control in $Form.Controls) {
@@ -237,7 +237,7 @@ function dark_mode {
         }
     }
 }
-function light_mode {
+function Set-LightMode {
     $Form.BackColor = [System.Drawing.Color]::FromArgb(240, 240, 240)
     $Form.ForeColor = [System.Drawing.Color]::Black
     foreach ($control in $Form.Controls) {
@@ -250,17 +250,17 @@ function light_mode {
 # Checks the system "app" color (light or dark)
 $registryPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize\"
 $keyName = "AppsUseLightTheme"
-function check_system_theme{
+function Get-SystemTheme{
     if(((Get-ItemProperty -Path $registryPath -Name $keyName).$keyName) -eq 0){
-        dark_mode
+        Set-DarkMode
         $ToggleBtn.Text = "Light Mode"
     }
     else{
-        light_mode
+        Set-LightMode
         $ToggleBtn.Text = "Dark Mode"
     }
 }
-check_system_theme
+Get-SystemTheme
 
 $Form.Controls.Add($ToggleBtn)
 

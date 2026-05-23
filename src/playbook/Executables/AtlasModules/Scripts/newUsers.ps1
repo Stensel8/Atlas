@@ -185,7 +185,7 @@ if ($setupMarker -lt 1) {
         Set-ItemProperty -LiteralPath 'HKCU:\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\Bags\AllFolders\Shell' -Name 'FolderType' -Value 'NotSpecified' -Type String
 
         # Set visual effects
-        & "$atlasDesktop\4. Interface Tweaks\Visual Effects (Animations)\Atlas Visual Effects (default).cmd" /silent
+        & "$atlasDesktop\4. Interface Tweaks\Visual Effects (Animations)\Atlas Visual Effects (default).ps1" -Silent
     }
     finally {
         Remove-Item "Env:\ATLAS_USER_CONTEXT" -ErrorAction SilentlyContinue

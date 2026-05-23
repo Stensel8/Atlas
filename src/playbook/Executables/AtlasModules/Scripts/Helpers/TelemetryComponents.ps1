@@ -9,16 +9,6 @@ function Write-BulletPoint($message) {
     Write-Host " - " -ForegroundColor Green -NoNewline
     Write-Host $message
 }
-function Restart {
-    Write-Host "`nCompleted!" -ForegroundColor Green
-    choice /c yn /n /m "Would you like to restart now to apply the changes? [Y/N] "
-    if ($lastexitcode -eq 1) {
-        Restart-Computer
-    } else {
-        Write-Host "`nChanges will apply after next restart." -ForegroundColor Yellow
-        Read-Pause
-    }
-}
 
 $packageInstall = "$windir\AtlasModules\Scripts\packageInstall.ps1"
 if (!(Test-Path $packageInstall)) {
@@ -44,7 +34,7 @@ if ($null -eq $packages) {
     $TelemetryDisabled = '(current)'
 }
 
-function Menu {
+function Show-Menu {
     Clear-Host
     $ColourDisable = $ColourEnable = 'White'
     if ($TelemetryDisabled) {$ColourDisable = 'Gray'} else {$ColourEnable = 'Gray'}
@@ -75,7 +65,7 @@ This package isn't needed on Education or Enterprise-based editions.
     switch ($pageInput.Character) {
         # Add NoTelemetry package
         1 {
-            if ($TelemetryDisabled) {Menu}
+            if ($TelemetryDisabled) {Show-Menu}
             Clear-Host
             Write-Host "Adding the NoTelemetry package... This will take a moment." -ForegroundColor Yellow
 
@@ -85,7 +75,7 @@ This package isn't needed on Education or Enterprise-based editions.
 
         # Remove NoTelemetry package
         2 {
-            if ($TelemetryEnabled) { Menu }
+            if ($TelemetryEnabled) { Show-Menu }
 
             Clear-Host
             Write-Host "Removing the NoTelemetry package... This will take a moment." -ForegroundColor Yellow
@@ -96,9 +86,9 @@ This package isn't needed on Education or Enterprise-based editions.
 
         # Do nothing
         default {
-            Menu
+            Show-Menu
         }
     }
 }
 
-Menu
+Show-Menu

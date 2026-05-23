@@ -48,7 +48,7 @@ foreach ($ext in @{
 }
 
 # Enable/disable functions
-function EnableSendTo($value) {
+function Enable-SendTo($value) {
     if ($value -is [string]) {
         $item = Get-Item -LiteralPath $value -Force
         $item.Attributes = $item.Attributes -band -bnot [System.IO.FileAttributes]::Hidden
@@ -56,7 +56,7 @@ function EnableSendTo($value) {
         & $value[1] | Out-Null
     }
 }
-function DisableSendTo($value) {
+function Disable-SendTo($value) {
     if ($value -is [string]) {
         $item = Get-Item -LiteralPath $value -Force
         $item.Attributes = $item.Attributes -bor [System.IO.FileAttributes]::Hidden
@@ -70,7 +70,7 @@ if ($Enable) {
     foreach ($item in $items.GetEnumerator()) {
         foreach ($itemToEnable in $Enable) {
             if ($item.Key -like "$itemToEnable") {
-                EnableSendTo $item.Value
+                Enable-SendTo $item.Value
             }
         }
     }
@@ -79,7 +79,7 @@ if ($Enable) {
     foreach ($item in $items.GetEnumerator()) {
         foreach ($itemToDisable in $Disable) {
             if ($item.Key -like "$itemToDisable") {
-                DisableSendTo $item.Value
+                Disable-SendTo $item.Value
             }
         }
     }
@@ -96,12 +96,12 @@ foreach ($item in $items.GetEnumerator()) {
     $value = $item.Value
     # If it's in the choices, enable
     if ($item.Key -in $choices) {
-        EnableSendTo $value
+        Enable-SendTo $value
         continue
     }
     # If it's in the choices, disable
     if ($item.Key -notin $choices) {
-        DisableSendTo $value
+        Disable-SendTo $value
         continue
     }
 }

@@ -20,7 +20,7 @@ if (-not $isAdmin) {
     exit 0
 }
 
-function Check($label, $path) {
+function Show-PathStatus($label, $path) {
     $exists = Test-Path $path
     $color = if ($exists) { 'Green' } else { 'Red' }
     Write-Host "[$( if ($exists) {'OK'} else {'--'} )] $label" -ForegroundColor $color
@@ -56,16 +56,16 @@ Get-PSDrive -PSProvider FileSystem -ErrorAction SilentlyContinue |
 
 # ── AME Wizard ────────────────────────────────────────────────────────────────
 Write-Host "`n=== AME Wizard Logs ===" -ForegroundColor Cyan
-Check 'AppData\Local\AME Wizard Beta'   "$env:LOCALAPPDATA\AME Wizard Beta"
-Check 'AppData\Roaming\AME Wizard Beta' "$env:APPDATA\AME Wizard Beta"
-Check 'C:\AME'                          'C:\AME'
-Check 'C:\ProgramData\AME'             'C:\ProgramData\AME'
-Check 'C:\Windows\Temp (AME files)'    'C:\Windows\Temp'
+Show-PathStatus 'AppData\Local\AME Wizard Beta'   "$env:LOCALAPPDATA\AME Wizard Beta"
+Show-PathStatus 'AppData\Roaming\AME Wizard Beta' "$env:APPDATA\AME Wizard Beta"
+Show-PathStatus 'C:\AME'                          'C:\AME'
+Show-PathStatus 'C:\ProgramData\AME'             'C:\ProgramData\AME'
+Show-PathStatus 'C:\Windows\Temp (AME files)'    'C:\Windows\Temp'
 
 # ── Atlas modules ─────────────────────────────────────────────────────────────
 Write-Host "`n=== Atlas Modules ===" -ForegroundColor Cyan
-Check 'C:\Windows\AtlasModules'  'C:\Windows\AtlasModules'
-Check 'C:\Windows\AtlasDesktop'  'C:\Windows\AtlasDesktop'
+Show-PathStatus 'C:\Windows\AtlasModules'  'C:\Windows\AtlasModules'
+Show-PathStatus 'C:\Windows\AtlasDesktop'  'C:\Windows\AtlasDesktop'
 
 # ── RunOnce keys ──────────────────────────────────────────────────────────────
 Write-Host "`n=== RunOnce keys ===" -ForegroundColor Cyan

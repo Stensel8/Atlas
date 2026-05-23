@@ -44,7 +44,7 @@ function Write-BulletPoint($message) {
 	Write-Host ""
 }
 
-function SafeMode {
+function Set-SafeMode {
 	param (
 		[switch]$Enable,
 		[array]$FailedPackageList,
@@ -53,7 +53,7 @@ function SafeMode {
 
 	if ($Enable) {
 		$bcdeditArgs = '/set {current} safeboot minimal'
-		$shellValue = "explorer.exe,cmd /c RunAsTI powershell -NoP -EP RemoteSigned -File `"$PSCommandPath`" -SafeMode"
+		$shellValue = "explorer.exe,powershell -NonInteractive -ExecutionPolicy Bypass -File `"$env:windir\AtlasModules\Scripts\RunAsTI.ps1`" powershell -NoP -EP RemoteSigned -File `"$PSCommandPath`" -SafeMode"
 
 		if ($FailedPackageList) {
 			Set-Content -Path $FailedPackageListPath -Value $FailedPackageList
@@ -71,23 +71,21 @@ if (
 	(Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name Shell).Shell -like "*$PSCommandPath*") -or
 	$SafeMode
 ) {
-	SafeMode
+	Set-SafeMode
 }
 
-function Restart {
-	shutdown /f /r /t 0 *>$null
-	Start-Sleep 2
-	Restart-Computer
+function Restart-System {
+	Restart-Computer -Force
 	Start-Sleep 2
 	Write-Host "Something seems to have went wrong restarting automatically, restart manually." -ForegroundColor Red
 	if (!$NoInteraction) { Read-Pause }
 	exit 9000
 }
 
-function Finish($failedPackages) {
+function Complete-Install($failedPackages) {
 	$failedPackages = @($failedPackages | Where-Object { $_ })
 
-	function GenerateText($text, $dashCount = 84) {
+	function New-StatusText($text, $dashCount = 84) {
 		$separator = "[ $('-' * $dashCount) ]"
 		$text = "[ $text $(' ' * ($dashCount - $text.Length - 1)) ]"
 		return @"
@@ -97,7 +95,7 @@ $separator
 "@
 	}
 
-	Write-Host "`n$(GenerateText "Completed! Errors: $script:errorLevel | Warnings: $script:warningLevel")`n" -ForegroundColor Green
+	Write-Host "`n$(New-StatusText "Completed! Errors: $script:errorLevel | Warnings: $script:warningLevel")`n" -ForegroundColor Green
 
 	if ($failedPackages.Count -gt 0) {
 		Write-Host "Some packages failed to install:" -ForegroundColor Red
@@ -124,7 +122,7 @@ $separator
 			exit $script:errorLevel
 		}
 
-		function NoRestart {
+		function Show-NoRestartMessage {
 			Write-Host "`nIf any packages installed successfully, they will apply next restart." -ForegroundColor Yellow
 			Read-Pause
 		}
@@ -133,17 +131,17 @@ $separator
 			Write-Host "Please report this to the Atlas team, as there's no automatic fallbacks past Safe Mode." -ForegroundColor Magenta
 			choice /c yn /n /m "Would you like to restart out of Safe Mode? [Y/N] "
 			if ($lastexitcode -eq 1) {
-				Restart
+				Restart-System
 			} else {
-				NoRestart
+				Show-NoRestartMessage
 			}
 		} else {
 			choice /c yn /n /m "Would you like to boot into Safe Mode and attempt to install them? [Y/N] "
 			if ($lastexitcode -eq 1) {
-				SafeMode -Enable -FailedPackageList $failedPackages
-				Restart
+				Set-SafeMode -Enable -FailedPackageList $failedPackages
+				Restart-System
 			} else {
-				NoRestart
+				Show-NoRestartMessage
 			}
 		}
 
@@ -153,7 +151,7 @@ $separator
 	if ($NoInteraction) { exit $script:errorLevel }
 	choice /c yn /n /m "Would you like to restart now to apply the changes? [Y/N] "
 	if ($lastexitcode -eq 1) {
-		Restart
+		Restart-System
 	} else {
 		Write-Host "`nChanges will apply next restart." -ForegroundColor Yellow
 		Read-Pause
@@ -189,7 +187,7 @@ if ($UninstallPackages) {
 		foreach ($package in $installedPackages) {
 			try {
 				Write-Host "[INFO] Uninstalling '$package'..."
-				Remove-WindowsPackage -Online -PackageName $package -NoRestart -LogLevel 1 *>$null
+				Remove-WindowsPackage -Online -PackageName $package -Show-NoRestartMessage -LogLevel 1 *>$null
 			} catch {
 				Write-Host "[ERROR] $package failed to uninstall: $_" -ForegroundColor Red
 				$script:errorLevel++
@@ -198,7 +196,7 @@ if ($UninstallPackages) {
 	}
 
 	if (!$InstallPackages) {
-		Finish
+		Complete-Install
 	}
 }
 
@@ -230,10 +228,10 @@ if ($InstallPackages) {
 }
 
 if ($SafeMode) {
-	function ExitSafeModePrompt {
+	function Invoke-SafeModeExitPrompt {
 		choice /c yn /n /m "Would you like to restart to get out of Safe Mode? [Y/N] "
 		if ($lastexitcode -eq 1) {
-			Restart
+			Restart-System
 		} else {
 			exit 1
 		}
@@ -243,14 +241,14 @@ if ($SafeMode) {
 
 	if ($matchedPackages.Count -le 0) {
 		Write-Host "[ERROR] Safe Mode package list not found! Please report this to Atlas." -ForegroundColor Red
-		ExitSafeModePrompt
+		Invoke-SafeModeExitPrompt
 	}
 
 	$packagesThatDontExist = $matchedPackages | ForEach-Object { if (!(Test-Path $_ -PathType Leaf)) { $_ } }
 	if ($packagesThatDontExist) {
 		Write-Host "[ERROR] Some Safe Mode packages weren't found. Please report this to Atlas." -ForegroundColor Red
 		Write-BulletPoint $packagesThatDontExist
-		ExitSafeModePrompt
+		Invoke-SafeModeExitPrompt
 	}
 }
 
@@ -264,8 +262,8 @@ Please note that if you chose to disable Windows Defender, it may still remain e
 "@
 
 	if ((Read-MessageBox -Title "Atlas - Component Modification" -Body $body -Icon Question) -eq 'Yes') {
-		SafeMode -Enable
-		Restart
+		Set-SafeMode -Enable
+		Restart-System
 	}
 
 	exit
@@ -292,7 +290,7 @@ if (!$matchedPackages) {
 # ======================================================================================================================= #
 # PROCESS PACKAGES                                                                                                        #
 # ======================================================================================================================= #
-function ProcessCab($cabPath) {
+function Install-CabPackage($cabPath) {
 	$filePath = Split-Path $cabPath -Leaf
 	Write-Host "`nInstalling $filePath..." -ForegroundColor Cyan
 	Write-Host ("-" * 84) -ForegroundColor Magenta
@@ -335,7 +333,7 @@ function ProcessCab($cabPath) {
 	Write-Host "[INFO] Adding package..."
 	$packageAdded = $true
 	try {
-		Add-WindowsPackage -Online -PackagePath $cabPath -NoRestart -IgnoreCheck -LogLevel 1 *>$null
+		Add-WindowsPackage -Online -PackagePath $cabPath -Show-NoRestartMessage -IgnoreCheck -LogLevel 1 *>$null
 	} catch {
 		Write-Host "[ERROR] Error when adding package '$cabPath': $_" -ForegroundColor Red
 		$script:errorLevel++
@@ -353,7 +351,7 @@ function ProcessCab($cabPath) {
 # Fixes RestoreHealth/SFC 'Sources' error
 # https://learn.microsoft.com/windows-hardware/manufacture/desktop/configure-a-windows-repair-source
 # https://github.com/Atlas-OS/Atlas/issues/1103
-function MakeRepairSource {
+function New-RepairSource {
 	$version = '38655.38527.65535.65535'
 	$srcPath = "%SystemRoot%\AtlasModules\Packages\WinSxS"
 	$srcPathExpanded = [System.Environment]::ExpandEnvironmentVariables($srcPath)
@@ -398,7 +396,7 @@ if ($matchedPackages) {
 $successPackages = @()
 $failedPackages = @()
 $packagesToProcess | ForEach-Object {
-	if (ProcessCab $_) {
+	if (Install-CabPackage $_) {
 		$successPackages += $_
 	} else {
 		$failedPackages += $_
@@ -406,10 +404,10 @@ $packagesToProcess | ForEach-Object {
 }
 
 if ($successPackages.Count -ne 0) {
-	MakeRepairSource
+	New-RepairSource
 }
 
 # ======================================================================================================================= #
 # RESTART                                                                                                                 #
 # ======================================================================================================================= #
-Finish $failedPackages
+Complete-Install $failedPackages

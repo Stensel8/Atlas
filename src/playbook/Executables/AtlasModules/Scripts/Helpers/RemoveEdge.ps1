@@ -13,7 +13,7 @@
 	.PARAMETER InstallEdge
 	Installs Edge, leaving the previous Edge user data.
 
-	.PARAMETER InstallWebView
+	.PARAMETER Install-WebView
 	Installs Edge WebView2 using the Evergreen installer.
 
 	.PARAMETER RemoveEdgeData
@@ -32,7 +32,7 @@
 param (
     [switch]$UninstallEdge,
     [switch]$InstallEdge,
-    [switch]$InstallWebView,
+    [switch]$Install-WebView,
     [switch]$RemoveEdgeData,
     [switch]$KeepAppX,
     [switch]$NonInteractive
@@ -51,14 +51,14 @@ $msedgeExePaths = @(
     "$([Environment]::GetFolderPath('ProgramFiles'))\Microsoft\Edge\Application\msedge.exe"
 )
 
-if ($NonInteractive -and (!$UninstallEdge -and !$InstallEdge -and !$InstallWebView)) {
+if ($NonInteractive -and (!$UninstallEdge -and !$InstallEdge -and !$Install-WebView)) {
     $NonInteractive = $false
 }
 if ($InstallEdge -and $UninstallEdge) {
     throw "You can't use both -InstallEdge and -UninstallEdge as arguments."
 }
 
-function Pause ($message = 'Press Enter to exit') {
+function Wait-UserInput ($message = 'Press Enter to exit') {
     if (!$NonInteractive) { $null = Read-Host $message }
 }
 
@@ -94,12 +94,12 @@ function Write-Status {
 
     if ($Exit) {
         Write-Output ''
-        Pause $ExitString
+        Wait-UserInput $ExitString
         exit $ExitCode
     }
 }
 
-function InternetCheck {
+function Test-InternetConnectivity {
     try {
         Invoke-WebRequest -Uri 'https://www.microsoft.com/robots.txt' -Method GET -TimeoutSec 10 -ErrorAction Stop | Out-Null
     }
@@ -108,14 +108,14 @@ function InternetCheck {
     }
 }
 
-function DeleteIfExist($Path) {
+function Remove-ItemIfExists($Path) {
     if (Test-Path $Path) {
         Remove-Item -Path $Path -Force -Recurse -Confirm:$false
     }
 }
 
 # True if it's installed
-function EdgeInstalled {
+function Test-EdgeInstalled {
     foreach ($msedgeExe in $msedgeExePaths) {
         if (Test-Path $msedgeExe) {
             return $true
@@ -125,7 +125,7 @@ function EdgeInstalled {
     return $false
 }
 
-function KillEdgeProcesses {
+function Stop-EdgeProcesses {
     $ErrorActionPreference = 'SilentlyContinue'
     foreach ($service in (Get-Service -Name '*edge*' | Where-Object { $_.DisplayName -like '*Microsoft Edge*' }).Name) {
         Stop-Service -Name $service -Force
@@ -139,7 +139,7 @@ function KillEdgeProcesses {
     $ErrorActionPreference = 'Continue'
 }
 
-function DisableEdgeUpdateInfrastructure {
+function Disable-EdgeUpdateInfrastructure {
     $serviceNames = @(
         'edgeupdate',
         'edgeupdatem',
@@ -188,10 +188,10 @@ function DisableEdgeUpdateInfrastructure {
     }
 }
 
-function InstallEdgeChromium {
-    InternetCheck
+function Install-EdgeChromium {
+    Test-InternetConnectivity
 
-    $temp = mkdir (Join-Path $([System.IO.Path]::GetTempPath()) $(New-Guid))
+    $temp = New-Item -ItemType Directory -Path (Join-Path ([System.IO.Path]::GetTempPath()) (New-Guid))
     $msi = "$temp\edge.msi"
     $msiLog = "$temp\edgeMsi.log"
     $link = 'Undefined'
@@ -304,8 +304,8 @@ Error: $_" -Level Critical -Exit -ExitCode 6
     Write-Status -Text 'Installed Microsoft Edge!' -Level Success
 }
 
-function InstallWebView {
-    InternetCheck
+function Install-WebView {
+    Test-InternetConnectivity
 
     $dlPath = "$((Join-Path $([System.IO.Path]::GetTempPath()) $(New-Guid)))-webview2.exe"
     $link = 'https://go.microsoft.com/fwlink/p/?LinkId=2124703'
@@ -348,8 +348,8 @@ else {
     }
 }
 
-$edgeInstalled = EdgeInstalled
-if (!$UninstallEdge -and !$InstallEdge -and !$InstallWebView) {
+$edgeInstalled = Test-EdgeInstalled
+if (!$UninstallEdge -and !$InstallEdge -and !$Install-WebView) {
     $host.UI.RawUI.WindowTitle = "AtlasOS EdgeRemover"
 
     $continue = $false
@@ -391,12 +391,12 @@ To perform an action, also type its number.
             }
             51 {
                 # reinstall WebView (3)
-                $InstallWebView = $true
+                $Install-WebView = $true
                 $continue = $true
             }
             52 {
                 # reinstall both (4)
-                $InstallWebView = $true
+                $Install-WebView = $true
                 $InstallEdge = $true
                 $continue = $true
             }
@@ -408,8 +408,8 @@ To perform an action, also type its number.
 
 if ($UninstallEdge) {
     Write-Status 'Uninstalling Edge Chromium...'
-    KillEdgeProcesses
-    DisableEdgeUpdateInfrastructure
+    Stop-EdgeProcesses
+    Disable-EdgeUpdateInfrastructure
 
     $setupCandidates = @()
     foreach ($root in @(
@@ -426,19 +426,19 @@ if ($UninstallEdge) {
         foreach ($setup in $setupCandidates) {
             Write-Status "Running uninstaller at '$($setup.FullName)'..."
             $process = Start-Process -FilePath $setup.FullName -ArgumentList '--uninstall --msedge --system-level --verbose-logging --force-uninstall' -WindowStyle Hidden -Wait -PassThru
-            if (($process.ExitCode -eq 0) -or (-not (EdgeInstalled))) {
+            if (($process.ExitCode -eq 0) -or (-not (Test-EdgeInstalled))) {
                 break
             }
 
             Write-Status "Edge uninstaller exited with code $($process.ExitCode); trying fallback methods." -Level Info
         }
     }
-    elseif (EdgeInstalled) {
+    elseif (Test-EdgeInstalled) {
         Write-Status 'Could not locate a local Edge installer to perform uninstallation.' -Level Warning
     }
 
-    KillEdgeProcesses
-    if (EdgeInstalled) {
+    Stop-EdgeProcesses
+    if (Test-EdgeInstalled) {
         $legacyRemoved = $false
         try {
             Write-Status 'Trying PowerShell-based Edge removal fallback...'
@@ -446,10 +446,10 @@ if ($UninstallEdge) {
             # Attempt winget uninstall first (cleanest path)
             if ($null -ne (Get-Command winget -ErrorAction SilentlyContinue)) {
                 & winget uninstall --id Microsoft.Edge --silent --accept-source-agreements --disable-interactivity 2>&1 | Out-Null
-                KillEdgeProcesses
+                Stop-EdgeProcesses
             }
 
-            if (-not (EdgeInstalled)) {
+            if (-not (Test-EdgeInstalled)) {
                 $legacyRemoved = $true
             }
             else {
@@ -477,17 +477,17 @@ if ($UninstallEdge) {
                     Remove-Item -Path $regPath -Recurse -Force -ErrorAction SilentlyContinue
                 }
 
-                KillEdgeProcesses
-                $legacyRemoved = -not (EdgeInstalled)
+                Stop-EdgeProcesses
+                $legacyRemoved = -not (Test-EdgeInstalled)
             }
         }
         catch {
-            if (EdgeInstalled) {
+            if (Test-EdgeInstalled) {
                 Write-Status "PowerShell Edge removal fallback failed: $($_.Exception.Message)" -Level Warning
             }
         }
 
-        if ((-not $legacyRemoved) -and (EdgeInstalled)) {
+        if ((-not $legacyRemoved) -and (Test-EdgeInstalled)) {
             if ($KeepAppX -or $NonInteractive) {
                 Write-Status 'Edge binaries were not fully removed. Continuing so playbook cleanup can finish.' -Level Warning
             }
@@ -521,21 +521,21 @@ if ($UninstallEdge) {
 }
 
 if ($RemoveEdgeData) {
-    KillEdgeProcesses
-    DeleteIfExist "$([Environment]::GetFolderPath('LocalApplicationData'))\Microsoft\Edge"
+    Stop-EdgeProcesses
+    Remove-ItemIfExists "$([Environment]::GetFolderPath('LocalApplicationData'))\Microsoft\Edge"
     Write-Status 'Removed any existing Edge Chromium user data.'
     Write-Output ''
 }
 
 if ($InstallEdge) {
-    InstallEdgeChromium
+    Install-EdgeChromium
     Write-Output ''
 }
-if ($InstallWebView) {
-    InstallWebView
+if ($Install-WebView) {
+    Install-WebView
     Write-Output ''
 }
 
 Write-Host 'Completed.' -ForegroundColor Cyan
 if ($NonInteractive) { exit }
-Pause
+Wait-UserInput
