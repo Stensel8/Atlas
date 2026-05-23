@@ -5,18 +5,18 @@ $ErrorActionPreference = 'Stop'
 # 🦆 Modified from: https://github.com/he3als/online-sxs
 
 param (
-	[array]$InstallPackages,
-	[array]$UninstallPackages,
-	[string]$PackagesPath = "$([Environment]::GetFolderPath('Windows'))\AtlasModules\Packages",
-	[switch]$NoInteraction,
-	[switch]$SafeMode,
-	[switch]$FailMessage
+    [array]$InstallPackages,
+    [array]$UninstallPackages,
+    [string]$PackagesPath = "$([Environment]::GetFolderPath('Windows'))\AtlasModules\Packages",
+    [switch]$NoInteraction,
+    [switch]$SafeMode,
+    [switch]$FailMessage
 )
 
 Set-StrictMode -Version 3.0
 
 if (!([Security.Principal.WindowsIdentity]::GetCurrent().User.Value -eq 'S-1-5-18')) {
-	throw "This script must be ran as TrustedInstaller/SYSTEM."
+    throw "This script must be ran as TrustedInstaller/SYSTEM."
 }
 
 # ======================================================================================================================= #
@@ -38,223 +38,223 @@ $safeModeStatus = (Get-CimInstance -Class Win32_ComputerSystem).BootupState -ne 
 # FUNCTIONS                                                                                                               #
 # ======================================================================================================================= #
 function Write-BulletPoint($message) {
-	$message | Foreach-Object {
-		Write-Host " - " -ForegroundColor Green -NoNewline
-		Write-Host $_
-	}
-	Write-Host ""
+    $message | Foreach-Object {
+        Write-Host " - " -ForegroundColor Green -NoNewline
+        Write-Host $_
+    }
+    Write-Host ""
 }
 
 function Set-SafeMode {
-	param (
-		[switch]$Enable,
-		[array]$FailedPackageList,
-		[string]$FailedPackageListPath = $safeModePackageList
-	)
+    param (
+        [switch]$Enable,
+        [array]$FailedPackageList,
+        [string]$FailedPackageListPath = $safeModePackageList
+    )
 
-	if ($Enable) {
-		$bcdeditArgs = '/set {current} safeboot minimal'
-		$shellValue = "explorer.exe,powershell -NonInteractive -ExecutionPolicy Bypass -File `"$env:windir\AtlasModules\Scripts\RunAsTI.ps1`" powershell -NoP -EP RemoteSigned -File `"$PSCommandPath`" -SafeMode"
+    if ($Enable) {
+        $bcdeditArgs = '/set {current} safeboot minimal'
+        $shellValue = "explorer.exe,powershell -NonInteractive -ExecutionPolicy Bypass -File `"$env:windir\AtlasModules\Scripts\RunAsTI.ps1`" powershell -NoP -EP RemoteSigned -File `"$PSCommandPath`" -SafeMode"
 
-		if ($FailedPackageList) {
-			Set-Content -Path $FailedPackageListPath -Value $FailedPackageList
-		}
-	} else {
-		$bcdeditArgs = '/deletevalue {current} safeboot'
-		$shellValue = 'explorer.exe'
-	}
+        if ($FailedPackageList) {
+            Set-Content -Path $FailedPackageListPath -Value $FailedPackageList
+        }
+    } else {
+        $bcdeditArgs = '/deletevalue {current} safeboot'
+        $shellValue = 'explorer.exe'
+    }
 
-	if ($bcdeditArgs) { Start-Process -FilePath "bcdedit" -ArgumentList $bcdeditArgs -WindowStyle Hidden -Wait }
-	Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name Shell -Value $shellValue -Force
+    if ($bcdeditArgs) { Start-Process -FilePath "bcdedit" -ArgumentList $bcdeditArgs -WindowStyle Hidden -Wait }
+    Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name Shell -Value $shellValue -Force
 }
 if (
-	($safeModeStatus -and
-	(Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name Shell).Shell -like "*$PSCommandPath*") -or
-	$SafeMode
+    ($safeModeStatus -and
+    (Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name Shell).Shell -like "*$PSCommandPath*") -or
+    $SafeMode
 ) {
-	Set-SafeMode
+    Set-SafeMode
 }
 
 function Restart-System {
-	Restart-Computer -Force
-	Start-Sleep 2
-	Write-Host "Something seems to have went wrong restarting automatically, restart manually." -ForegroundColor Red
-	if (!$NoInteraction) { Read-Pause }
-	exit 9000
+    Restart-Computer -Force
+    Start-Sleep 2
+    Write-Host "Something seems to have went wrong restarting automatically, restart manually." -ForegroundColor Red
+    if (!$NoInteraction) { Read-Pause }
+    exit 9000
 }
 
 function Complete-Install($failedPackages) {
-	$failedPackages = @($failedPackages | Where-Object { $_ })
+    $failedPackages = @($failedPackages | Where-Object { $_ })
 
-	function New-StatusText($text, $dashCount = 84) {
-		$separator = "[ $('-' * $dashCount) ]"
-		$text = "[ $text $(' ' * ($dashCount - $text.Length - 1)) ]"
-		return @"
+    function New-StatusText($text, $dashCount = 84) {
+        $separator = "[ $('-' * $dashCount) ]"
+        $text = "[ $text $(' ' * ($dashCount - $text.Length - 1)) ]"
+        return @"
 $separator
 $text
 $separator
 "@
-	}
+    }
 
-	Write-Host "`n$(New-StatusText "Completed! Errors: $script:errorLevel | Warnings: $script:warningLevel")`n" -ForegroundColor Green
+    Write-Host "`n$(New-StatusText "Completed! Errors: $script:errorLevel | Warnings: $script:warningLevel")`n" -ForegroundColor Green
 
-	if ($failedPackages.Count -gt 0) {
-		Write-Host "Some packages failed to install:" -ForegroundColor Red
-		Write-BulletPoint $failedPackages
+    if ($failedPackages.Count -gt 0) {
+        Write-Host "Some packages failed to install:" -ForegroundColor Red
+        Write-BulletPoint $failedPackages
 
-		if ($NoInteraction) {
-			Write-Host "Setting error message box next boot as NoInteraction is enabled."
-			Set-Content -Path $safeModePackageList -Value $failedPackages
+        if ($NoInteraction) {
+            Write-Host "Setting error message box next boot as NoInteraction is enabled."
+            Set-Content -Path $safeModePackageList -Value $failedPackages
 
-			$failedMsgTitle = 'AtlasFailedComponentMsgBox'
-			$failedMsgArgs = "/c title Finalizing Installation - Atlas & echo Do not close this window. & schtasks /delete /tn `"$failedMsgTitle`" /f > nul & " `
-			+ "PowerShell -NoP -NonI -W Hidden -EP RemoteSigned -C `"& '$PSCommandPath' -FailMessage`""
-			$failedMsg = @{
-				'TaskName'    = $failedMsgTitle
-				'Settings'    = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
-				'Trigger'     = New-ScheduledTaskTrigger -AtLogOn
-				'User'        = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
-				'Force'       = $true
-				'RunLevel'    = 'Highest'
-				'Action'      = New-ScheduledTaskAction -Execute 'cmd' -Argument $failedMsgArgs
-			}
-			Register-ScheduledTask @failedMsg
+            $failedMsgTitle = 'AtlasFailedComponentMsgBox'
+            $failedMsgArgs = "/c title Finalizing Installation - Atlas & echo Do not close this window. & schtasks /delete /tn `"$failedMsgTitle`" /f > nul & " `
+            + "PowerShell -NoP -NonI -W Hidden -EP RemoteSigned -C `"& '$PSCommandPath' -FailMessage`""
+            $failedMsg = @{
+                'TaskName'    = $failedMsgTitle
+                'Settings'    = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
+                'Trigger'     = New-ScheduledTaskTrigger -AtLogOn
+                'User'        = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
+                'Force'       = $true
+                'RunLevel'    = 'Highest'
+                'Action'      = New-ScheduledTaskAction -Execute 'cmd' -Argument $failedMsgArgs
+            }
+            Register-ScheduledTask @failedMsg
 
-			exit $script:errorLevel
-		}
+            exit $script:errorLevel
+        }
 
-		function Show-NoRestartMessage {
-			Write-Host "`nIf any packages installed successfully, they will apply next restart." -ForegroundColor Yellow
-			Read-Pause
-		}
+        function Show-NoRestartMessage {
+            Write-Host "`nIf any packages installed successfully, they will apply next restart." -ForegroundColor Yellow
+            Read-Pause
+        }
 
-		if ($safeModeStatus) {
-			Write-Host "Please report this to the Atlas team, as there's no automatic fallbacks past Safe Mode." -ForegroundColor Magenta
-			choice /c yn /n /m "Would you like to restart out of Safe Mode? [Y/N] "
-			if ($lastexitcode -eq 1) {
-				Restart-System
-			} else {
-				Show-NoRestartMessage
-			}
-		} else {
-			choice /c yn /n /m "Would you like to boot into Safe Mode and attempt to install them? [Y/N] "
-			if ($lastexitcode -eq 1) {
-				Set-SafeMode -Enable -FailedPackageList $failedPackages
-				Restart-System
-			} else {
-				Show-NoRestartMessage
-			}
-		}
+        if ($safeModeStatus) {
+            Write-Host "Please report this to the Atlas team, as there's no automatic fallbacks past Safe Mode." -ForegroundColor Magenta
+            choice /c yn /n /m "Would you like to restart out of Safe Mode? [Y/N] "
+            if ($lastexitcode -eq 1) {
+                Restart-System
+            } else {
+                Show-NoRestartMessage
+            }
+        } else {
+            choice /c yn /n /m "Would you like to boot into Safe Mode and attempt to install them? [Y/N] "
+            if ($lastexitcode -eq 1) {
+                Set-SafeMode -Enable -FailedPackageList $failedPackages
+                Restart-System
+            } else {
+                Show-NoRestartMessage
+            }
+        }
 
-		exit $script:errorLevel
-	}
+        exit $script:errorLevel
+    }
 
-	if ($NoInteraction) { exit $script:errorLevel }
-	choice /c yn /n /m "Would you like to restart now to apply the changes? [Y/N] "
-	if ($lastexitcode -eq 1) {
-		Restart-System
-	} else {
-		Write-Host "`nChanges will apply next restart." -ForegroundColor Yellow
-		Read-Pause
-		exit $script:errorLevel
-	}
+    if ($NoInteraction) { exit $script:errorLevel }
+    choice /c yn /n /m "Would you like to restart now to apply the changes? [Y/N] "
+    if ($lastexitcode -eq 1) {
+        Restart-System
+    } else {
+        Write-Host "`nChanges will apply next restart." -ForegroundColor Yellow
+        Read-Pause
+        exit $script:errorLevel
+    }
 }
 
 # ======================================================================================================================= #
 # UNINSTALL PACKAGES                                                                                                      #
 # ======================================================================================================================= #
 if ($UninstallPackages) {
-	$installedPackages = @()
-	$notInstalledPackages = $UninstallPackages
-	(Get-WindowsPackage -Online).PackageName | ForEach-Object {
-		foreach ($package in $UninstallPackages) {
-			if (($_ -like $package) -and ($_ -match "$arch")) {
-				$installedPackages += $_
-				$notInstalledPackages = $notInstalledPackages -ne $package
-				break
-			}
-		}
-	}
+    $installedPackages = @()
+    $notInstalledPackages = $UninstallPackages
+    (Get-WindowsPackage -Online).PackageName | ForEach-Object {
+        foreach ($package in $UninstallPackages) {
+            if (($_ -like $package) -and ($_ -match "$arch")) {
+                $installedPackages += $_
+                $notInstalledPackages = $notInstalledPackages -ne $package
+                break
+            }
+        }
+    }
 
-	if ($installedPackages.Count -eq 0) {
-		Write-Host "[WARN] '$UninstallPackages' matched no installed packages, nothing to do." -ForegroundColor Yellow
-		$script:warningLevel++
-	} else {
-		if ($notInstalledPackages.Count -gt 0) {
-			Write-Host "[WARN] Some packages not found to uninstall: $notInstalledPackages" -ForegroundColor Yellow
-			$script:warningLevel++
-		}
+    if ($installedPackages.Count -eq 0) {
+        Write-Host "[WARN] '$UninstallPackages' matched no installed packages, nothing to do." -ForegroundColor Yellow
+        $script:warningLevel++
+    } else {
+        if ($notInstalledPackages.Count -gt 0) {
+            Write-Host "[WARN] Some packages not found to uninstall: $notInstalledPackages" -ForegroundColor Yellow
+            $script:warningLevel++
+        }
 
-		foreach ($package in $installedPackages) {
-			try {
-				Write-Host "[INFO] Uninstalling '$package'..."
-				Remove-WindowsPackage -Online -PackageName $package -Show-NoRestartMessage -LogLevel 1 *>$null
-			} catch {
-				Write-Host "[ERROR] $package failed to uninstall: $_" -ForegroundColor Red
-				$script:errorLevel++
-			}
-		}
-	}
+        foreach ($package in $installedPackages) {
+            try {
+                Write-Host "[INFO] Uninstalling '$package'..."
+                Remove-WindowsPackage -Online -PackageName $package -Show-NoRestartMessage -LogLevel 1 *>$null
+            } catch {
+                Write-Host "[ERROR] $package failed to uninstall: $_" -ForegroundColor Red
+                $script:errorLevel++
+            }
+        }
+    }
 
-	if (!$InstallPackages) {
-		Complete-Install
-	}
+    if (!$InstallPackages) {
+        Complete-Install
+    }
 }
 
 # ======================================================================================================================= #
 # PARSE $InstallPackages ARG                                                                                                     #
 # ======================================================================================================================= #
 if ($InstallPackages) {
-	$matchedPackages = @()
-	$notMatchedPackages = $InstallPackages
-	(Get-ChildItem $PackagesPath -File -Filter "*.cab").FullName | Sort-Object -Descending | ForEach-Object {
-		foreach ($package in $notMatchedPackages) {
-			if (($_ -like $package) -and ($_ -match "$arch")) {
-				$matchedPackages += $_
-				$notMatchedPackages = $notMatchedPackages -ne $package
-				break
-			}
-		}
-	}
+    $matchedPackages = @()
+    $notMatchedPackages = $InstallPackages
+    (Get-ChildItem $PackagesPath -File -Filter "*.cab").FullName | Sort-Object -Descending | ForEach-Object {
+        foreach ($package in $notMatchedPackages) {
+            if (($_ -like $package) -and ($_ -match "$arch")) {
+                $matchedPackages += $_
+                $notMatchedPackages = $notMatchedPackages -ne $package
+                break
+            }
+        }
+    }
 
-	if ($matchedPackages.Count -eq 0) {
-		Write-Host "[ERROR] The specified CABs ($InstallPackages) to install weren't found." -ForegroundColor Red
-		if (!$NoInteraction) { Read-Pause }
-		exit 1
-	}
-	if ($notMatchedPackages.Count -gt 0) {
-		Write-Host "[WARN] These CABs to install weren't found: $notMatchedPackages" -ForegroundColor Yellow
-		$script:warningLevel++
-	}
+    if ($matchedPackages.Count -eq 0) {
+        Write-Host "[ERROR] The specified CABs ($InstallPackages) to install weren't found." -ForegroundColor Red
+        if (!$NoInteraction) { Read-Pause }
+        exit 1
+    }
+    if ($notMatchedPackages.Count -gt 0) {
+        Write-Host "[WARN] These CABs to install weren't found: $notMatchedPackages" -ForegroundColor Yellow
+        $script:warningLevel++
+    }
 }
 
 if ($SafeMode) {
-	function Invoke-SafeModeExitPrompt {
-		choice /c yn /n /m "Would you like to restart to get out of Safe Mode? [Y/N] "
-		if ($lastexitcode -eq 1) {
-			Restart-System
-		} else {
-			exit 1
-		}
-	}
+    function Invoke-SafeModeExitPrompt {
+        choice /c yn /n /m "Would you like to restart to get out of Safe Mode? [Y/N] "
+        if ($lastexitcode -eq 1) {
+            Restart-System
+        } else {
+            exit 1
+        }
+    }
 
-	$matchedPackages = @(Get-Content $safeModePackageList)
+    $matchedPackages = @(Get-Content $safeModePackageList)
 
-	if ($matchedPackages.Count -le 0) {
-		Write-Host "[ERROR] Safe Mode package list not found! Please report this to Atlas." -ForegroundColor Red
-		Invoke-SafeModeExitPrompt
-	}
+    if ($matchedPackages.Count -le 0) {
+        Write-Host "[ERROR] Safe Mode package list not found! Please report this to Atlas." -ForegroundColor Red
+        Invoke-SafeModeExitPrompt
+    }
 
-	$packagesThatDontExist = $matchedPackages | ForEach-Object { if (!(Test-Path $_ -PathType Leaf)) { $_ } }
-	if ($packagesThatDontExist) {
-		Write-Host "[ERROR] Some Safe Mode packages weren't found. Please report this to Atlas." -ForegroundColor Red
-		Write-BulletPoint $packagesThatDontExist
-		Invoke-SafeModeExitPrompt
-	}
+    $packagesThatDontExist = $matchedPackages | ForEach-Object { if (!(Test-Path $_ -PathType Leaf)) { $_ } }
+    if ($packagesThatDontExist) {
+        Write-Host "[ERROR] Some Safe Mode packages weren't found. Please report this to Atlas." -ForegroundColor Red
+        Write-BulletPoint $packagesThatDontExist
+        Invoke-SafeModeExitPrompt
+    }
 }
 
 if ($FailMessage) {
-	$body = @"
+    $body = @"
 It appears that there was an issue while attempting to disable certain Windows components.
 
 Would you like Atlas to restart your system into Safe Mode and try again? This process shouldn't take much time.
@@ -262,150 +262,150 @@ Would you like Atlas to restart your system into Safe Mode and try again? This p
 Please note that if you chose to disable Windows Defender, it may still remain enabled if you select 'No'. However, you can always try disabling it later in the Atlas folder.
 "@
 
-	if ((Read-MessageBox -Title "Atlas - Component Modification" -Body $body -Icon Question) -eq 'Yes') {
-		Set-SafeMode -Enable
-		Restart-System
-	}
+    if ((Read-MessageBox -Title "Atlas - Component Modification" -Body $body -Icon Question) -eq 'Yes') {
+        Set-SafeMode -Enable
+        Restart-System
+    }
 
-	exit
+    exit
 }
 
 # ======================================================================================================================= #
 # UI - SELECT PACKAGES                                                                                                    #
 # ======================================================================================================================= #
 if (!$matchedPackages) {
-	Write-Host "This will install specified CBS packages online, meaning live on your current install of Windows." -ForegroundColor Yellow
-	Read-Pause "Press Enter to continue"
+    Write-Host "This will install specified CBS packages online, meaning live on your current install of Windows." -ForegroundColor Yellow
+    Read-Pause "Press Enter to continue"
 
-	Write-Host "`n[INFO] Opening file dialog to select CBS package CAB..."
-	Add-Type -AssemblyName System.Windows.Forms
-	$openFileDialog = New-Object System.Windows.Forms.OpenFileDialog
-	$openFileDialog.Multiselect = $true
-	$openFileDialog.Filter = "CBS Package Files (*.cab)|*.cab"
-	$openFileDialog.Title = "Select a CBS Package File"
-	if ($openFileDialog.ShowDialog() -ne 'OK') {
-		exit
-	}
+    Write-Host "`n[INFO] Opening file dialog to select CBS package CAB..."
+    Add-Type -AssemblyName System.Windows.Forms
+    $openFileDialog = New-Object System.Windows.Forms.OpenFileDialog
+    $openFileDialog.Multiselect = $true
+    $openFileDialog.Filter = "CBS Package Files (*.cab)|*.cab"
+    $openFileDialog.Title = "Select a CBS Package File"
+    if ($openFileDialog.ShowDialog() -ne 'OK') {
+        exit
+    }
 }
 
 # ======================================================================================================================= #
 # PROCESS PACKAGES                                                                                                        #
 # ======================================================================================================================= #
 function Install-CabPackage($cabPath) {
-	$filePath = Split-Path $cabPath -Leaf
-	Write-Host "`nInstalling $filePath..." -ForegroundColor Cyan
-	Write-Host ("-" * 84) -ForegroundColor Magenta
+    $filePath = Split-Path $cabPath -Leaf
+    Write-Host "`nInstalling $filePath..." -ForegroundColor Cyan
+    Write-Host ("-" * 84) -ForegroundColor Magenta
 
-	Write-Host "[INFO] Checking certificate..."
-	$certificateValidated = $false
-	try {
-		$cert = (Get-AuthenticodeSignature -FilePath $cabPath).SignerCertificate
-		if ($null -eq $cert) {
-			throw "No signer certificate was found."
-		}
+    Write-Host "[INFO] Checking certificate..."
+    $certificateValidated = $false
+    try {
+        $cert = (Get-AuthenticodeSignature -FilePath $cabPath).SignerCertificate
+        if ($null -eq $cert) {
+            throw "No signer certificate was found."
+        }
 
-		$ekuValues = @(
-			$cert.Extensions |
-				Where-Object { $_ -is [System.Security.Cryptography.X509Certificates.X509EnhancedKeyUsageExtension] } |
-				ForEach-Object { $_.EnhancedKeyUsages | ForEach-Object { $_.Value } }
-		)
+        $ekuValues = @(
+            $cert.Extensions |
+                Where-Object { $_ -is [System.Security.Cryptography.X509Certificates.X509EnhancedKeyUsageExtension] } |
+                ForEach-Object { $_.EnhancedKeyUsages | ForEach-Object { $_.Value } }
+        )
 
-		if ($ekuValues -notcontains "1.3.6.1.4.1.311.10.3.6") {
-			throw "Cert doesn't have proper key usages, can't continue."
-		}
+        if ($ekuValues -notcontains "1.3.6.1.4.1.311.10.3.6") {
+            throw "Cert doesn't have proper key usages, can't continue."
+        }
 
-		# add test cert
-		# isn't cleared later as it's required for the alt repair source
-		$certRegPath = "HKLM:\Software\Microsoft\SystemCertificates\ROOT\Certificates\8A334AA8052DD244A647306A76B8178FA215F344"
-		if (!(Test-Path "$certRegPath")) {
-			New-Item -Path $certRegPath -Force | Out-Null
-		}
+        # add test cert
+        # isn't cleared later as it's required for the alt repair source
+        $certRegPath = "HKLM:\Software\Microsoft\SystemCertificates\ROOT\Certificates\8A334AA8052DD244A647306A76B8178FA215F344"
+        if (!(Test-Path "$certRegPath")) {
+            New-Item -Path $certRegPath -Force | Out-Null
+        }
 
-		$certificateValidated = $true
-	} catch {
-		Write-Host "[ERROR] Cert error from '$cabPath': $_" -ForegroundColor Red
-		$script:errorLevel++
-	}
+        $certificateValidated = $true
+    } catch {
+        Write-Host "[ERROR] Cert error from '$cabPath': $_" -ForegroundColor Red
+        $script:errorLevel++
+    }
 
-	if (-not $certificateValidated) {
-		return $false
-	}
+    if (-not $certificateValidated) {
+        return $false
+    }
 
-	Write-Host "[INFO] Adding package..."
-	$packageAdded = $true
-	try {
-		Add-WindowsPackage -Online -PackagePath $cabPath -Show-NoRestartMessage -IgnoreCheck -LogLevel 1 *>$null
-	} catch {
-		Write-Host "[ERROR] Error when adding package '$cabPath': $_" -ForegroundColor Red
-		$script:errorLevel++
-		$packageAdded = $false
-	}
+    Write-Host "[INFO] Adding package..."
+    $packageAdded = $true
+    try {
+        Add-WindowsPackage -Online -PackagePath $cabPath -Show-NoRestartMessage -IgnoreCheck -LogLevel 1 *>$null
+    } catch {
+        Write-Host "[ERROR] Error when adding package '$cabPath': $_" -ForegroundColor Red
+        $script:errorLevel++
+        $packageAdded = $false
+    }
 
-	if (-not $packageAdded) {
-		return $false
-	}
+    if (-not $packageAdded) {
+        return $false
+    }
 
-	Write-Host "[INFO] Completed successfully."
-	return $true
+    Write-Host "[INFO] Completed successfully."
+    return $true
 }
 
 # Fixes RestoreHealth/SFC 'Sources' error
 # https://learn.microsoft.com/windows-hardware/manufacture/desktop/configure-a-windows-repair-source
 # https://github.com/Atlas-OS/Atlas/issues/1103
 function New-RepairSource {
-	$version = '38655.38527.65535.65535'
-	$srcPath = "%SystemRoot%\AtlasModules\Packages\WinSxS"
-	$srcPathExpanded = [System.Environment]::ExpandEnvironmentVariables($srcPath)
+    $version = '38655.38527.65535.65535'
+    $srcPath = "%SystemRoot%\AtlasModules\Packages\WinSxS"
+    $srcPathExpanded = [System.Environment]::ExpandEnvironmentVariables($srcPath)
 
-	Write-Host "`nMaking repair source..." -ForegroundColor Cyan
-	Write-Host ("-" * 84) -ForegroundColor Magenta
+    Write-Host "`nMaking repair source..." -ForegroundColor Cyan
+    Write-Host ("-" * 84) -ForegroundColor Magenta
 
-	# get list of Atlas manifests
-	Write-Host "[INFO] Getting manifests..."
-	$manifests = @(Get-ChildItem "$windir\WinSxS\Manifests" -File -Filter "*$version*")
-	if ($manifests.Count -eq 0) {
-		Write-Host "[WARN] No manifests found! Can't create repair source." -ForegroundColor Yellow
-		return $false
-	}
+    # get list of Atlas manifests
+    Write-Host "[INFO] Getting manifests..."
+    $manifests = @(Get-ChildItem "$windir\WinSxS\Manifests" -File -Filter "*$version*")
+    if ($manifests.Count -eq 0) {
+        Write-Host "[WARN] No manifests found! Can't create repair source." -ForegroundColor Yellow
+        return $false
+    }
 
-	# create new repair source folder
-	if (Test-Path $srcPathExpanded -PathType Container) {
-		Write-Host "[INFO] Deleting old RepairSrc..."
-		Remove-Item $srcPathExpanded -Force -Recurse
-	}
-	Write-Host "[INFO] Creating RepairSrc path..."
-	New-Item "$srcPathExpanded\Manifests" -Force -ItemType Directory | Out-Null
+    # create new repair source folder
+    if (Test-Path $srcPathExpanded -PathType Container) {
+        Write-Host "[INFO] Deleting old RepairSrc..."
+        Remove-Item $srcPathExpanded -Force -Recurse
+    }
+    Write-Host "[INFO] Creating RepairSrc path..."
+    New-Item "$srcPathExpanded\Manifests" -Force -ItemType Directory | Out-Null
 
-	# hardlink all the manifests to the repair source
-	Write-Host "[INFO] Hard linking manifests..."
-	foreach ($manifest in $manifests) {
-		New-Item -ItemType HardLink -Path "$srcPathExpanded\Manifests\$manifest" -Target $manifest.FullName | Out-Null
-	}
+    # hardlink all the manifests to the repair source
+    Write-Host "[INFO] Hard linking manifests..."
+    foreach ($manifest in $manifests) {
+        New-Item -ItemType HardLink -Path "$srcPathExpanded\Manifests\$manifest" -Target $manifest.FullName | Out-Null
+    }
 
-	# adds the repair source policy
-	$servicingPolicyKey = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\Servicing"
-	if (!(Test-Path $servicingPolicyKey)) { New-Item -Path $servicingPolicyKey -Force | Out-Null }
-	Set-ItemProperty -Path $servicingPolicyKey -Name LocalSourcePath -Value "$srcPath" -Type ExpandString -Force
+    # adds the repair source policy
+    $servicingPolicyKey = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\Servicing"
+    if (!(Test-Path $servicingPolicyKey)) { New-Item -Path $servicingPolicyKey -Force | Out-Null }
+    Set-ItemProperty -Path $servicingPolicyKey -Name LocalSourcePath -Value "$srcPath" -Type ExpandString -Force
 }
 
 if ($matchedPackages) {
-	$packagesToProcess = $matchedPackages
+    $packagesToProcess = $matchedPackages
 } else {
-	$packagesToProcess = $openFileDialog.FileNames
+    $packagesToProcess = $openFileDialog.FileNames
 }
 
 $successPackages = @()
 $failedPackages = @()
 $packagesToProcess | ForEach-Object {
-	if (Install-CabPackage $_) {
-		$successPackages += $_
-	} else {
-		$failedPackages += $_
-	}
+    if (Install-CabPackage $_) {
+        $successPackages += $_
+    } else {
+        $failedPackages += $_
+    }
 }
 
 if ($successPackages.Count -ne 0) {
-	New-RepairSource
+    New-RepairSource
 }
 
 # ======================================================================================================================= #

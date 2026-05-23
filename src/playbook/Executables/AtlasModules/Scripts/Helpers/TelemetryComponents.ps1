@@ -22,11 +22,9 @@ $package = "*Z-Atlas-NoTelemetry-Package*"
 try {
     $packages = (Get-WindowsPackage -online | Where-Object { $_.PackageName -like $package }).PackageName
 } catch {
-    if (!$?) {
-        Write-Host "Failed to get packages! $_" -ForegroundColor Red
-        Read-Pause
-        exit 1
-    }
+    Write-Host "Failed to get packages! $_" -ForegroundColor Red
+    Read-Pause
+    exit 1
 }
 if ($null -eq $packages) {
     $TelemetryEnabled = '(current)'

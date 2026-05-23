@@ -2,12 +2,12 @@
 
 function New-Shortcut {
     [CmdletBinding()]
-	param (
+    param (
         [Parameter(Mandatory = $True)][ValidateNotNullOrEmpty()][string]$Source,
         [Parameter(Mandatory = $True)][ValidateNotNullOrEmpty()][string]$Destination,
         [ValidateNotNullOrEmpty()][string]$WorkingDir,
         [ValidateNotNullOrEmpty()][string]$Arguments,
-		[ValidateNotNullOrEmpty()][string]$Icon,
+    	[ValidateNotNullOrEmpty()][string]$Icon,
         [switch]$IfExist
     )
 
@@ -27,13 +27,13 @@ function New-Shortcut {
         }
     }
 
-	$WshShell = New-Object -ComObject WScript.Shell
-	$Shortcut = $WshShell.CreateShortcut($Destination)
-	$Shortcut.TargetPath = $Source
-	$Shortcut.WorkingDirectory = $WorkingDir
-	if ($Icon) { $Shortcut.IconLocation = $Icon }
-	if ($Arguments) { $Shortcut.Arguments = $Arguments }
-	$Shortcut.Save()
+    $WshShell = New-Object -ComObject WScript.Shell
+    $Shortcut = $WshShell.CreateShortcut($Destination)
+    $Shortcut.TargetPath = $Source
+    $Shortcut.WorkingDirectory = $WorkingDir
+    if ($Icon) { $Shortcut.IconLocation = $Icon }
+    if ($Arguments) { $Shortcut.Arguments = $Arguments }
+    $Shortcut.Save()
 }
 
 Export-ModuleMember -Function New-Shortcut

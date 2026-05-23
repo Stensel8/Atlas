@@ -1,32 +1,32 @@
 #Requires -Version 5.1
 
 <#
-	.SYNOPSIS
-	Uninstalls or reinstalls Microsoft Edge and its related components. Made by @he3als.
+    .SYNOPSIS
+    Uninstalls or reinstalls Microsoft Edge and its related components. Made by @he3als.
 
-	.Description
-	Uninstalls or reinstalls Microsoft Edge and its related components in a non-forceful manner, based upon switches or user choices in a TUI.
+    .Description
+    Uninstalls or reinstalls Microsoft Edge and its related components in a non-forceful manner, based upon switches or user choices in a TUI.
 
-	.PARAMETER UninstallEdge
-	Uninstalls Edge, leaving the Edge user data.
+    .PARAMETER UninstallEdge
+    Uninstalls Edge, leaving the Edge user data.
 
-	.PARAMETER InstallEdge
-	Installs Edge, leaving the previous Edge user data.
+    .PARAMETER InstallEdge
+    Installs Edge, leaving the previous Edge user data.
 
-	.PARAMETER InstallWebView
-	Installs Edge WebView2 using the Evergreen installer.
+    .PARAMETER InstallWebView
+    Installs Edge WebView2 using the Evergreen installer.
 
-	.PARAMETER RemoveEdgeData
-	Removes all Edge user data. Compatible with -InstallEdge.
+    .PARAMETER RemoveEdgeData
+    Removes all Edge user data. Compatible with -InstallEdge.
 
-	.PARAMETER KeepAppX
-	Doesn't check for and remove the AppX, in case you want to use alternative AppX removal methods. Doesn't work with UninstallEdge.
+    .PARAMETER KeepAppX
+    Doesn't check for and remove the AppX, in case you want to use alternative AppX removal methods. Doesn't work with UninstallEdge.
 
-	.PARAMETER NonInteractive
-	When combined with other parameters, this does not prompt the user for anything.
+    .PARAMETER NonInteractive
+    When combined with other parameters, this does not prompt the user for anything.
 
-	.LINK
-	https://github.com/he3als/EdgeRemover
+    .LINK
+    https://github.com/he3als/EdgeRemover
 #>
 
 param (
