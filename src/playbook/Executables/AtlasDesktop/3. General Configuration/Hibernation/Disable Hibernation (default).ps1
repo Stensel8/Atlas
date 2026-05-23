@@ -24,6 +24,6 @@ Write-Output 'Hibernation has been disabled.'
 Write-Output ''
 $choice = Read-Host 'Would you like to reboot now to apply changes? (Y/N)'
 if ($choice -match '^[Yy]') {
-    & shutdown.exe /r /t 0
+    Restart-Computer -Force
 }
 $null = Read-Host 'Press Enter to exit'

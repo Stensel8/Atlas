@@ -25,7 +25,7 @@ if ($JustContext) { $passArgs += '-JustContext' }
 if ($JustContext -or $Silent) { return }
 
 $choice = $Host.UI.PromptForChoice('', 'Would you like to restart now to apply the changes?', @('&Yes', '&No'), 1)
-if ($choice -eq 0) { & shutdown.exe /r /t 0 }
+if ($choice -eq 0) { Restart-Computer -Force }
 
 Write-Output ''
 Write-Output 'File Sharing is now disabled.'

@@ -97,4 +97,4 @@ if ($choice -eq 0) {
 
 Write-Output ''
 $reboot = $Host.UI.PromptForChoice('', 'Would you like to reboot now to apply changes?', @('&Yes', '&No'), 1)
-if ($reboot -eq 0) { & shutdown.exe /r /t 0 }
+if ($reboot -eq 0) { Restart-Computer -Force }
