@@ -26,7 +26,7 @@ if (-not $isAdmin) {
     exit 0
 }
 
-$script = Join-Path $env:windir 'AtlasModules\Scripts\ScriptWrappers\RemoveEdge.ps1'
+$script = Join-Path $env:windir 'AtlasModules\Scripts\ScriptWrappers\Set-EdgeInstall.ps1'
 if (-not (Test-Path -LiteralPath $script -PathType Leaf)) {
     Write-Host "[!!] Script not found: '$script'" -ForegroundColor Red
     if (-not $Silent) { Read-Host 'Press Enter to exit' }

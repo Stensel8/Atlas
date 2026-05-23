@@ -29,7 +29,7 @@ if ($installEdge) {
     }
 }
 
-$remover = "$env:windir\AtlasModules\Scripts\ScriptWrappers\RemoveEdge.ps1"
+$remover = "$env:windir\AtlasModules\Scripts\ScriptWrappers\Set-EdgeInstall.ps1"
 if (-not (Test-Path -LiteralPath $remover -PathType Leaf)) {
     Write-Output "Error: '$remover' not found."
     exit 1

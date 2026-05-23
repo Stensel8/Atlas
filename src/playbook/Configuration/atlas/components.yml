@@ -16,10 +16,10 @@ actions:
 
     # Microsoft Edge
     # Service stopping, disabling, and scheduled task removal are all handled inside
-    # RemoveEdge.ps1 (DisableEdgeUpdateInfrastructure), including dynamic service discovery.
+    # Set-EdgeInstall.ps1 (DisableEdgeUpdateInfrastructure), including dynamic service discovery.
   - !writeStatus: {status: 'Removing Microsoft Edge', option: 'uninstall-edge'}
   - !powerShell:
-    command: '& """.\AtlasModules\Scripts\ScriptWrappers\RemoveEdge.ps1""" -UninstallEdge -RemoveEdgeData -KeepAppX -NonInteractive'
+    command: '& """.\AtlasModules\Scripts\ScriptWrappers\Set-EdgeInstall.ps1""" -UninstallEdge -RemoveEdgeData -KeepAppX -NonInteractive'
     runas: currentUserElevated
     option: 'uninstall-edge'
     wait: true
