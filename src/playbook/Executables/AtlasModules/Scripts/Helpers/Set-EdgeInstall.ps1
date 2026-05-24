@@ -102,7 +102,7 @@ function Write-Status {
 
 function Test-InternetConnectivity {
     try {
-        Invoke-WebRequest -Uri 'https://www.microsoft.com/robots.txt' -Method GET -TimeoutSec 10 -ErrorAction Stop | Out-Null
+        Invoke-WebRequest -Uri 'https://www.microsoft.com/robots.txt' -Method GET -TimeoutSec 10 -UseBasicParsing -ErrorAction Stop | Out-Null
     }
     catch {
         Write-Status "Failed to reach Microsoft.com via web request. You must have an internet connection to reinstall Edge and its components.`n$($_.Exception.Message)" -Level Critical -Exit -ExitCode 404
@@ -232,7 +232,7 @@ Error: $_" -Level Critical -Exit -ExitCode 4
                 released = Get-Date $edgeItem.PublishedTime
             }.GetEnumerator()) {
             $val = $var.Value | Select-Object -First 1
-            if ($val.Length -le 0) {
+            if ([string]::IsNullOrEmpty("$val")) {
                 Set-Variable -Name $var.Key -Value 'Undefined'
                 if ($var.Key -eq 'link') { throw 'Failed to parse download link!' }
             }
