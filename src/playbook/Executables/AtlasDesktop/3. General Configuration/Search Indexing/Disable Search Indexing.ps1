@@ -10,10 +10,10 @@ $activeArgs = @($PSBoundParameters.GetEnumerator() |
     ForEach-Object { "-$($_.Key)" })
 Assert-AtlasAdminPrivilege -ScriptPath $PSCommandPath -ScriptArgs $activeArgs
 
-$indexConf = Join-Path $env:windir 'AtlasModules\Scripts\indexConf.ps1'
+$indexConf = Join-Path $env:windir 'AtlasModules\Scripts\Set-SearchIndexConfig.ps1'
 if (-not (Test-Path -LiteralPath $indexConf -PathType Leaf)) {
     if (-not $Silent) {
-        Write-Output "The 'indexConf.ps1' script was not found in AtlasModules."
+        Write-Output "The 'Set-SearchIndexConfig.ps1' script was not found in AtlasModules."
         $null = Read-Host 'Press Enter to exit'
     }
     exit 1

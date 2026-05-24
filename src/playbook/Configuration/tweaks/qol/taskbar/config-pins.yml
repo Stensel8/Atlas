@@ -48,35 +48,35 @@ actions:
   - !registryValue: { path: 'HKLM\SOFTWARE\AtlasOS\SetupOptions', value: 'browser', data: "", type: REG_SZ, option: '!install-another-browser'}
 
   - !powerShell:
-    command: '.\TASKBARPINS.ps1'
+    command: '.\Set-AtlasTaskbarPins.ps1'
     option: '!install-another-browser'
     exeDir: true
     onUpgrade: false
     oobe: false
     wait: true
   - !powerShell:
-    command: ".\\TASKBARPINS.ps1 'Brave'"
+    command: ".\\Set-AtlasTaskbarPins.ps1 'Brave'"
     option: 'browser-brave'
     exeDir: true
     onUpgrade: false
     oobe: false
     wait: true
   - !powerShell:
-    command: ".\\TASKBARPINS.ps1 'Firefox'"
+    command: ".\\Set-AtlasTaskbarPins.ps1 'Firefox'"
     option: 'browser-firefox'
     exeDir: true
     onUpgrade: false
     oobe: false
     wait: true
   - !powerShell:
-    command: ".\\TASKBARPINS.ps1 'Google Chrome'"
+    command: ".\\Set-AtlasTaskbarPins.ps1 'Google Chrome'"
     option: 'browser-chrome'
     exeDir: true
     onUpgrade: false
     oobe: false
     wait: true
   - !powerShell:
-    command: ".\\TASKBARPINS.ps1 'LibreWolf'"
+    command: ".\\Set-AtlasTaskbarPins.ps1 'LibreWolf'"
     option: 'browser-librewolf'
     exeDir: true
     onUpgrade: false

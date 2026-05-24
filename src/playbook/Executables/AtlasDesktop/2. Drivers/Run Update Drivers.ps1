@@ -10,7 +10,7 @@ $activeArgs = @($PSBoundParameters.GetEnumerator() |
     ForEach-Object { "-$($_.Key)" })
 Assert-AtlasAdminPrivilege -ScriptPath $PSCommandPath -ScriptArgs $activeArgs
 
-$internalScript = Join-Path $env:windir 'AtlasModules\Scripts\Helpers\UpdateDrivers.ps1'
+$internalScript = Join-Path $env:windir 'AtlasModules\Scripts\Helpers\Update-Drivers.ps1'
 if (-not (Test-Path -LiteralPath $internalScript -PathType Leaf)) {
     throw "Atlas internal script '$internalScript' is missing."
 }

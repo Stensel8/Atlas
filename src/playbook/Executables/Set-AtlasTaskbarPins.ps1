@@ -4,7 +4,7 @@ param (
 )
 $ErrorActionPreference = 'Stop'
 
-$scriptPath = Join-Path $PSScriptRoot 'AtlasModules\Scripts\taskbarPins.ps1'
+$scriptPath = Join-Path $PSScriptRoot 'AtlasModules\Scripts\Set-TaskbarPins.ps1'
 if (!(Test-Path $scriptPath -PathType Leaf)) {
     Write-Error "Taskbar pin script not found at '$scriptPath'."
     exit 1

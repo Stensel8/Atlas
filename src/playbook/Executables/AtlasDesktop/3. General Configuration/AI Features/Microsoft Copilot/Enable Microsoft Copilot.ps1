@@ -4,7 +4,7 @@
 # Re-enables Copilot. On Windows 11 24H2+, IsCopilotAvailable may be absent,
 # meaning the sidebar was replaced by the standalone app; in that case the app
 # is installed via winget (id: 9NHT9RB2F4HD) instead of toggling the button.
-# Requires Edge or WebView2 (checked via edgeCheck.ps1).
+# Requires Edge or WebView2 (checked via Test-EdgeInstall.ps1).
 # Restarts Explorer unless -NoAction is passed.
 # ============================================================================
 
@@ -42,7 +42,7 @@ try {
     Set-ItemProperty -Path $atlasKey -Name 'state' -Value $stateValue -Type DWord  -Force
     Set-ItemProperty -Path $atlasKey -Name 'path'  -Value $scriptPath -Type String -Force
 
-    $edgeCheck = Join-Path $env:windir 'AtlasModules\Scripts\edgeCheck.ps1'
+    $edgeCheck = Join-Path $env:windir 'AtlasModules\Scripts\Test-EdgeInstall.ps1'
     & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $edgeCheck -EdgeOnly
     if ($LASTEXITCODE -ne 0) { exit 1 }
 
@@ -56,7 +56,7 @@ try {
     if ($isCopilotAvailable -eq 0) {
         Write-Host '[!] Taskbar Copilot unavailable; installing the Copilot app instead.' -ForegroundColor Yellow
 
-        $wingetCheck = Join-Path $env:windir 'AtlasModules\Scripts\WingetCheck.ps1'
+        $wingetCheck = Join-Path $env:windir 'AtlasModules\Scripts\Test-WingetReady.ps1'
         & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $wingetCheck -NoDashes
         if ($LASTEXITCODE -ne 0) { exit 1 }
 

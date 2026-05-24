@@ -3,9 +3,9 @@ param([string]$Browser)
 
 $ErrorActionPreference = 'Stop'
 
-$assocScript = Join-Path $PSScriptRoot 'ASSOC.ps1'
+$assocScript = Join-Path $PSScriptRoot 'Set-UserFileAssociation.ps1'
 if (-not (Test-Path -LiteralPath $assocScript)) {
-    throw "ASSOC.ps1 not found: $assocScript"
+    throw "Set-UserFileAssociation.ps1 not found: $assocScript"
 }
 
 $baseAssociations = @('.url:InternetShortcut')

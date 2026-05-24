@@ -3,7 +3,7 @@ $ErrorActionPreference = 'Stop'
 # System script domain functions: Security
 
 function Disable-CoreIsolation {
-    & ".\AtlasModules\Scripts\ScriptWrappers\ConfigVBS.ps1" -DisableAllVBS
+    & ".\AtlasModules\Scripts\ScriptWrappers\Set-VbsConfig.ps1" -DisableAllVBS
 }
 
 function Disable-Mitigations {

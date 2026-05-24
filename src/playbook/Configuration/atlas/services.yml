@@ -14,7 +14,7 @@ actions:
   # Back up default Windows services & drivers
   - !powerShell:
     command: |
-      .\BACKUP.ps1 -FilePath """$([Environment]::GetFolderPath('Windows'))\AtlasModules\Other\winServices.reg"""
+      .\Backup-Registry.ps1 -FilePath """$([Environment]::GetFolderPath('Windows'))\AtlasModules\Other\winServices.reg"""
     wait: true
     exeDir: true
 
@@ -24,7 +24,7 @@ actions:
 
   - !writeStatus: {status: 'Disabling File Sharing'}
   - !powerShell:
-    command: '.\AtlasModules\Scripts\ScriptWrappers\DisableFileSharing.ps1 -Silent'
+    command: '.\AtlasModules\Scripts\ScriptWrappers\Disable-FileSharing.ps1 -Silent'
     exeDir: true
     wait: true
     runas: currentUserElevated

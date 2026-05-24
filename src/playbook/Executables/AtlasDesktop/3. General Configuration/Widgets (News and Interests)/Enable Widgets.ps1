@@ -2,7 +2,7 @@
 # ============================================================================
 # AtlasOS -- Enable Widgets
 # Re-enables News and Interests / Widgets by removing the policy keys.
-# Requires Edge or WebView2 for Widgets to function (checked via edgeCheck.ps1).
+# Requires Edge or WebView2 for Widgets to function (checked via Test-EdgeInstall.ps1).
 # Restarts Explorer and opens the taskbar Settings page to let the user
 # toggle the widget icon. -NoAction skips the Explorer restart.
 # ============================================================================
@@ -41,7 +41,7 @@ try {
     Set-ItemProperty -Path $atlasKey -Name 'state' -Value $stateValue -Type DWord  -Force
     Set-ItemProperty -Path $atlasKey -Name 'path'  -Value $scriptPath -Type String -Force
 
-    $edgeCheck = Join-Path $env:windir 'AtlasModules\Scripts\edgeCheck.ps1'
+    $edgeCheck = Join-Path $env:windir 'AtlasModules\Scripts\Test-EdgeInstall.ps1'
     & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $edgeCheck
     if ($LASTEXITCODE -ne 0) { exit 1 }
 

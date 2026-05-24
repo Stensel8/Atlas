@@ -9,7 +9,7 @@ actions:
     wait: true
   - !writeStatus: { status: "Deleting old AtlasOS folders" }
   - !powerShell:
-    command: '.\STOPFOLDERPROC.ps1'
+    command: '.\Stop-AtlasProcesses.ps1'
     exeDir: true
     onUpgrade: true
     wait: true
@@ -37,7 +37,7 @@ actions:
 
   # Prevent annoying notifications during deployment
   - !powerShell:
-    command: '& """.\AtlasModules\Scripts\Helpers\Notifications.ps1""" -Mode Disable'
+    command: '& """.\AtlasModules\Scripts\Helpers\Set-Notifications.ps1""" -Mode Disable'
     exeDir: true
     wait: true
     runas: currentUserElevated
@@ -54,7 +54,7 @@ actions:
   # Disk Cleanup is run first so it can run in the background
   - !writeStatus: { status: "Cleaning up" }
   - !powerShell:
-    command: '.\CLEANUP.ps1'
+    command: '.\Invoke-DiskCleanup.ps1'
     exeDir: true
     wait: true
     runas: currentUserElevated
@@ -81,7 +81,7 @@ actions:
   # Set hives to HKU default user
   - !writeStatus: { status: "Applying hives..." }
   - !powerShell:
-    command: '.\APPLYDUHIVE.ps1'
+    command: '.\Invoke-ApplyDuHive.ps1'
     exeDir: true
     wait: true
     runas: currentUserElevated
@@ -89,7 +89,7 @@ actions:
   # Set all the correct paths if there are incorrect ones in the registry
   - !writeStatus: { status: "Cleaning up registry paths" }
   - !powerShell:
-    command: '.\SETPATHS.ps1'
+    command: '.\Update-AtlasServicePaths.ps1'
     exeDir: true
     wait: true
     runas: currentUserElevated

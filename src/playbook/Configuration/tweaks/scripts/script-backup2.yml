@@ -4,6 +4,6 @@ description: Backs up default Atlas services and drivers, after all the tweaks a
 actions:
   - !powerShell:
     command: >-
-      .\BACKUP.ps1 -FilePath """$([Environment]::GetFolderPath('Windows'))\AtlasModules\Other\atlasServices.reg"""
+      .\Backup-Registry.ps1 -FilePath """$([Environment]::GetFolderPath('Windows'))\AtlasModules\Other\atlasServices.reg"""
     wait: true
     exeDir: true

@@ -8,7 +8,7 @@ $ErrorActionPreference = 'Stop'
 
 function Test-Admin {
     $currentUser = [System.Security.Principal.WindowsIdentity]::GetCurrent()
-    $principal = New-Object System.Security.Principal.WindowsPrincipal($currentUser)
+    $principal = [System.Security.Principal.WindowsPrincipal]::new($currentUser)
     if (-not $principal.IsInRole([System.Security.Principal.WindowsBuiltInRole]::Administrator)) {
         Write-Host "Restarting script with administrator privileges..."
 

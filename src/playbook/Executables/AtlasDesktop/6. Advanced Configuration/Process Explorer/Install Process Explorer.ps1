@@ -12,7 +12,7 @@ Assert-AtlasAdminPrivilege -ScriptPath $PSCommandPath -ScriptArgs $activeArgs
 
 Set-AtlasSettingState -SettingName 'ProcessExplorer' -State 1 -ScriptPath $PSCommandPath
 
-$wingetCheck = Join-Path $env:windir 'AtlasModules\Scripts\WingetCheck.ps1'
+$wingetCheck = Join-Path $env:windir 'AtlasModules\Scripts\Test-WingetReady.ps1'
 & $wingetCheck
 if ($LASTEXITCODE -ne 0) { exit 1 }
 

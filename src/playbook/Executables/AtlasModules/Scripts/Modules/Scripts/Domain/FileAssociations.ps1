@@ -7,7 +7,7 @@ function Set-FileAssociations {
         [string]$Browser
     )
 
-    $fileAssoc = Join-Path $env:windir 'AtlasModules\Scripts\fileAssoc.ps1'
+    $fileAssoc = Join-Path $env:windir 'AtlasModules\Scripts\Set-BrowserFileAssociations.ps1'
 
     if ($Browser -in @("Brave", "LibreWolf", "Firefox", "Google Chrome")) {
         & $fileAssoc -Browser $Browser

@@ -56,7 +56,7 @@ function Set-SetupMarker {
 
 function Set-NewUsersRunOnce {
     $runOncePath = 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce'
-    $command = 'powershell -EP RemoteSigned -NoP & """$([Environment]::GetFolderPath(''Windows''))\AtlasModules\Scripts\newUsers.ps1"""'
+    $command = 'powershell -EP RemoteSigned -NoP & """$([Environment]::GetFolderPath(''Windows''))\AtlasModules\Scripts\Initialize-NewUsers.ps1"""'
 
     $null = New-Item -Path $runOncePath -Force -ErrorAction Stop
     Set-ItemProperty -Path $runOncePath -Name 'RunScript' -Value $command -Type String -Force -ErrorAction Stop
@@ -88,7 +88,7 @@ function Set-SearchTaskbarMode {
 }
 
 function Start-DelayedSearchFinalizer {
-    $scriptPath = Join-Path -Path ([Environment]::GetFolderPath('Windows')) -ChildPath 'AtlasModules\Scripts\newUsers.ps1'
+    $scriptPath = Join-Path -Path ([Environment]::GetFolderPath('Windows')) -ChildPath 'AtlasModules\Scripts\Initialize-NewUsers.ps1'
     $arguments = @(
         '-NoProfile'
         '-ExecutionPolicy'
@@ -106,7 +106,7 @@ function Start-DelayedSearchFinalizer {
 function Set-AtlasTaskbarPins {
     param([AllowNull()][string]$Browser)
 
-    $taskbarPinsScript = Join-Path -Path $atlasModules -ChildPath 'Scripts\Helpers\TaskbarPins.ps1'
+    $taskbarPinsScript = Join-Path -Path $atlasModules -ChildPath 'Scripts\Helpers\Set-TaskbarPins.ps1'
     if (!(Test-Path -LiteralPath $taskbarPinsScript -PathType Leaf)) {
         throw "Taskbar pins script '$taskbarPinsScript' was not found."
     }

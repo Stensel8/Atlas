@@ -11,7 +11,7 @@ actions:
     onUpgrade: false
     runas: currentUserElevated
   - !powerShell:
-    command: '.\DEFAULT.ps1'
+    command: '.\Invoke-AtlasDefaults.ps1'
     exeDir: true
     onUpgrade: true
     wait: true

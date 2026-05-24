@@ -1,6 +1,6 @@
 #Requires -Version 5.1
 $ErrorActionPreference = 'Stop'
-$internalScript = Join-Path -Path $PSScriptRoot -ChildPath 'AtlasModules\Scripts\Helpers\SetPaths.ps1'
+$internalScript = Join-Path -Path $PSScriptRoot -ChildPath 'AtlasModules\Scripts\Helpers\Update-AtlasServicePaths.ps1'
 if (-not (Test-Path -LiteralPath $internalScript -PathType Leaf)) {
     Write-Error "Atlas internal path migration script '$internalScript' is missing."
     exit 1

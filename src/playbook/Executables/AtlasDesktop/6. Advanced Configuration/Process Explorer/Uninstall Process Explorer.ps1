@@ -12,7 +12,7 @@ Assert-AtlasAdminPrivilege -ScriptPath $PSCommandPath -ScriptArgs $activeArgs
 
 Set-AtlasSettingState -SettingName 'ProcessExplorer' -State 0 -ScriptPath $PSCommandPath
 
-$wingetCheck = Join-Path $env:windir 'AtlasModules\Scripts\WingetCheck.ps1'
+$wingetCheck = Join-Path $env:windir 'AtlasModules\Scripts\Test-WingetReady.ps1'
 & $wingetCheck -Silent
 if ($LASTEXITCODE -ne 0) {
     Write-Output 'info: WinGet is not functional, reverting other changes anyways...'

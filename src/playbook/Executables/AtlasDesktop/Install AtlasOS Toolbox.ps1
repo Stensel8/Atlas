@@ -5,7 +5,7 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
     exit
 }
 
-$script = Join-Path $env:windir 'AtlasModules\Scripts\installToolbox.ps1'
+$script = Join-Path $env:windir 'AtlasModules\Scripts\Install-AtlasToolbox.ps1'
 if (-not (Test-Path -LiteralPath $script -PathType Leaf)) {
     Write-Error "Script not found: '$script'"
     Read-Host 'Press Enter to exit'

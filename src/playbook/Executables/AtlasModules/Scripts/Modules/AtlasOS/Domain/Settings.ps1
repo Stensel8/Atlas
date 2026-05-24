@@ -25,7 +25,7 @@ function Invoke-AtlasSettingsPage {
         [Parameter(Mandatory)][string]$Page
     )
 
-    $scriptPath = Join-Path -Path $env:windir -ChildPath 'AtlasModules\Scripts\Helpers\SettingsPages.ps1'
+    $scriptPath = Join-Path -Path $env:windir -ChildPath 'AtlasModules\Scripts\Helpers\Set-SettingsPageVisibility.ps1'
     if (-not (Test-Path -LiteralPath $scriptPath -PathType Leaf)) { return }
     & $scriptPath -Operation $Operation -Page $Page -Silent
 }

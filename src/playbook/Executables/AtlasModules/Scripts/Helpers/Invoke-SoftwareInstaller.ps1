@@ -1,7 +1,7 @@
 #Requires -Version 5.1
 $windir = [Environment]::GetFolderPath('Windows')
 & "$windir\AtlasModules\initPowerShell.ps1"
-& powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$windir\AtlasModules\Scripts\WingetCheck.ps1"
+& powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$windir\AtlasModules\Scripts\Test-WingetReady.ps1"
 if ($LASTEXITCODE -ne 0) { exit 1 }
 
 Clear-Host

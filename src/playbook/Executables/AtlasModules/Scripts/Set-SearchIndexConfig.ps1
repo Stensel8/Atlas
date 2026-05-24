@@ -13,7 +13,7 @@ param (
 
 $ErrorActionPreference = 'Stop'
 
-$settingsPages = Join-Path -Path $env:windir -ChildPath 'AtlasModules\Scripts\Helpers\SettingsPages.ps1'
+$settingsPages = Join-Path -Path $env:windir -ChildPath 'AtlasModules\Scripts\Helpers\Set-SettingsPageVisibility.ps1'
 $serviceKey    = 'HKLM:\SYSTEM\CurrentControlSet\Services\WSearch'
 
 if ($Stop) {
@@ -91,4 +91,4 @@ if ($Include -or $Exclude) {
     return
 }
 
-Write-Host 'Usage: indexConf.ps1 -Include|-Exclude -Path <path> | -CleanPolicies | -Start | -Stop' -ForegroundColor Yellow
+Write-Host 'Usage: Set-SearchIndexConfig.ps1 -Include|-Exclude -Path <path> | -CleanPolicies | -Start | -Stop' -ForegroundColor Yellow

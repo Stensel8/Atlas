@@ -12,7 +12,7 @@ Assert-AtlasAdminPrivilege -ScriptPath $PSCommandPath -ScriptArgs $activeArgs
 
 Set-AtlasSettingState -SettingName 'FileSharing' -State 1 -ScriptPath $PSCommandPath
 
-$internalScript = Join-Path $env:windir 'AtlasModules\Scripts\Helpers\EnableFileSharing.ps1'
+$internalScript = Join-Path $env:windir 'AtlasModules\Scripts\Helpers\Enable-FileSharing.ps1'
 if (-not (Test-Path -LiteralPath $internalScript -PathType Leaf)) {
     throw "Atlas internal script '$internalScript' is missing."
 }

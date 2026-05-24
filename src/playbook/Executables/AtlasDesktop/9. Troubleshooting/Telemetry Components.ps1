@@ -7,7 +7,7 @@ Import-Module -Name (Join-Path $env:windir 'AtlasModules\Scripts\Modules\AtlasOS
 $activeArgs = @()
 Assert-AtlasAdminPrivilege -ScriptPath $PSCommandPath -ScriptArgs $activeArgs
 
-$internalScript = Join-Path $env:windir 'AtlasModules\Scripts\Helpers\TelemetryComponents.ps1'
+$internalScript = Join-Path $env:windir 'AtlasModules\Scripts\Helpers\Set-TelemetryPackage.ps1'
 if (-not (Test-Path -LiteralPath $internalScript -PathType Leaf)) {
     throw "Atlas internal script '$internalScript' is missing."
 }

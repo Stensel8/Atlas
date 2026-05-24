@@ -6,7 +6,7 @@ $ErrorActionPreference = 'Stop'
 Import-Module -Name (Join-Path $env:windir 'AtlasModules\Scripts\Modules\AtlasOS\AtlasOS.psm1') -Force
 Assert-AtlasAdminPrivilege -ScriptPath $PSCommandPath -ScriptArgs @()
 
-$edgeCheck = Join-Path $env:windir 'AtlasModules\Scripts\edgeCheck.ps1'
+$edgeCheck = Join-Path $env:windir 'AtlasModules\Scripts\Test-EdgeInstall.ps1'
 if (-not (Test-Path -LiteralPath $edgeCheck -PathType Leaf)) {
     throw "Atlas script '$edgeCheck' is missing."
 }
@@ -25,7 +25,7 @@ if ($isCopilotAvailable -eq 0) {
     Write-Output 'NOTE: Copilot on the taskbar is not available, the app will be installed instead.'
     $appText = 'You can find the Copilot app in your Start Menu.'
 
-    $wingetCheck = Join-Path $env:windir 'AtlasModules\Scripts\WingetCheck.ps1'
+    $wingetCheck = Join-Path $env:windir 'AtlasModules\Scripts\Test-WingetReady.ps1'
     & $wingetCheck
     if ($LASTEXITCODE -ne 0) { return }
 

@@ -54,7 +54,7 @@ function Show-MoreDetailsOnTransfers {
 # Function to debloat Send-To context menu
 
 function Set-SendToContextMenu {
-    & "$env:windir\AtlasModules\Scripts\Helpers\DebloatSendToContextMenu.ps1" -Disable @('Documents', 'Mail Recipient', 'Fax recipient', 'Bluetooth')
+    & "$env:windir\AtlasModules\Scripts\Helpers\Set-SendToContextMenu.ps1" -Disable @('Documents', 'Mail Recipient', 'Fax recipient', 'Bluetooth')
 }
 
 # Function to disable use of check boxes to select items

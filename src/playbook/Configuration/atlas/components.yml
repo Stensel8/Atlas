@@ -47,7 +47,7 @@ actions:
     iso: only
   - !powerShell:
     command: >-
-      & """$([Environment]::GetFolderPath('Windows'))\AtlasModules\Scripts\packageInstall.ps1"""
+      & """$([Environment]::GetFolderPath('Windows'))\AtlasModules\Scripts\Install-CbsPackage.ps1"""
       -InstallPackages @('*Z-Atlas-NoDefender-Package*',
         '*Z-Atlas-NoTelemetry-Package*'
       )
@@ -57,7 +57,7 @@ actions:
     exeDir: true
   - !powerShell:
     command: >-
-      & """$([Environment]::GetFolderPath('Windows'))\AtlasModules\Scripts\packageInstall.ps1"""
+      & """$([Environment]::GetFolderPath('Windows'))\AtlasModules\Scripts\Install-CbsPackage.ps1"""
       -InstallPackages @('*Z-Atlas-NoTelemetry-Package*')
       -UninstallPackages @('*Z-Atlas-NoDefender-Package*')
       -NoInteraction

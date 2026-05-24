@@ -38,7 +38,7 @@ $consentKey = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\CapabilityAccessM
 if (-not (Test-Path -LiteralPath $consentKey)) { New-Item -Path $consentKey -Force | Out-Null }
 Set-ItemProperty -Path $consentKey -Name ShowGlobalPrompts -Value 0 -Type DWord -Force
 
-$settingsPages = Join-Path $env:windir 'AtlasModules\Scripts\Helpers\SettingsPages.ps1'
+$settingsPages = Join-Path $env:windir 'AtlasModules\Scripts\Helpers\Set-SettingsPageVisibility.ps1'
 if (Test-Path -LiteralPath $settingsPages) {
     foreach ($page in @('privacy-location', 'findmydevice')) {
         & $settingsPages -Operation hide -Page $page -Silent

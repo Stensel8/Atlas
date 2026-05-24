@@ -31,7 +31,7 @@ actions:
     # Initial software — VC++ Runtimes, NanaZip
   - !writeStatus: {status: 'Installing utilities'}
   - !powerShell:
-    command: '.\SOFTWARE.ps1'
+    command: '.\Install-AtlasSoftware.ps1'
     exeDir: true
     wait: true
     onUpgrade: false
@@ -41,7 +41,7 @@ actions:
     # Legacy gaming SDKs (optional)
   - !writeStatus: {status: 'Installing legacy DirectX', option: 'legacy-directx'}
   - !powerShell:
-    command: '.\SOFTWARE.ps1 -DirectX'
+    command: '.\Install-AtlasSoftware.ps1 -DirectX'
     exeDir: true
     wait: true
     weight: 120
@@ -54,7 +54,7 @@ actions:
     #Toolbox
   - !writeStatus: {status: 'Installing AtlasOS Toolbox'}
   - !powerShell:
-    command: '.\SOFTWARE.ps1 -Toolbox'
+    command: '.\Install-AtlasSoftware.ps1 -Toolbox'
     exeDir: true
     wait: true
     weight: 100
@@ -64,7 +64,7 @@ actions:
     #UniGetUI
   - !writeStatus: {status: 'Installing UniGetUI', option: 'install-unigetui'}
   - !powerShell:
-    command: '.\SOFTWARE.ps1 -UniGetUI'
+    command: '.\Install-AtlasSoftware.ps1 -UniGetUI'
     exeDir: true
     wait: true
     weight: 100
@@ -74,7 +74,7 @@ actions:
     # Browsers
   - !writeStatus: {status: 'Installing Brave', option: 'browser-brave'}
   - !powerShell:
-    command: '.\SOFTWARE.ps1 -Brave'
+    command: '.\Install-AtlasSoftware.ps1 -Brave'
     exeDir: true
     wait: true
     weight: 120
@@ -82,7 +82,7 @@ actions:
     runas: currentUserElevated
   - !writeStatus: {status: 'Installing Firefox', option: 'browser-firefox'}
   - !powerShell:
-    command: '.\SOFTWARE.ps1 -Firefox'
+    command: '.\Install-AtlasSoftware.ps1 -Firefox'
     exeDir: true
     wait: true
     weight: 120
@@ -90,7 +90,7 @@ actions:
     runas: currentUserElevated
   - !writeStatus: {status: 'Installing LibreWolf', option: 'browser-librewolf'}
   - !powerShell:
-    command: '.\LIBREWOLF.ps1'
+    command: '.\Install-LibreWolf.ps1'
     exeDir: true
     wait: true
     weight: 120
@@ -98,7 +98,7 @@ actions:
     runas: currentUserElevated
   - !writeStatus: {status: 'Installing Google Chrome', option: 'browser-chrome'}
   - !powerShell:
-    command: '.\SOFTWARE.ps1 -Chrome'
+    command: '.\Install-AtlasSoftware.ps1 -Chrome'
     exeDir: true
     wait: true
     weight: 120

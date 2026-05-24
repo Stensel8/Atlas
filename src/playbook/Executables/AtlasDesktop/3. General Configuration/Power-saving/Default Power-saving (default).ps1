@@ -12,7 +12,7 @@ Assert-AtlasAdminPrivilege -ScriptPath $PSCommandPath -ScriptArgs $activeArgs
 
 Set-AtlasSettingState -SettingName 'PowerSaving' -State 1 -ScriptPath $PSCommandPath
 
-$internalScript = Join-Path $env:windir 'AtlasModules\Scripts\Helpers\DefaultPowerSaving.ps1'
+$internalScript = Join-Path $env:windir 'AtlasModules\Scripts\Helpers\Restore-PowerSavingDefaults.ps1'
 if (-not (Test-Path -LiteralPath $internalScript -PathType Leaf)) {
     throw "Atlas internal script '$internalScript' is missing."
 }

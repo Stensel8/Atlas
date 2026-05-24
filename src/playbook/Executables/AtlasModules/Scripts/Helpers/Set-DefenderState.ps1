@@ -5,7 +5,7 @@ $ProgressPreference = 'SilentlyContinue'
 $windir = [Environment]::GetFolderPath('Windows')
 & "$windir\AtlasModules\initPowerShell.ps1"
 
-$packageInstall = "$windir\AtlasModules\Scripts\packageInstall.ps1"
+$packageInstall = "$windir\AtlasModules\Scripts\Install-CbsPackage.ps1"
 if (!(Test-Path $packageInstall)) {
     Write-Host "Missing package install script, can't continue."
     if (!$args) { Read-Pause }
@@ -17,11 +17,9 @@ $package = "*Z-Atlas-NoDefender-Package*"
 try {
     $packages = (Get-WindowsPackage -online | Where-Object { $_.PackageName -like "*NoDefender*" }).PackageName
 } catch {
-    if (!$?) {
-        Write-Host "Failed to get packages! $_" -ForegroundColor Red
-        Read-Pause
-        exit 1
-    }
+    Write-Host "Failed to get packages! $_" -ForegroundColor Red
+    Read-Pause
+    exit 1
 }
 if ($null -eq $packages) {
     $DefenderEnabled = '(current)'

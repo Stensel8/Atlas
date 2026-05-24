@@ -8,6 +8,6 @@ actions:
         Disable-NetAdapterBinding -ErrorAction SilentlyContinue |
         Out-Null
   - !powerShell:
-    command: '.\DISABLEPNP.ps1'
+    command: '.\Disable-PnpDevices.ps1'
     exeDir: true
     wait: true

@@ -35,14 +35,14 @@ function Invoke-AtlasRegistryValueRemoval {
     Remove-ItemProperty -LiteralPath $Path -Name $Name -Force -ErrorAction SilentlyContinue
 }
 
-# helper: set service start type, uses SetServiceStartup.ps1 if available
+# helper: set service start type, uses Set-ServiceStartupType.ps1 if available
 function Invoke-AtlasServiceStartChange {
     param (
         [Parameter(Mandatory = $true)][string]$Name,
         [Parameter(Mandatory = $true)][int]$Start
     )
 
-    $script = Join-Path -Path ([Environment]::GetFolderPath('Windows')) -ChildPath 'AtlasModules\Scripts\Helpers\SetServiceStartup.ps1'
+    $script = Join-Path -Path ([Environment]::GetFolderPath('Windows')) -ChildPath 'AtlasModules\Scripts\Helpers\Set-ServiceStartupType.ps1'
     if (Test-Path -LiteralPath $script -PathType Leaf) {
         & $script -Name $Name -Start $Start
         return
@@ -64,7 +64,7 @@ function Invoke-AtlasSettingsPageVisibilityChange {
         [string[]]$Pages
     )
 
-    $script = Join-Path -Path ([Environment]::GetFolderPath('Windows')) -ChildPath 'AtlasModules\Scripts\Helpers\SettingsPages.ps1'
+    $script = Join-Path -Path ([Environment]::GetFolderPath('Windows')) -ChildPath 'AtlasModules\Scripts\Helpers\Set-SettingsPageVisibility.ps1'
     if (-not (Test-Path -LiteralPath $script -PathType Leaf)) {
         return
     }
