@@ -39,6 +39,7 @@ param (
 )
 
 Set-StrictMode -Version 3.0
+$ErrorActionPreference = 'Stop'
 
 $version = '1.9.5'
 

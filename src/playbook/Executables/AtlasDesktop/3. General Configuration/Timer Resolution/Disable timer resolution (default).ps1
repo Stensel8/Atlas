@@ -16,7 +16,7 @@ Remove-ItemProperty -LiteralPath 'HKLM:\SYSTEM\CurrentControlSet\Control\Session
     -Name 'GlobalTimerResolutionRequests' -ErrorAction SilentlyContinue
 
 Stop-Process -Name 'SetTimerResolution' -Force -ErrorAction SilentlyContinue
-& schtasks.exe /delete /tn 'Force Timer Resolution' /f 2>$null | Out-Null
+Unregister-ScheduledTask -TaskName 'Force Timer Resolution' -Confirm:$false -ErrorAction SilentlyContinue
 
 if ($Silent) { return }
 Write-Output ''

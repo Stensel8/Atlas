@@ -24,7 +24,7 @@ if (-not (Get-Service -Name 'NVDisplay.ContainerLocalSystem' -ErrorAction Silent
 }
 
 Set-AtlasServiceStartup -Name 'NVDisplay.ContainerLocalSystem' -Start 2
-& sc.exe start 'NVDisplay.ContainerLocalSystem' 2>$null | Out-Null
+Start-Service -Name 'NVDisplay.ContainerLocalSystem' -ErrorAction SilentlyContinue
 
 if ($Silent) { return }
 Write-Output ''

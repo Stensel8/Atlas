@@ -18,7 +18,7 @@ $resolutions = @{
 foreach ($image in $resolutions.Keys) {
     $resolution = $resolutions[$image]
 
-    $a = New-Object System.Drawing.Bitmap($resolution, $resolution)
+    $a = [System.Drawing.Bitmap]::new($resolution, $resolution)
     $graph = [System.Drawing.Graphics]::FromImage($a)
     $graph.DrawImage($img, 0, 0, $resolution, $resolution)
     $a.Save("$([Environment]::GetFolderPath('CommonApplicationData'))\Microsoft\User Account Pictures\$image")

@@ -55,7 +55,7 @@ $ErrorActionPreference = 'Stop'
     $bytesBaseInfo += 0x00, 0x00
 
     # Windows uses MD5 internally for the UserChoice hash, so we can't swap this out. # DevSkim: ignore DS126858
-    $hashProvider = New-Object -TypeName System.Security.Cryptography.MD5CryptoServiceProvider
+    $hashProvider = [System.Security.Cryptography.MD5CryptoServiceProvider]::new()
     [Byte[]] $initialHash = $hashProvider.ComputeHash($bytesBaseInfo)
 
     $lengthBase = ($baseInfo.Length * 2) + 2
@@ -200,7 +200,7 @@ if ($Hive.StartsWith("S-"))
   $userExperienceSearch = "User Choice set via Windows User Experience"
   $user32Path = [Environment]::GetFolderPath([Environment+SpecialFolder]::SystemX86) + "\Shell32.dll"
   $fileStream = [System.IO.File]::Open($user32Path, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::ReadWrite)
-  $binaryReader = New-Object System.IO.BinaryReader($fileStream)
+  $binaryReader = [System.IO.BinaryReader]::new($fileStream)
   [Byte[]] $bytesData = $binaryReader.ReadBytes(5mb)
   $fileStream.Close()
   $dataString = [Text.Encoding]::Unicode.GetString($bytesData)
@@ -210,7 +210,7 @@ if ($Hive.StartsWith("S-"))
   $userExperience = $dataString.Substring($position1, $position2 - $position1 + 1)
 }
 
-Write-Host "Setting file associations for HKEY_USERS\$Hive..."
+Write-Output "Setting file associations for HKEY_USERS\$Hive..."
 
 New-PSDrive -PSProvider Registry -Name HKU -Root HKEY_USERS | Out-Null
 

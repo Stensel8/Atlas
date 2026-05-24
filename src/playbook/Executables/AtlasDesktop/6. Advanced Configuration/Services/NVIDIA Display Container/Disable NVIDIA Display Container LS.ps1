@@ -33,7 +33,7 @@ if (-not $Silent) {
 }
 
 Set-AtlasServiceStartup -Name 'NVDisplay.ContainerLocalSystem' -Start 4
-& sc.exe stop 'NVDisplay.ContainerLocalSystem' 2>$null | Out-Null
+Stop-Service -Name 'NVDisplay.ContainerLocalSystem' -Force -ErrorAction SilentlyContinue
 
 if ($Silent) { return }
 Write-Output ''

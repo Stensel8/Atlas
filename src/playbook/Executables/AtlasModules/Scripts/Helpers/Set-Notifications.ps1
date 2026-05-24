@@ -84,15 +84,15 @@ if ($Mode -eq 'Disable') {
 
     Invoke-AtlasSettingsPageVisibilityChange -Operation 'hide' -Pages @('notifications', 'privacy-notifications')
 
-    & sc.exe config WpnService start=disabled | Out-Null
-    & sc.exe stop WpnService 2>$null | Out-Null
+    Set-Service -Name WpnService -StartupType Disabled
+    Stop-Service -Name WpnService -Force -ErrorAction SilentlyContinue
     Invoke-AtlasServiceStartChange -Name 'WpnUserService' -Start 4
 
     Get-ChildItem -LiteralPath 'HKLM:\SYSTEM\CurrentControlSet\Services' -ErrorAction SilentlyContinue |
         Where-Object { $_.PSChildName -like 'WpnUserService_*' } |
         ForEach-Object {
             Invoke-AtlasServiceStartChange -Name $_.PSChildName -Start 4
-            & sc.exe stop $_.PSChildName 2>$null | Out-Null
+            Stop-Service -Name $_.PSChildName -Force -ErrorAction SilentlyContinue
             & sc.exe delete $_.PSChildName 2>$null | Out-Null
         }
 
@@ -108,6 +108,6 @@ Invoke-AtlasRegistryValueRemoval -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Window
 
 Invoke-AtlasSettingsPageVisibilityChange -Operation 'unhide' -Pages @('notifications', 'privacy-notifications')
 Invoke-AtlasServiceStartChange -Name 'WpnUserService' -Start 2
-& sc.exe config WpnService start=auto | Out-Null
+Set-Service -Name WpnService -StartupType Automatic
 
 Write-Output 'Enabled notifications.'

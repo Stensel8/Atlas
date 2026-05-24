@@ -20,7 +20,7 @@ foreach ($channel in @(
     & wevtutil.exe sl $channel /q:true
 }
 
-& schtasks.exe /change /tn '\Microsoft\Windows\Power Efficiency Diagnostics\AnalyzeSystem' /enable | Out-Null
+Enable-ScheduledTask -TaskPath '\Microsoft\Windows\Power Efficiency Diagnostics\' -TaskName 'AnalyzeSystem' -ErrorAction SilentlyContinue | Out-Null
 
 if ($Silent) { return }
 Write-Output ''

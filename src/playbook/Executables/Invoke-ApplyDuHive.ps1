@@ -3,7 +3,7 @@ $ErrorActionPreference = 'Stop'
 $configurationFolder = Join-Path $PSScriptRoot "..\Configuration\tweaks"
 $yamlFiles = Get-ChildItem -Path $configurationFolder -Filter *.yml -Recurse -File
 
-$registryPaths = New-Object System.Collections.Generic.HashSet[string]([System.StringComparer]::OrdinalIgnoreCase)
+$registryPaths = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
 $pathPattern = [regex]::new('^(?!\s*#).*?\bpath\s*:\s*[''\"]HKCU\\(?<path>[^''\"]+)[''\"]', [System.Text.RegularExpressions.RegexOptions]::IgnoreCase -bor [System.Text.RegularExpressions.RegexOptions]::Multiline)
 
 foreach ($yamlFile in $yamlFiles) {

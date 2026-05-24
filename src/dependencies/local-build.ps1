@@ -476,7 +476,7 @@ try {
         $relative
     }
 
-    $utf8NoBom = New-Object System.Text.UTF8Encoding $false
+    $utf8NoBom = [System.Text.UTF8Encoding]::new($false)
     [System.IO.File]::WriteAllLines($filesListPath, $relativePaths, $utf8NoBom)
 
     $passwordArgs = @()

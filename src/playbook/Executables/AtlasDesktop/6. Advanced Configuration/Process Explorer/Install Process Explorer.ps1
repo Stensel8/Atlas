@@ -55,7 +55,7 @@ Write-Output 'Disabling it matters less as you have Process Explorer, but softwa
 if (-not $Silent) {
     $choice = $Host.UI.PromptForChoice('', 'Would you like to disable it?', @('&Yes', '&No'), 1)
     if ($choice -eq 0) {
-        & sc.exe config pcw start=disabled | Out-Null
+        Set-Service -Name pcw -StartupType Disabled
     }
 }
 

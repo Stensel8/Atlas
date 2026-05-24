@@ -5,7 +5,7 @@ $windir = [Environment]::GetFolderPath('Windows')
 if ($LASTEXITCODE -ne 0) { exit 1 }
 
 Clear-Host
-$ErrorActionPreference = 'SilentlyContinue'
+$ErrorActionPreference = 'Stop'
 
 [int] $script:column = 0
 [int] $separate = 30
@@ -29,19 +29,19 @@ function New-Checkbox {
         [string]$package,
         [bool]$enabled = $true
     )
-    $checkbox = new-object System.Windows.Forms.checkbox
+    $checkbox = [System.Windows.Forms.CheckBox]::new()
     if($script:index -eq [math]::Ceiling($script:item_count / 2)){
         $script:column = 1
         $script:lastPos = 50
     }
     if($script:column -eq 0){
-        $checkbox.Location = new-object System.Drawing.Size(30, $script:lastPos)
+        $checkbox.Location = [System.Drawing.Size]::new(30, $script:lastPos)
     }
     else{
-        $checkbox.Location = new-object System.Drawing.Size(($script:column * 300), $script:lastPos)
+        $checkbox.Location = [System.Drawing.Size]::new(($script:column * 300), $script:lastPos)
     }
     $script:lastPos += $separate
-    $checkbox.Size = new-object System.Drawing.Size(250, 18)
+    $checkbox.Size = [System.Drawing.Size]::new(250, 18)
     $checkbox.Text = $checkboxText
     $checkbox.Name = $package
     $checkbox.Enabled = $enabled
@@ -53,20 +53,20 @@ function New-Checkbox {
 [void] [System.Reflection.Assembly]::LoadWithPartialName("System.Drawing")
 
 # Set the size of the form
-$Form = New-Object System.Windows.Forms.Form
+$Form = [System.Windows.Forms.Form]::new()
 $Form.Text = "Install Software | Atlas" # Titlebar
 $Form.ShowIcon = $false
 $Form.MaximizeBox = $false
 $Form.MinimizeBox = $false
-$Form.Size = New-Object System.Drawing.Size(600, 210)
+$Form.Size = [System.Drawing.Size]::new(600, 210)
 $Form.AutoSizeMode = 0
 $Form.KeyPreview = $True
 $Form.SizeGripStyle = 2
 
 # Label
-$Label = New-Object System.Windows.Forms.label
-$Label.Location = New-Object System.Drawing.Size(11, 15)
-$Label.Size = New-Object System.Drawing.Size(255, 15)
+$Label = [System.Windows.Forms.Label]::new()
+$Label.Location = [System.Drawing.Size]::new(11, 15)
+$Label.Size = [System.Drawing.Size]::new(255, 15)
 $Label.Text = "Download and install software using WinGet:"
 $Form.Controls.Add($Label)
 
@@ -214,9 +214,9 @@ if ($script:column -ne 0) {
 $Form.height = $script:lastPos + 80
 
 # Dark Mode/Light Mode Toggle
-$ToggleBtn = New-Object System.Windows.Forms.Button
-$ToggleBtn.Location = New-Object System.Drawing.Point(500, 20)
-$ToggleBtn.Size = New-Object System.Drawing.Size(80, 23)
+$ToggleBtn = [System.Windows.Forms.Button]::new()
+$ToggleBtn.Location = [System.Drawing.Point]::new(500, 20)
+$ToggleBtn.Size = [System.Drawing.Size]::new(80, 23)
 $ToggleBtn.Add_Click({
 if ($this.Text -eq "Dark Mode") {
     $this.Text = "Light Mode"
@@ -266,9 +266,9 @@ $Form.Controls.Add($ToggleBtn)
 
 # Install Button
 $lastPosWidth = $form.Width - 80 - 31
-$InstallButton = new-object System.Windows.Forms.Button
-$InstallButton.Location = new-object System.Drawing.Size($lastPosWidth, $script:lastPos)
-$InstallButton.Size = new-object System.Drawing.Size(80, 23)
+$InstallButton = [System.Windows.Forms.Button]::new()
+$InstallButton.Location = [System.Drawing.Size]::new($lastPosWidth, $script:lastPos)
+$InstallButton.Size = [System.Drawing.Size]::new(80, 23)
 $InstallButton.Text = "Install"
 $InstallButton.Add_Click({
     $checkedBoxes = $Form.Controls | Where-Object { $_ -is [System.Windows.Forms.Checkbox] -and $_.Checked }

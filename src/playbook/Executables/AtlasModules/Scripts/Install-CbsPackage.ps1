@@ -279,7 +279,7 @@ if (!$matchedPackages) {
 
     Write-Host "`n[INFO] Opening file dialog to select CBS package CAB..."
     Add-Type -AssemblyName System.Windows.Forms
-    $openFileDialog = New-Object System.Windows.Forms.OpenFileDialog
+    $openFileDialog = [System.Windows.Forms.OpenFileDialog]::new()
     $openFileDialog.Multiselect = $true
     $openFileDialog.Filter = "CBS Package Files (*.cab)|*.cab"
     $openFileDialog.Title = "Select a CBS Package File"

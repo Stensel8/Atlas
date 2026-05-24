@@ -29,15 +29,15 @@ $choice = $Host.UI.PromptForChoice(
 
 if ($choice -eq 0) {
     Write-Output 'Disabling Windows Update service and scheduled tasks...'
-    & sc.exe stop  wuauserv    2>$null | Out-Null
-    & sc.exe config wuauserv start= disabled 2>$null | Out-Null
-    & sc.exe stop  UsoSvc     2>$null | Out-Null
-    & sc.exe config UsoSvc start= disabled 2>$null | Out-Null
+    Stop-Service -Name wuauserv -Force -ErrorAction SilentlyContinue
+    Set-Service -Name wuauserv -StartupType Disabled
+    Stop-Service -Name UsoSvc -Force -ErrorAction SilentlyContinue
+    Set-Service -Name UsoSvc -StartupType Disabled
 
     $medicKey = 'HKLM:\SYSTEM\CurrentControlSet\Services\WaaSMedicSvc'
     if (-not (Test-Path -LiteralPath $medicKey)) { New-Item -Path $medicKey -Force | Out-Null }
     Set-ItemProperty -LiteralPath $medicKey -Name 'Start' -Value 4 -Type DWord
-    & sc.exe stop WaaSMedicSvc 2>$null | Out-Null
+    Stop-Service -Name WaaSMedicSvc -Force -ErrorAction SilentlyContinue
 
     foreach ($task in @(
         '\Microsoft\Windows\WindowsUpdate\sih'
@@ -46,7 +46,9 @@ if ($choice -eq 0) {
         '\Microsoft\Windows\UpdateOrchestrator\USO_UxBroker'
         '\Microsoft\Windows\UpdateOrchestrator\Reboot'
     )) {
-        & schtasks.exe /Change /TN $task /Disable 2>$null | Out-Null
+        $taskPath = $task -replace '[^\\]+$', ''
+        $taskName = ($task -split '\\')[-1]
+        Disable-ScheduledTask -TaskPath $taskPath -TaskName $taskName -ErrorAction SilentlyContinue | Out-Null
     }
 
     $wuKey = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate'
@@ -64,15 +66,15 @@ if ($choice -eq 0) {
 
 } else {
     Write-Output 'Enabling Windows Update service and scheduled tasks...'
-    & sc.exe config wuauserv start= demand 2>$null | Out-Null
-    & sc.exe start  wuauserv 2>$null | Out-Null
-    & sc.exe config UsoSvc start= demand 2>$null | Out-Null
-    & sc.exe start  UsoSvc  2>$null | Out-Null
+    Set-Service -Name wuauserv -StartupType Manual
+    Start-Service -Name wuauserv -ErrorAction SilentlyContinue
+    Set-Service -Name UsoSvc -StartupType Manual
+    Start-Service -Name UsoSvc -ErrorAction SilentlyContinue
 
     $medicKey = 'HKLM:\SYSTEM\CurrentControlSet\Services\WaaSMedicSvc'
     if (-not (Test-Path -LiteralPath $medicKey)) { New-Item -Path $medicKey -Force | Out-Null }
     Set-ItemProperty -LiteralPath $medicKey -Name 'Start' -Value 3 -Type DWord
-    & sc.exe start WaaSMedicSvc 2>$null | Out-Null
+    Start-Service -Name WaaSMedicSvc -ErrorAction SilentlyContinue
 
     foreach ($task in @(
         '\Microsoft\Windows\WindowsUpdate\sih'
@@ -81,7 +83,9 @@ if ($choice -eq 0) {
         '\Microsoft\Windows\UpdateOrchestrator\USO_UxBroker'
         '\Microsoft\Windows\UpdateOrchestrator\Reboot'
     )) {
-        & schtasks.exe /Change /TN $task /Enable 2>$null | Out-Null
+        $taskPath = $task -replace '[^\\]+$', ''
+        $taskName = ($task -split '\\')[-1]
+        Enable-ScheduledTask -TaskPath $taskPath -TaskName $taskName -ErrorAction SilentlyContinue | Out-Null
     }
 
     $wuKey = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate'

@@ -58,24 +58,24 @@ function Show-DriverSelection {
 
     Add-Type -AssemblyName PresentationFramework
 
-    $window = New-Object System.Windows.Window
+    $window = [System.Windows.Window]::new()
     $window.Title = "Select drivers to install"
     $window.Width = 500
     $window.Height = 400
     $window.WindowStartupLocation = "CenterScreen"
 
-    $stackPanel = New-Object System.Windows.Controls.StackPanel
+    $stackPanel = [System.Windows.Controls.StackPanel]::new()
 
-    $listBox = New-Object System.Windows.Controls.ListBox
+    $listBox = [System.Windows.Controls.ListBox]::new()
     $listBox.SelectionMode = "Extended"
     foreach ($update in $Updates) {
-        $item = New-Object System.Windows.Controls.ListBoxItem
+        $item = [System.Windows.Controls.ListBoxItem]::new()
         $item.Content = $update.Title.ToString().Trim()
         $listBox.Items.Add($item) | Out-Null
     }
     $stackPanel.Children.Add($listBox) | Out-Null
 
-    $okButton = New-Object System.Windows.Controls.Button
+    $okButton = [System.Windows.Controls.Button]::new()
     $okButton.Content = "OK"
     $okButton.Margin = "10,10,10,10"
     $okButton.Add_Click({

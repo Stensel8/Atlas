@@ -1,8 +1,8 @@
 #Requires -Version 5.1
 # Fully removes OneDrive: uninstalls it, cleans registry and file leftovers for all users.
-$ErrorActionPreference = 'SilentlyContinue'
+$ErrorActionPreference = 'Stop'
 
-Stop-Process -Name 'OneDrive' -Force
+Stop-Process -Name 'OneDrive' -Force -ErrorAction SilentlyContinue
 
 # try the built-in uninstaller first; fall back to winget for Store installs
 foreach ($setupExe in @(
