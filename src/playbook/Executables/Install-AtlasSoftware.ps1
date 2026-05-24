@@ -3,6 +3,7 @@ param (
     [switch]$Chrome,
     [switch]$Brave,
     [switch]$Firefox,
+    [switch]$LibreWolf,
     [switch]$Toolbox,
     [switch]$UniGetUI,
     [switch]$DirectX

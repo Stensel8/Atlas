@@ -10,6 +10,17 @@
 function RunAsTI ($cmd, $arg) {
     $id  = 'RunAsTI'
     $key = "Registry::HKU\$(((whoami /user) -split ' ')[-1])\Volatile Environment"
+
+    # Runs the target process under the TrustedInstaller token by inheriting its handle.
+    # Technique: dynamically define P/Invoke stubs (CreateProcess, RegOpenKeyEx, RegSetValueEx)
+    # via Reflection so no Add-Type / C# compilation is needed at runtime.
+    # $D = array of dynamically defined value types (structs for STARTUPINFO, PROCESS_INFO, etc.)
+    # $T = the finalized/created Type instances from $D
+    # $F = P/Invoke signatures: DLL name + parameter type arrays for each native function
+    # 0x0E080600 = CREATE_UNICODE_ENVIRONMENT | CREATE_NEW_CONSOLE | CREATE_NEW_PROCESS_GROUP
+    #              | EXTENDED_STARTUPINFO_PRESENT (process creation flags for CreateProcess)
+    # Obfuscation in the heredoc is intentional — adapted from AveYo/LeanAndMean to evade
+    # heuristic AV triggers on string literals like "CreateProcess" and "RegOpenKeyEx".
     $code = @'
  $I=[int32]; $M=$I.module.gettype("System.Runtime.Interop`Services.Mar`shal"); $P=$I.module.gettype("System.Int`Ptr"); $S=[string]
  $D=@(); $T=@(); $DM=[AppDomain]::CurrentDomain."DefineDynami`cAssembly"(1,1)."DefineDynami`cModule"(1); $Z=[uintptr]::size
@@ -39,7 +50,7 @@ function RunAsTI ($cmd, $arg) {
  if ($11bug) {[Windows.Forms.SendKeys]::SendWait($path)}; do {sleep 7} while(Q); L '.Default' $LNK 'Interactive User'
 '@
     $V = ''; 'cmd', 'arg', 'id', 'key' | ForEach-Object { $V += "`n`$$_='$($(Get-Variable $_ -ValueOnly) -replace "'","''")';"}
-    Set-ItemProperty $key $id $($V, $code) -Type 7 -Force -ErrorAction SilentlyContinue
+    Set-ItemProperty -Path $key -Name $id -Value $($V, $code) -Type 7 -Force -ErrorAction SilentlyContinue
     Start-Process powershell -Args "-windowstyle $env:RunAsTI_WindowStyle -nop -c ``n$V ``$env:R=(Get-Item ``$key -ea 0).getvalue(``$id)-join''; Invoke-Expression ``$env:R" -Verb RunAs # DevSkim: ignore DS104456
 }
 

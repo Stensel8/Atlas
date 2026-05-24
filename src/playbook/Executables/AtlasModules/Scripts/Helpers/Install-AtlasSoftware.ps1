@@ -3,6 +3,7 @@ param (
     [switch]$Chrome,
     [switch]$Brave,
     [switch]$Firefox,
+    [switch]$LibreWolf,
     [switch]$Toolbox,
     [switch]$UniGetUI,
     [switch]$DirectX
@@ -35,6 +36,7 @@ function Invoke-AtlasDownload {
         [Parameter(Mandatory)][string]$Description
     )
     Write-Output "Downloading $Description..."
+    # curl.exe preferred over Invoke-WebRequest: bypasses WinHTTP proxy issues, supports --retry-all-errors
     & curl.exe -LSs $Uri -o $Destination --connect-timeout 10 --retry 3 --retry-all-errors
     if ($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath $Destination -PathType Leaf)) {
         throw "Downloading $Description from '$Uri' failed with exit code $LASTEXITCODE."
@@ -146,21 +148,23 @@ function Install-AtlasToolbox {
     Start-AtlasInstaller -FilePath $toolboxPath -ArgumentList '/verysilent /install /MERGETASKS="desktopicon"' -Description 'Atlas Toolbox'
 }
 
-function Install-BraveBrowser   { Invoke-WingetInstall -Id 'Brave.Brave'          -Description 'Brave Browser'   -MachineScope }
-function Install-FirefoxBrowser { Invoke-WingetInstall -Id 'Mozilla.Firefox'      -Description 'Mozilla Firefox' -MachineScope }
-function Install-ChromeBrowser  { Invoke-WingetInstall -Id 'Google.Chrome'        -Description 'Google Chrome'   -MachineScope }
-function Install-UniGetUI       { Invoke-WingetInstall -Id 'Devolutions.UniGetUI' -Description 'UniGetUI'                      }
+function Install-BraveBrowser      { Invoke-WingetInstall -Id 'Brave.Brave'          -Description 'Brave Browser'   -MachineScope }
+function Install-FirefoxBrowser    { Invoke-WingetInstall -Id 'Mozilla.Firefox'      -Description 'Mozilla Firefox' -MachineScope }
+function Install-ChromeBrowser     { Invoke-WingetInstall -Id 'Google.Chrome'        -Description 'Google Chrome'   -MachineScope }
+function Install-LibreWolfBrowser  { Invoke-WingetInstall -Id 'LibreWolf.LibreWolf'  -Description 'LibreWolf'       -MachineScope }
+function Install-UniGetUI          { Invoke-WingetInstall -Id 'Devolutions.UniGetUI' -Description 'UniGetUI'                      }
 
 # -- Entry point
 
 New-Item -ItemType Directory -Path $script:TempDir -Force | Out-Null
 try {
-    if ($Toolbox)   { Install-AtlasToolbox;    return }
-    if ($UniGetUI)  { Install-UniGetUI;        return }
-    if ($DirectX)   { Install-DirectXRuntime;  return }
-    if ($Brave)     { Install-BraveBrowser;    return }
-    if ($Firefox)   { Install-FirefoxBrowser;  return }
-    if ($Chrome)    { Install-ChromeBrowser;   return }
+    if ($Toolbox)    { Install-AtlasToolbox;       return }
+    if ($UniGetUI)   { Install-UniGetUI;           return }
+    if ($DirectX)    { Install-DirectXRuntime;     return }
+    if ($Brave)      { Install-BraveBrowser;       return }
+    if ($Firefox)    { Install-FirefoxBrowser;     return }
+    if ($LibreWolf)  { Install-LibreWolfBrowser;   return }
+    if ($Chrome)     { Install-ChromeBrowser;      return }
 
     # Default: base software (VC++ runtimes, NanaZip)
     if (-not (Test-AtlasInternetConnectivity)) {

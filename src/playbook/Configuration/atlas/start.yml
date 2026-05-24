@@ -90,7 +90,7 @@ actions:
     runas: currentUserElevated
   - !writeStatus: {status: 'Installing LibreWolf', option: 'browser-librewolf'}
   - !powerShell:
-    command: '.\Install-LibreWolf.ps1'
+    command: '.\Install-AtlasSoftware.ps1 -LibreWolf'
     exeDir: true
     wait: true
     weight: 120

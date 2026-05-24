@@ -153,6 +153,7 @@ if ($setupMarker -lt 1) {
     Write-Host $('-' * ($title.length + 3)) -ForegroundColor Yellow
     Write-Host "You'll be logged out in 10 to 20 seconds, and once you login again, your new account will be ready for use."
 
+    # Signals to other scripts (e.g. theme, lockscreen helpers) that this is a first-run user-setup pass
     $env:ATLAS_USER_CONTEXT = "1"
     try {
         # Disable Windows 11 context menu & 'Gallery' in File Explorer

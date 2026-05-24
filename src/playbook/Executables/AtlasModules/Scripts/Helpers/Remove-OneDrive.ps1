@@ -55,7 +55,9 @@ function Remove-OneDriveUserKeys ([string]$Sid) {
     }
 }
 
-# process loaded user hives and AME-mounted profiles (have 'Volatile Environment' or AME_UserHive_ prefix)
+# Walk all loaded hives. Two-step filter:
+# 1. Skip non-user keys (.DEFAULT, S-1-5-18 system SIDs, class-root stubs) — keep real user SIDs and AME_UserHive_ mounts
+# 2. Skip user SIDs whose hive isn't actually loaded — 'Volatile Environment' only exists in a live session
 foreach ($key in (Get-ChildItem 'Registry::HKEY_USERS' -ErrorAction SilentlyContinue)) {
     $sid = $key.PSChildName
     if ($sid -notmatch '^S-' -and $sid -notmatch '^AME_UserHive_[^_]+$') { continue }
