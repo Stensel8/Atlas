@@ -6,7 +6,7 @@ onUpgrade: true
 actions:
   - !writeStatus: { status: "Reverting old changes" }
   - !powerShell:
-    command: '& (Join-Path $env:windir "AtlasModules\Scripts\Helpers\Fix-Store.ps1") -Silent'
+    command: '& (Join-Path $env:windir "AtlasDesktop\9. Troubleshooting\Fix-Store.ps1") -Silent'
     weight: 2
     wait: true
     onUpgrade: true

@@ -1,26 +1,46 @@
 #Requires -Version 5.1
 # Repairs Microsoft Store and Xbox/Gaming Services install failures.
-# Addresses two root causes:
+# Two root causes addressed:
 #   1. StateRepository-Deployment.srd corruption — deleting it forces a clean rebuild on next AppX operation
-#   2. Store-essential services set to Disabled — promoted to Manual so Windows can trigger-start them
-# Caller is responsible for administrator privileges.
+#   2. Store-essential services Disabled by debloat tools — promoted to Manual so Windows can trigger-start them
 param([switch]$Silent)
 
 $ErrorActionPreference = 'Stop'
 
+# --- Admin elevation ---
+$identity  = [Security.Principal.WindowsIdentity]::GetCurrent()
+$principal = [Security.Principal.WindowsPrincipal]::new($identity)
+if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    $argList = "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`""
+    if ($Silent) { $argList += ' -Silent' }
+    try {
+        Start-Process -FilePath 'powershell.exe' -ArgumentList $argList -Verb RunAs -Wait
+    } catch {
+        Write-Host '[!!] Administrator privileges are required.' -ForegroundColor Red
+        if (-not $Silent) { $null = Read-Host 'Press Enter to exit' }
+        exit 1
+    }
+    exit 0
+}
+
+# --- Constants ---
+
 # ClipSVC validates app licenses; AppXSvc deploys packages; StateRepository tracks the installed-app database
-$script:StoreServices   = @('ClipSVC', 'AppXSvc', 'StateRepository')
+$storeServices   = @('ClipSVC', 'AppXSvc', 'StateRepository')
 # Required for Xbox Game Pass and Gaming Services installs
-$script:GamingServices  = @('GamingServices', 'GamingServicesNet', 'XboxNetApiSvc', 'XblAuthManager', 'XblGameSave')
-$script:AllRootServices = $script:StoreServices + $script:GamingServices
+$gamingServices  = @('GamingServices', 'GamingServicesNet', 'XboxNetApiSvc', 'XblAuthManager', 'XblGameSave')
+$allRootServices = $storeServices + $gamingServices
 
 # SQLite database tracking all installed AppX packages; corruption causes 0x80073CF9 and similar errors
-$script:StateRepoFile = 'C:\ProgramData\Microsoft\Windows\AppRepository\StateRepository-Deployment.srd'
+$stateRepoFile = 'C:\ProgramData\Microsoft\Windows\AppRepository\StateRepository-Deployment.srd'
 
+# --- Output helpers ---
 function Write-FixStatus ([string]$Message) { Write-Host "[..] $Message" -ForegroundColor Yellow }
 function Write-FixOK     ([string]$Message) { Write-Host "[OK] $Message" -ForegroundColor Green  }
 function Write-FixWarn   ([string]$Message) { Write-Host "[??] $Message" -ForegroundColor Yellow }
 function Write-FixError  ([string]$Message) { Write-Host "[!!] $Message" -ForegroundColor Red    }
+
+# --- Service helpers ---
 
 function Get-ServiceDependents ([string[]]$Names) {
     $seen = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
@@ -53,13 +73,13 @@ function Set-StartupTypeSafe ([string]$Name, [string]$StartupType) {
 
 # --- Step 1: collect all services that depend on the root set (must be stopped before roots) ---
 Write-FixStatus 'Collecting dependent services...'
-$dependents = Get-ServiceDependents -Names $script:AllRootServices
-$stopOrder  = $dependents + $script:AllRootServices          # dependents before roots
-$startOrder = $script:StoreServices + $script:GamingServices + $dependents  # roots before dependents
+$dependents = Get-ServiceDependents -Names $allRootServices
+$stopOrder  = $dependents + $allRootServices
+$startOrder = $storeServices + $gamingServices + $dependents
 
 # --- Step 2: backup current startup types before touching anything ---
 $backup = @{}
-foreach ($name in ($script:AllRootServices + $dependents)) {
+foreach ($name in ($allRootServices + $dependents)) {
     $svc = Get-Service -Name $name -ErrorAction SilentlyContinue
     if ($svc) { $backup[$name] = $svc.StartType.ToString() }
 }
@@ -76,22 +96,22 @@ try {
     # --- Step 4: delete the corrupt AppX deployment state database ---
     # Windows automatically recreates StateRepository-Deployment.srd on the next package operation
     Write-FixStatus 'Deleting StateRepository-Deployment.srd...'
-    if (Test-Path -LiteralPath $script:StateRepoFile) {
-        Remove-Item -LiteralPath $script:StateRepoFile -Force
+    if (Test-Path -LiteralPath $stateRepoFile) {
+        Remove-Item -LiteralPath $stateRepoFile -Force
         Write-FixOK 'Deleted StateRepository-Deployment.srd.'
     } else {
         Write-FixWarn 'StateRepository-Deployment.srd not found — database may already be healthy.'
     }
 } finally {
     # --- Step 5: restore startup types ---
-    # Essential services that were Disabled (e.g. from debloat tools) get promoted to Manual.
-    # Restoring Disabled would make the fix survive only until the next reboot.
+    # Essential services that were Disabled (e.g. after debloat) get promoted to Manual.
+    # Restoring Disabled means the fix only works until next reboot.
     Write-FixStatus 'Restoring service startup types...'
-    foreach ($name in ($script:AllRootServices + $dependents)) {
+    foreach ($name in ($allRootServices + $dependents)) {
         $original = $backup[$name]
         if (-not $original) { continue }
 
-        $isEssential = $script:AllRootServices -contains $name
+        $isEssential = $allRootServices -contains $name
         $target = if ($isEssential -and $original -eq 'Disabled') { 'Manual' } else { $original }
 
         if ($target -ne $original) {
