@@ -1,5 +1,4 @@
 #Requires -Version 5.1 -RunAsAdministrator
-$ErrorActionPreference = 'Stop'
 
 # GPL-3.0-only license
 # 🦆 Modified from: https://github.com/he3als/online-sxs
@@ -14,6 +13,7 @@ param (
 )
 
 Set-StrictMode -Version 3.0
+$ErrorActionPreference = 'Stop'
 
 if (!([Security.Principal.WindowsIdentity]::GetCurrent().User.Value -eq 'S-1-5-18')) {
     throw "This script must be ran as TrustedInstaller/SYSTEM."

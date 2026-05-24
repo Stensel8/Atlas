@@ -12,3 +12,5 @@ src/dependencies/local-build.ps1
 src/playbook/VS Workspace.code-workspace
 agent-scanprofiel.json
 AGENTS.md
+Logs/\[2026-05-24 (9.41)\] AtlasOS/Output.txt
+Logs/\[2026-05-24 (9.41)\] AtlasOS/Log.yml
