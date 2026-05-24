@@ -42,22 +42,34 @@ function Write-FixError  ([string]$Message) { Write-Host "[!!] $Message" -Foregr
 
 # --- Service helpers ---
 
-function Get-ServiceDependents ([string[]]$Names) {
-    $seen = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
-    foreach ($name in $Names) {
-        $svc = Get-Service -Name $name -ErrorAction SilentlyContinue
-        if ($svc) {
-            $svc.DependentServices | ForEach-Object { [void]$seen.Add($_.ServiceName) }
+# BFS through the full dependency chain — catches transitive dependents that a simple
+# DependentServices query misses (e.g. a dependent of a dependent of ClipSVC)
+function Get-ServiceDependentsBFS ([string[]]$Names) {
+    $seen  = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+    $queue = [System.Collections.Generic.Queue[string]]::new()
+    foreach ($n in $Names) { [void]$queue.Enqueue($n) }
+
+    while ($queue.Count -gt 0) {
+        $current = $queue.Dequeue()
+        $svc = Get-Service -Name $current -ErrorAction SilentlyContinue
+        if (-not $svc) { continue }
+        foreach ($dep in $svc.DependentServices) {
+            if ($seen.Add($dep.ServiceName)) {
+                [void]$queue.Enqueue($dep.ServiceName)
+            }
         }
     }
+    # Root services are tracked separately; remove them from the dependent set
+    foreach ($n in $Names) { [void]$seen.Remove($n) }
     return [string[]]$seen
 }
 
 function Stop-ServiceSafe ([string]$Name) {
     $svc = Get-Service -Name $Name -ErrorAction SilentlyContinue
-    if ($svc -and $svc.Status -ne 'Stopped') {
-        Stop-Service -Name $Name -Force -ErrorAction SilentlyContinue
-    }
+    if (-not $svc -or $svc.Status -eq 'Stopped') { return }
+    Stop-Service -Name $Name -Force -ErrorAction SilentlyContinue
+    # Wait up to 15 s for the service to reach Stopped before moving on
+    try { $svc.WaitForStatus('Stopped', [TimeSpan]::FromSeconds(15)) } catch { }
 }
 
 function Start-ServiceSafe ([string]$Name) {
@@ -71,11 +83,11 @@ function Set-StartupTypeSafe ([string]$Name, [string]$StartupType) {
     Set-Service -Name $Name -StartupType $StartupType -ErrorAction SilentlyContinue
 }
 
-# --- Step 1: collect all services that depend on the root set (must be stopped before roots) ---
-Write-FixStatus 'Collecting dependent services...'
-$dependents = Get-ServiceDependents -Names $allRootServices
-$stopOrder  = $dependents + $allRootServices
-$startOrder = $storeServices + $gamingServices + $dependents
+# --- Step 1: collect the full transitive dependent tree ---
+Write-FixStatus 'Collecting dependent services (full tree)...'
+$dependents = Get-ServiceDependentsBFS -Names $allRootServices
+$stopOrder  = $dependents + $allRootServices          # dependents before roots
+$startOrder = $storeServices + $gamingServices + $dependents  # roots before dependents
 
 # --- Step 2: backup current startup types before touching anything ---
 $backup = @{}
@@ -90,7 +102,6 @@ foreach ($name in $stopOrder) {
     Set-StartupTypeSafe -Name $name -StartupType 'Disabled'
     Stop-ServiceSafe -Name $name
 }
-Start-Sleep -Seconds 2
 
 try {
     # --- Step 4: delete the corrupt AppX deployment state database ---
@@ -105,7 +116,7 @@ try {
 } finally {
     # --- Step 5: restore startup types ---
     # Essential services that were Disabled (e.g. after debloat) get promoted to Manual.
-    # Restoring Disabled means the fix only works until next reboot.
+    # Restoring Disabled means the fix only works until the next reboot.
     Write-FixStatus 'Restoring service startup types...'
     foreach ($name in ($allRootServices + $dependents)) {
         $original = $backup[$name]
@@ -120,12 +131,12 @@ try {
         Set-StartupTypeSafe -Name $name -StartupType $target
     }
 
-    # --- Step 6: restart core services ---
-    Write-FixStatus 'Starting services...'
-    foreach ($name in $startOrder) {
-        Start-ServiceSafe -Name $name
-    }
-    Start-Sleep -Seconds 1
+    # --- Step 6: restart StateRepository so AppX operations can proceed immediately ---
+    Write-FixStatus 'Starting StateRepository...'
+    Start-ServiceSafe -Name 'StateRepository'
+
+    # Trigger-started services (ClipSVC, AppXSvc) are started by Windows on demand —
+    # forcing them here is unnecessary and may fail if no AppX operation is in flight
 }
 
 # --- Step 7: Gaming Services package check ---
@@ -147,6 +158,17 @@ if (-not $gsPkg) {
     }
 } else {
     Write-FixOK "Gaming Services present (v$($gsPkg.Version))."
+}
+
+# --- Step 8: reinstall the Store package ---
+# wsreset.exe -i silently reinstalls the WindowsStore AppX package without opening the Store window.
+# This repairs a missing or damaged Store installation — distinct from wsreset.exe (cache clear only).
+Write-FixStatus 'Reinstalling Store package (wsreset -i)...'
+$wsreset = Start-Process -FilePath 'wsreset.exe' -ArgumentList '-i' -Wait -PassThru
+if ($wsreset.ExitCode -eq 0) {
+    Write-FixOK 'Store package reinstalled.'
+} else {
+    Write-FixWarn "wsreset -i exited with code $($wsreset.ExitCode)."
 }
 
 Write-Host ''
