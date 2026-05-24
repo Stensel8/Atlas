@@ -11,6 +11,10 @@
 
         # We deliberately use UTF-8 WITHOUT BOM (LF line endings, POSIX-compatible).
         # BOM causes issues in some AME Wizard parsing contexts.
-        'PSUseBOMForUnicodeEncodedFile'
+        'PSUseBOMForUnicodeEncodedFile',
+
+        # Interactive troubleshooting and AtlasDesktop scripts use Write-Host intentionally
+        # for colored status output ([OK]/[!!]/[..]) that Write-Output cannot provide.
+        'PSAvoidUsingWriteHost'
     )
 }

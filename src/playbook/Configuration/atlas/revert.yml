@@ -5,10 +5,8 @@ privilege: TrustedInstaller
 onUpgrade: true
 actions:
   - !writeStatus: { status: "Reverting old changes" }
-  - !run:
-    exe: "%windir%\\AtlasModules\\Tools\\StoreFixer.exe"
-    args: "silent"
+  - !powerShell:
+    command: '& (Join-Path $env:windir "AtlasModules\Scripts\Helpers\Fix-Store.ps1") -Silent'
     weight: 2
     wait: true
-    exeDir: true
     onUpgrade: true
