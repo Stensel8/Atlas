@@ -54,7 +54,7 @@ function Set-SafeMode {
 
     if ($Enable) {
         $bcdeditArgs = '/set {current} safeboot minimal'
-        $shellValue = "explorer.exe,powershell -NonInteractive -ExecutionPolicy Bypass -File `"$env:windir\AtlasModules\Scripts\RunAsTI.ps1`" powershell -NoP -EP RemoteSigned -File `"$PSCommandPath`" -SafeMode"
+        $shellValue = "explorer.exe,powershell -NonInteractive -ExecutionPolicy Bypass -File `"$env:windir\AtlasModules\Scripts\Invoke-TrustedInstaller.ps1`" powershell -NoP -EP RemoteSigned -File `"$PSCommandPath`" -SafeMode"
 
         if ($FailedPackageList) {
             Set-Content -Path $FailedPackageListPath -Value $FailedPackageList

@@ -4,10 +4,10 @@
 .NOTES
     Adapted from https://github.com/AveYo/LeanAndMean
     Revised and customized for Atlas by he3als and Xyueta.
-    Usage: RunAsTI.ps1 "<executable>" [args]
+    Usage: Invoke-TrustedInstaller.ps1 "<executable>" [args]
 #>
 
-function RunAsTI ($cmd, $arg) {
+function Invoke-TrustedInstaller ($cmd, $arg) {
     $id  = 'RunAsTI'
     $key = "Registry::HKU\$(((whoami /user) -split ' ')[-1])\Volatile Environment"
 
@@ -73,7 +73,7 @@ if ($silentPatterns | Where-Object { $arguments -match [regex]::Escape($_) }) {
 }
 
 Try {
-    RunAsTI $exe $arguments
+    Invoke-TrustedInstaller $exe $arguments
 } Catch {
     $uacDeclined = $_ | Select-String -Pattern 'The operation was canceled by the user' -Quiet
     if ($uacDeclined) {

@@ -15,5 +15,5 @@ actions:
   - !registryValue:
     path: 'HKLM\Software\Classes\regfile\Shell\RunAs\Command'
     value: ''
-    data: 'powershell -NonInteractive -ExecutionPolicy Bypass -File "%windir%\AtlasModules\Scripts\RunAsTI.ps1" "%1"'
+    data: 'powershell -NonInteractive -ExecutionPolicy Bypass -File "%windir%\AtlasModules\Scripts\Invoke-TrustedInstaller.ps1" "%1"'
     type: REG_SZ
