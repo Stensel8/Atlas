@@ -1,0 +1,37 @@
+---
+title: Prevent Windows Update from Installing Drivers
+description: Stops Windows Update from offering device drivers and metadata, preventing driver conflicts with manually installed or OEM drivers
+actions:
+  - !registryKey:
+    path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\Device Metadata'
+    operation: add
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\Device Metadata'
+    value: 'PreventDeviceMetadataFromNetwork'
+    data: '1'
+    type: REG_DWORD
+
+  - !registryKey:
+    path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\DriverSearching'
+    operation: add
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\DriverSearching'
+    value: 'DontPromptForWindowsUpdate'
+    data: '1'
+    type: REG_DWORD
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\DriverSearching'
+    value: 'DontSearchWindowsUpdate'
+    data: '1'
+    type: REG_DWORD
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\DriverSearching'
+    value: 'DriverUpdateWizardWuSearchEnabled'
+    data: '0'
+    type: REG_DWORD
+
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate'
+    value: 'ExcludeWUDriversInQualityUpdate'
+    data: '1'
+    type: REG_DWORD
