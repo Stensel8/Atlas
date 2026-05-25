@@ -22,6 +22,7 @@ foreach ($val in @(
     'DisableWindowsSpotlightOnActionCenter'
     'DisableWindowsSpotlightOnSettings'
     'DisableThirdPartySuggestions'
+    'DisableSpotlightCollectionOnDesktop'
 )) {
     Remove-ItemProperty -LiteralPath $cloudCu -Name $val -ErrorAction SilentlyContinue
 }
