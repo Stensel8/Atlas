@@ -1,0 +1,22 @@
+---
+title: Scrollbars Always Visible and NumLock on Startup
+description: Prevents Windows from hiding scrollbars automatically, and enables NumLock by default on startup
+actions:
+    # Always show scrollbars (Windows 11 hides them by default)
+  - !registryValue:
+    path: 'HKCU\Control Panel\Accessibility'
+    value: 'DynamicScrollbars'
+    data: '0'
+    type: REG_DWORD
+
+    # NumLock on at startup (default user + current user)
+  - !registryValue:
+    path: 'HKU\.DEFAULT\Control Panel\Keyboard'
+    value: 'InitialKeyboardIndicators'
+    data: '2'
+    type: REG_SZ
+  - !registryValue:
+    path: 'HKCU\Control Panel\Keyboard'
+    value: 'InitialKeyboardIndicators'
+    data: '2'
+    type: REG_SZ
