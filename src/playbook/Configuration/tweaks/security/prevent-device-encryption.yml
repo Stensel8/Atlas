@@ -7,3 +7,10 @@ actions:
     value: 'PreventDeviceEncryption'
     data: '1'
     type: REG_DWORD
+
+    # Prevent Windows from storing credentials to auto-sign-in after a restart/update
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System'
+    value: 'DisableAutomaticRestartSignOn'
+    data: '1'
+    type: REG_DWORD
