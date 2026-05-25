@@ -13,3 +13,17 @@ actions:
     value: 'DisableWindowsConsumerFeatures'
     data: '1'
     type: REG_DWORD
+
+    # Suppress Microsoft 365 subscription ads in Settings Home
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\CloudContent'
+    value: 'DisableConsumerAccountStateContent'
+    data: '1'
+    type: REG_DWORD
+
+    # Disable share drag tray (sidebar appearing during drag operations)
+  - !registryValue:
+    path: 'HKCU\Software\Microsoft\Windows\CurrentVersion\CDP'
+    value: 'DragTrayEnabled'
+    data: '0'
+    type: REG_DWORD
