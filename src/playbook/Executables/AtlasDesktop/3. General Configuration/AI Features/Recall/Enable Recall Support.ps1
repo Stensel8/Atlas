@@ -12,8 +12,9 @@ Assert-AtlasAdminPrivilege -ScriptPath $PSCommandPath -ScriptArgs $activeArgs
 
 Set-AtlasSettingState -SettingName 'Recall' -State 1 -ScriptPath $PSCommandPath
 
-Remove-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI' `
-    -Name 'DisableAIDataAnalysis' -ErrorAction SilentlyContinue
+$aiKey = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI'
+Remove-ItemProperty -LiteralPath $aiKey -Name 'DisableAIDataAnalysis' -ErrorAction SilentlyContinue
+Remove-ItemProperty -LiteralPath $aiKey -Name 'AllowRecallEnablement' -ErrorAction SilentlyContinue
 
 if ($Silent) { return }
 Write-Output ''

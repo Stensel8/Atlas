@@ -15,6 +15,7 @@ Set-AtlasSettingState -SettingName 'Recall' -State 0 -ScriptPath $PSCommandPath
 $key = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI'
 if (-not (Test-Path -LiteralPath $key)) { New-Item -Path $key -Force | Out-Null }
 Set-ItemProperty -LiteralPath $key -Name 'DisableAIDataAnalysis' -Value 1 -Type DWord
+Set-ItemProperty -LiteralPath $key -Name 'AllowRecallEnablement' -Value 0 -Type DWord
 
 if ($JustContext -or $Silent) { return }
 
