@@ -1,0 +1,30 @@
+---
+title: Disable AutoRun and Windows Script Host
+description: Blocks AutoRun for all drive types, redirects Autorun.inf to a non-existent path, and disables Windows Script Host to prevent .vbs/.wsf/.js execution
+actions:
+    # Block AutoRun for all drive types (255 = all types)
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer'
+    value: 'NoDriveTypeAutoRun'
+    data: '255'
+    type: REG_DWORD
+
+    # Redirect Autorun.inf on any drive to a non-existent registry path
+  - !registryKey:
+    path: 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\IniFileMapping\Autorun.inf'
+    operation: add
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\IniFileMapping\Autorun.inf'
+    value: ''
+    data: '@SYS:DoesNotExist'
+    type: REG_SZ
+
+    # Disable Windows Script Host (.vbs, .wsf, .js execution)
+  - !registryKey:
+    path: 'HKLM\SOFTWARE\Microsoft\Windows Script Host\Settings'
+    operation: add
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Microsoft\Windows Script Host\Settings'
+    value: 'Enabled'
+    data: '0'
+    type: REG_DWORD
