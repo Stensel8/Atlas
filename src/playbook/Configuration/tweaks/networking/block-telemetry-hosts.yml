@@ -1,0 +1,47 @@
+---
+title: Block Windows Telemetry via Hosts File
+description: Appends known Microsoft telemetry and data-collection endpoints to the hosts file, providing network-level blocking on top of registry-based telemetry disables
+actions:
+  - !powerShell:
+    command: |
+      $hosts  = "$env:SystemRoot\System32\drivers\etc\hosts"
+      $marker = '# AtlasOS telemetry block'
+
+      if (Select-String -Path $hosts -Pattern $marker -Quiet -SimpleMatch) { return }
+
+      $domains = @(
+          # Core diagnostic/telemetry pipeline
+          'vortex.data.microsoft.com',
+          'vortex-win.data.microsoft.com',
+          'telecommand.telemetry.microsoft.com',
+          'oca.telemetry.microsoft.com',
+          'oca.microsoft.com',
+          'sqm.telemetry.microsoft.com',
+          'watson.telemetry.microsoft.com',
+          'watson.ppe.telemetry.microsoft.com',
+          'df.telemetry.microsoft.com',
+          'wes.df.telemetry.microsoft.com',
+          'telemetry.microsoft.com',
+          'compatexchange.cloudapp.net',
+          'diagnostics.support.microsoft.com',
+
+          # Error reporting (Watson)
+          'watson.live.com',
+          'redir.metaservices.microsoft.com',
+
+          # Stats and feedback
+          'statsfe1.ws.microsoft.com',
+          'statsfe2.ws.microsoft.com',
+          'feedback.windows.com',
+          'feedback.microsoft-hohm.com',
+          'feedback.search.microsoft.com',
+
+          # Activity / event data
+          'activity.windows.com',
+          'browser.events.data.microsoft.com'
+      )
+
+      $lines = @('', $marker) + ($domains | ForEach-Object { "0.0.0.0 $_" }) + @('# end AtlasOS telemetry block')
+      Add-Content -Path $hosts -Value $lines -Encoding UTF8
+    runas: currentUserElevated
+    wait: true
