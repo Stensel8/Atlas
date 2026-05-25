@@ -15,6 +15,12 @@ Set-AtlasSettingState -SettingName 'AutomaticUpdates' -State 1 -ScriptPath $PSCo
 Remove-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU' `
     -Name 'AUOptions' -ErrorAction SilentlyContinue
 
+# Remove balanced-mode deferral keys
+$uxKey = 'HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings'
+foreach ($val in @('BranchReadinessLevel', 'DeferFeatureUpdatesPeriodInDays', 'DeferQualityUpdatesPeriodInDays')) {
+    Remove-ItemProperty -LiteralPath $uxKey -Name $val -ErrorAction SilentlyContinue
+}
+
 if ($Silent) { return }
 Write-Output ''
 Write-Output 'Automatic Updates have been enabled.'

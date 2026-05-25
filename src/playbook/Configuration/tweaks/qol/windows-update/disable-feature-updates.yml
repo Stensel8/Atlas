@@ -9,3 +9,12 @@ actions:
   - !powerShell:
     command: '& (Join-Path ([Environment]::GetFolderPath(''Windows'')) ''AtlasModules\Scripts\Tasks\Set-FeatureUpdateTarget.ps1'')'
     wait: true
+
+    # Semi-Annual Channel + defer feature 365 days + defer quality 4 days
+    # Quality deferral gives MS time to pull broken patches before they hit Atlas users
+  - !registryKey:
+    path: 'HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings'
+    operation: add
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings', value: 'BranchReadinessLevel', data: '20', type: REG_DWORD}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings', value: 'DeferFeatureUpdatesPeriodInDays', data: '365', type: REG_DWORD}
+  - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings', value: 'DeferQualityUpdatesPeriodInDays', data: '4', type: REG_DWORD}
