@@ -55,3 +55,25 @@ actions:
     data: '0'
     type: REG_DWORD
   - !cmd: {command: 'del "%ProgramData%\Microsoft\Diagnosis\ETLLogs\AutoLogger\DiagTrack*" "%ProgramData%\Microsoft\Diagnosis\ETLLogs\ShutdownLogger\DiagTrack*" > nul 2>&1'}
+
+    # Windows Threat Detection Service (WTDS) - phishing/credential threat notifications
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\WTDS\Components'
+    value: 'ServiceEnabled'
+    data: '0'
+    type: REG_DWORD
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\WTDS\Components'
+    value: 'NotifyMalicious'
+    data: '0'
+    type: REG_DWORD
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\WTDS\Components'
+    value: 'NotifyPasswordReuse'
+    data: '0'
+    type: REG_DWORD
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\WTDS\Components'
+    value: 'NotifyUnsafeApp'
+    data: '0'
+    type: REG_DWORD
