@@ -8,5 +8,12 @@ actions:
     value: 'Start_TrackProgs'
     data: '0'
     type: REG_DWORD
-    
-    
+
+    # Prevent apps from auto-restarting after sign-in
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon'
+    value: 'RestartApps'
+    data: '0'
+    type: REG_DWORD
+
+
