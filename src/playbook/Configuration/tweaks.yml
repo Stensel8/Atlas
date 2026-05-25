@@ -29,6 +29,8 @@ actions:
   # - !task: {path: 'tweaks\networking\disable-llmnr.yml'}
   - !task: {path: 'tweaks\networking\atlas-network-settings.yml'}
   - !task: {path: 'tweaks\networking\optimize-wifi.yml'}
+  - !task: {path: 'tweaks\networking\disable-teredo.yml'}
+  - !task: {path: 'tweaks\networking\block-telemetry-hosts.yml'}
 
   # -------------------------------------------------------------------------- #
   #  networking\shares                                                         #
@@ -191,6 +193,7 @@ actions:
   - !task: {path: 'tweaks\qol\windows-update\disable-insider.yml'}
   - !task: {path: 'tweaks\qol\windows-update\disable-msrt-telemetry.yml'}
   - !task: {path: 'tweaks\qol\windows-update\disable-feature-updates.yml'}
+  - !task: {path: 'tweaks\qol\windows-update\disable-driver-updates.yml'}
   - !task: {path: 'tweaks\qol\windows-update\disable-auto-updates.yml'}
   - !task: {path: 'tweaks\qol\windows-update\disable-auto-reboot.yml'}
   - !task: {path: 'tweaks\qol\windows-update\disable-delivery-optimization.yml'}
@@ -298,6 +301,7 @@ actions:
   # -------------------------------------------------------------------------- #
   - !task: {path: 'tweaks\qol\system\crash-control-qol.yml'}
   - !task: {path: 'tweaks\qol\system\disable-wpbt.yml'}
+  - !task: {path: 'tweaks\qol\system\scrollbars-numlock.yml'}
 
 
   # -----------------------------------------------------
@@ -313,6 +317,7 @@ actions:
   - !task: {path: 'tweaks\security\disable-remote-assistance.yml'}
   - !task: {path: 'tweaks\security\disable-ie-mode.yml'}
   - !task: {path: 'tweaks\security\prevent-device-encryption.yml'}
+  - !task: {path: 'tweaks\security\disable-autorun-wsh.yml'}
 
 
 
@@ -331,6 +336,7 @@ actions:
   - !task: {path: 'tweaks\debloat\block-razer-installs.yml'}
   - !task: {path: 'tweaks\debloat\hide-unused-security-pages.yml'}
   - !task: {path: 'tweaks\debloat\config-storage-sense.yml'}
+  - !task: {path: 'tweaks\debloat\remove-default-store-packages.yml'}
 
 
 
