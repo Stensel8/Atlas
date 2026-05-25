@@ -95,12 +95,76 @@ actions:
     data: '0'
     type: REG_DWORD
 
+    # Disable Edge Copilot / AI features
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\Microsoft\Edge'
+    value: 'CopilotCDPPageContext'
+    data: '0'
+    type: REG_DWORD
+
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\Microsoft\Edge'
+    value: 'CopilotPageContext'
+    data: '0'
+    type: REG_DWORD
+
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\Microsoft\Edge'
+    value: 'HubsSidebarEnabled'
+    data: '0'
+    type: REG_DWORD
+
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\Microsoft\Edge'
+    value: 'EdgeEntraCopilotPageContext'
+    data: '0'
+    type: REG_DWORD
+
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\Microsoft\Edge'
+    value: 'EdgeHistoryAISearchEnabled'
+    data: '0'
+    type: REG_DWORD
+
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\Microsoft\Edge'
+    value: 'ComposeInlineEnabled'
+    data: '0'
+    type: REG_DWORD
+
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\Microsoft\Edge'
+    value: 'GenAILocalFoundationalModelSettings'
+    data: '1'
+    type: REG_DWORD
+
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\Microsoft\Edge'
+    value: 'NewTabPageBingChatEnabled'
+    data: '0'
+    type: REG_DWORD
+
   - !registryKey:
     path: 'HKLM\SOFTWARE\Policies\Microsoft\EdgeUpdate'
     operation: add
   - !registryValue:
     path: 'HKLM\SOFTWARE\Policies\Microsoft\EdgeUpdate'
     value: 'CreateDesktopShortcutDefault'
+    data: '0'
+    type: REG_DWORD
+
+  - !registryKey:
+    path: 'HKLM\SOFTWARE\Policies\Microsoft\Edge\Recommended'
+    operation: add
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\Microsoft\Edge\Recommended'
+    value: 'BackgroundModeEnabled'
+    data: '0'
+    type: REG_DWORD
+
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\Microsoft\Edge\Recommended'
+    value: 'StartupBoostEnabled'
     data: '0'
     type: REG_DWORD
 
