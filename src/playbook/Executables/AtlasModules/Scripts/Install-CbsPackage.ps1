@@ -188,7 +188,7 @@ if ($UninstallPackages) {
         foreach ($package in $installedPackages) {
             try {
                 Write-Host "[INFO] Uninstalling '$package'..."
-                Remove-WindowsPackage -Online -PackageName $package -Show-NoRestartMessage -LogLevel 1 *>$null
+                Remove-WindowsPackage -Online -PackageName $package -NoRestart -LogLevel 1 *>$null
             } catch {
                 Write-Host "[ERROR] $package failed to uninstall: $_" -ForegroundColor Red
                 $script:errorLevel++
@@ -334,7 +334,7 @@ function Install-CabPackage($cabPath) {
     Write-Host "[INFO] Adding package..."
     $packageAdded = $true
     try {
-        Add-WindowsPackage -Online -PackagePath $cabPath -Show-NoRestartMessage -IgnoreCheck -LogLevel 1 *>$null
+        Add-WindowsPackage -Online -PackagePath $cabPath -NoRestart -IgnoreCheck -LogLevel 1 *>$null
     } catch {
         Write-Host "[ERROR] Error when adding package '$cabPath': $_" -ForegroundColor Red
         $script:errorLevel++

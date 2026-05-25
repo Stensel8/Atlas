@@ -7,3 +7,9 @@ actions:
     value: 'DisableCloudOptimizedContent'
     data: '1'
     type: REG_DWORD
+
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows\CloudContent'
+    value: 'DisableWindowsConsumerFeatures'
+    data: '1'
+    type: REG_DWORD

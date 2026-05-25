@@ -10,20 +10,24 @@ PicturePosition=4
 WindowsSpotlight=0
 
 [Control Panel\Cursors]
-AppStarting=%windir%\cursors\aero_working.ani
-Arrow=%windir%\cursors\aero_arrow.cur
-Hand=%windir%\cursors\aero_link.cur
-Help=%windir%\cursors\aero_helpsel.cur
-No=%windir%\cursors\aero_unavail.cur
-NWPen=%windir%\cursors\aero_pen.cur
-SizeAll=%windir%\cursors\aero_move.cur
-SizeNESW=%windir%\cursors\aero_nesw.cur
-SizeNS=%windir%\cursors\aero_ns.cur
-SizeNWSE=%windir%\cursors\aero_nwse.cur
-SizeWE=%windir%\cursors\aero_ew.cur
-UpArrow=%windir%\cursors\aero_up.cur
-Wait=%windir%\cursors\aero_busy.ani
-DefaultValue=Windows Default
+AppStarting=%windir%\cursors\wait_r.cur
+Arrow=%windir%\cursors\arrow_r.cur
+Hand=
+Help=%windir%\cursors\help_r.cur
+No=%windir%\cursors\no_r.cur
+NWPen=%windir%\cursors\pen_r.cur
+SizeAll=%windir%\cursors\move_r.cur
+SizeNESW=%windir%\cursors\size1_r.cur
+SizeNS=%windir%\cursors\size4_r.cur
+SizeNWSE=%windir%\cursors\size2_r.cur
+SizeWE=%windir%\cursors\size3_r.cur
+UpArrow=%windir%\cursors\up_r.cur
+Wait=%windir%\cursors\busy_r.cur
+DefaultValue=Windows Black
+Crosshair=%windir%\cursors\cross_r.cur
+IBeam=%windir%\cursors\beam_r.cur
+Pin=%windir%\cursors\pin_r.cur
+Person=%windir%\cursors\person_r.cur
 
 [Sounds]
 SchemeName=No Sounds
