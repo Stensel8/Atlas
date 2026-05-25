@@ -17,3 +17,15 @@ actions:
     value: 'UILockdown'
     data: '1'
     type: REG_DWORD
+
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\Notifications'
+    value: 'DisableNotifications'
+    data: '1'
+    type: REG_DWORD
+
+  - !registryValue:
+    path: 'HKLM\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\Systray'
+    value: 'HideSystray'
+    data: '1'
+    type: REG_DWORD
