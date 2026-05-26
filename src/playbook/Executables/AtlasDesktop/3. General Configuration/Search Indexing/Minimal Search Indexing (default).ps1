@@ -36,6 +36,11 @@ $gatherSubPath = 'Software\Microsoft\Windows Search\Gather\Windows\SystemIndex'
 # We use SeTakeOwnershipPrivilege (available in elevated admin tokens) to take ownership,
 # grant Administrators SetValue, then write RespectPowerModes. WSearch is stopped at this point.
 try {
+    # SeTakeOwnershipPrivilege is present in elevated tokens but inactive until explicitly enabled.
+    # Without this, OpenSubKey with TakeOwnership rights throws SecurityException.
+    $priv = [System.Diagnostics.Process].GetMember('SetPrivilege', 42)[0]
+    $priv.Invoke($null, @('SeTakeOwnershipPrivilege', 2))
+
     $regKey = [Microsoft.Win32.Registry]::LocalMachine.OpenSubKey(
         $gatherSubPath,
         [Microsoft.Win32.RegistryKeyPermissionCheck]::ReadWriteSubTree,

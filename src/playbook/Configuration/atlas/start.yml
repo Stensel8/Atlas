@@ -21,16 +21,13 @@ actions:
   - !run: {exe: 'DISM.exe', args: '/Online /Remove-Capability /CapabilityName:"Microsoft.Windows.PowerShell.ISE~~~~0.0.1.0" /NoRestart', weight: 30, ignoreErrors: true}
   - !run: {exe: 'DISM.exe', args: '/Online /Remove-Capability /CapabilityName:"Microsoft.Windows.Notepad.System~~~~0.0.1.0" /NoRestart', weight: 30, ignoreErrors: true}
   - !run: {exe: 'DISM.exe', args: '/Online /Remove-Capability /CapabilityName:"Browser.InternetExplorer~~~~0.0.11.0" /NoRestart', weight: 30, ignoreErrors: true}
-  # TODO: Extended Theme Content capability name changed on 26200 — verify correct name via:
-  #   DISM.exe /Online /Get-Capabilities | findstr /i "theme extended"
-  # then replace this line with the correct CapabilityName.
-  # - !run: {exe: 'DISM.exe', args: '/Online /Remove-Capability /CapabilityName:"Microsoft.Windows.Extended.Themes~~~~0.0.1.0" /NoRestart', weight: 30, ignoreErrors: true}
+  - !run: {exe: 'DISM.exe', args: '/Online /Remove-Capability /CapabilityName:"Microsoft.Wallpapers.Extended~~~~0.0.1.0" /NoRestart', weight: 30, ignoreErrors: true}
   - !run: {exe: 'DISM.exe', args: '/Online /Remove-Capability /CapabilityName:"MathRecognizer~~~~0.0.1.0" /NoRestart', weight: 30, ignoreErrors: true}
 
   - !run: {exe: 'DISM.exe', args: '/Online /Remove-Capability /CapabilityName:"App.StepsRecorder~~~~0.0.1.0" /NoRestart', weight: 30, onUpgrade: false}
 
   - !writeStatus: {status: 'Cleaning the component store'}
-  - !run: {exe: 'DISM.exe', args: '/Online /Cleanup-Image /StartComponentCleanup', weight: 50}
+  - !run: {exe: 'DISM.exe', args: '/Online /Cleanup-Image /StartComponentCleanup', weight: 50, ignoreErrors: true}
 
     # Initial software — VC++ Runtimes, NanaZip
   - !writeStatus: {status: 'Installing utilities'}
