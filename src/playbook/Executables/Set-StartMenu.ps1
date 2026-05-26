@@ -34,14 +34,14 @@ foreach ($userKey in (Get-RegUserPaths).PsPath) {
             $appData = Join-Path $profilePath 'AppData\Local'
         }
     }
-    
+
     Write-Title "Configuring Start Menu for '$sid'..."
     if ([string]::IsNullOrEmpty($appData) -or !(Test-Path $appData -PathType Container)) {
         Write-Warning "Couldn't find Local AppData path for $sid; skipping Start Menu file cleanup."
     } else {
         Write-Output "Copying default layout XML"
         Copy-Item -Path "Layout.xml" -Destination "$appdata\Microsoft\Windows\Shell\LayoutModification.xml" -Force
-        
+
         if (!$default) {
             Write-Output "Clearing Start Menu pinned items"
 
@@ -54,10 +54,10 @@ foreach ($userKey in (Get-RegUserPaths).PsPath) {
             }
         }
     }
-    
+
     if (!$default) {
         Write-Output "Clearing default 'tilegrid'"
-        $tilegrid = Get-ChildItem -Path "$userKey\SOFTWARE\Microsoft\Windows\CurrentVersion\CloudStore\Store\Cache\DefaultAccount" -Recurse | Where-Object { $_.Name -match "start.tilegrid" }    
+        $tilegrid = Get-ChildItem -Path "$userKey\SOFTWARE\Microsoft\Windows\CurrentVersion\CloudStore\Store\Cache\DefaultAccount" -Recurse | Where-Object { $_.Name -match "start.tilegrid" }
         foreach ($key in $tilegrid) {
             Remove-Item -Path $key.PSPath -Force
         }
@@ -65,4 +65,9 @@ foreach ($userKey in (Get-RegUserPaths).PsPath) {
 
     Write-Output "Removing advertisements/stubs from Start Menu (23H2+)"
     Remove-ItemProperty -Path "$userKey\SOFTWARE\Microsoft\Windows\CurrentVersion\Start" -Name 'Config' -Force -EA 0
+
+    # Set All Apps view to List (0=Category, 1=Grid, 2=List)
+    $startPath = "$userKey\SOFTWARE\Microsoft\Windows\CurrentVersion\Start"
+    $null = New-Item -Path $startPath -Force -ErrorAction SilentlyContinue
+    Set-ItemProperty -Path $startPath -Name 'AllAppsViewMode' -Value 2 -Type DWord -Force
 }
