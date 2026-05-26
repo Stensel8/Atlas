@@ -156,6 +156,9 @@ actions:
   - !writeStatus: {status: 'Running QoL tweaks'}
   - !task: {path: 'tweaks\qol\bcdedit-tweaks.yml'}
   - !task: {path: 'tweaks\qol\best-wallpaper-quality.yml'}
+    # Content delivery must be disabled before Start Menu cache is cleared, otherwise
+    # StartMenuExperienceHost rebuilds with ContentDeliveryManager defaults (WhatsApp etc.)
+  - !task: {path: 'tweaks\debloat\config-content-delivery.yml'}
   - !task: {path: 'tweaks\qol\config-start-menu.yml'}
   - !task: {path: 'tweaks\qol\config-windows-ink-workspace.yml'}
   - !task: {path: 'tweaks\qol\disable-mouse-accel.yml'}
@@ -330,7 +333,6 @@ actions:
   # storage space or convenience.
   # -----------------------------------------------------
   - !writeStatus: {status: 'Running debloating tweaks'}
-  - !task: {path: 'tweaks\debloat\config-content-delivery.yml'}
   - !task: {path: 'tweaks\debloat\disable-reserved-storage.yml'}
   - !task: {path: 'tweaks\debloat\disable-scheduled-tasks.yml'}
   - !task: {path: 'tweaks\debloat\block-razer-installs.yml'}

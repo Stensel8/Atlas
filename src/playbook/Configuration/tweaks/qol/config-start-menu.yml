@@ -17,6 +17,20 @@ actions:
     wait: true
   - !appx: {operation: clearCache, name: 'Microsoft.Windows.StartMenuExperienceHost*'}
 
+    # Set All Apps view to List (0=Category, 1=Grid, 2=List).
+    # Set AFTER clearCache: StartMenuExperienceHost resets this to 0 (Category) on restart
+    # when no Config blob is present. Writing it here ensures it persists.
+  - !registryValue:
+    path: 'HKCU\Software\Microsoft\Windows\CurrentVersion\Start'
+    value: 'AllAppsViewMode'
+    data: '2'
+    type: REG_DWORD
+  - !registryValue:
+    path: 'HKU\AME_UserHive_Default\Software\Microsoft\Windows\CurrentVersion\Start'
+    value: 'AllAppsViewMode'
+    data: '2'
+    type: REG_DWORD
+
     # Remove frequent programs list from the Start Menu 
   - !registryValue:
     path: 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer'

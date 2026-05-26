@@ -24,45 +24,67 @@ Set-AtlasSettingState -SettingName 'Indexing' -State 1 -ScriptPath $PSCommandPat
 if (-not $Silent) { Write-Output 'Configuring minimal search indexing...' }
 
 & $indexConf -Stop
+
+$gatherKey = 'HKLM:\Software\Microsoft\Windows Search\Gather\Windows\SystemIndex'
+
+# WSearch registry keys under Gather\SystemIndex and Sites\LocalHost are owned by
+# TrustedInstaller with DENY ACEs for Administrators. Enable SeTakeOwnershipPrivilege (9)
+# and SeRestorePrivilege (17) via RtlAdjustPrivilege (ntdll.dll), take ownership of each
+# key, grant FullControl to Administrators so Set-SearchIndexConfig writes succeed.
+try {
+    if (-not ([System.Management.Automation.PSTypeName]'AtlasNtPrivilege').Type) {
+        Add-Type -TypeDefinition @'
+using System.Runtime.InteropServices;
+public static class AtlasNtPrivilege {
+    [DllImport("ntdll.dll")]
+    public static extern uint RtlAdjustPrivilege(int priv, bool enable, bool thread, out bool prev);
+}
+'@
+    }
+    $prev = $false
+    [AtlasNtPrivilege]::RtlAdjustPrivilege(9,  $true, $false, [ref]$prev) | Out-Null
+    [AtlasNtPrivilege]::RtlAdjustPrivilege(17, $true, $false, [ref]$prev) | Out-Null
+
+    $lm     = [Microsoft.Win32.Registry]::LocalMachine
+    $admins = [System.Security.Principal.NTAccount]'BUILTIN\Administrators'
+
+    foreach ($sp in @(
+        'Software\Microsoft\Windows Search\Gather\Windows\SystemIndex',
+        'Software\Microsoft\Windows Search\Gather\Windows\SystemIndex\Sites\LocalHost',
+        'Software\Microsoft\Windows Search\Gather\Windows\SystemIndex\Sites\LocalHost\Paths',
+        'Software\Microsoft\Windows Search\Gather\Windows\SystemIndex\Sites\LocalHost\Exclusions'
+    )) {
+        $k = $lm.OpenSubKey($sp, [Microsoft.Win32.RegistryKeyPermissionCheck]::ReadWriteSubTree,
+            [System.Security.AccessControl.RegistryRights]::TakeOwnership)
+        if (-not $k) { continue }
+        $acl = $k.GetAccessControl([System.Security.AccessControl.AccessControlSections]::None)
+        $acl.SetOwner($admins)
+        $k.SetAccessControl($acl)
+        $k.Close()
+
+        $k = $lm.OpenSubKey($sp, [Microsoft.Win32.RegistryKeyPermissionCheck]::ReadWriteSubTree,
+            [System.Security.AccessControl.RegistryRights]::ChangePermissions)
+        if (-not $k) { continue }
+        $acl = $k.GetAccessControl()
+        $acl.SetAccessRule([System.Security.AccessControl.RegistryAccessRule]::new(
+            $admins,
+            [System.Security.AccessControl.RegistryRights]::FullControl,
+            [System.Security.AccessControl.InheritanceFlags]::ContainerInherit,
+            [System.Security.AccessControl.PropagationFlags]::None,
+            [System.Security.AccessControl.AccessControlType]::Allow))
+        $k.SetAccessControl($acl)
+        $k.Close()
+    }
+} catch {
+    Write-Warning "Could not grant registry access to WSearch keys: $_"
+}
+
 & $indexConf -CleanPolicies
 & $indexConf -Include -Path "$env:ProgramData\Microsoft\Windows\Start Menu\Programs"
 & $indexConf -Include -Path "$env:windir\AtlasDesktop"
 & $indexConf -Exclude -Path "$env:SystemDrive\Users"
 
-$gatherKey     = 'HKLM:\Software\Microsoft\Windows Search\Gather\Windows\SystemIndex'
-$gatherSubPath = 'Software\Microsoft\Windows Search\Gather\Windows\SystemIndex'
-
-# This key is owned by TrustedInstaller/WSearch and denies write access to Administrators.
-# We use SeTakeOwnershipPrivilege (available in elevated admin tokens) to take ownership,
-# grant Administrators SetValue, then write RespectPowerModes. WSearch is stopped at this point.
-try {
-    # SeTakeOwnershipPrivilege is present in elevated tokens but inactive until explicitly enabled.
-    # Without this, OpenSubKey with TakeOwnership rights throws SecurityException.
-    $priv = [System.Diagnostics.Process].GetMember('SetPrivilege', 42)[0]
-    $priv.Invoke($null, @('SeTakeOwnershipPrivilege', 2))
-
-    $regKey = [Microsoft.Win32.Registry]::LocalMachine.OpenSubKey(
-        $gatherSubPath,
-        [Microsoft.Win32.RegistryKeyPermissionCheck]::ReadWriteSubTree,
-        [System.Security.AccessControl.RegistryRights]::TakeOwnership
-    )
-    $acl = $regKey.GetAccessControl([System.Security.AccessControl.AccessControlSections]::None)
-    $acl.SetOwner([System.Security.Principal.NTAccount]'BUILTIN\Administrators')
-    $regKey.SetAccessControl($acl)
-    # Re-read ACL now that Administrators owns the key, then grant SetValue
-    $acl = $regKey.GetAccessControl()
-    $rule = [System.Security.AccessControl.RegistryAccessRule]::new(
-        [System.Security.Principal.NTAccount]'BUILTIN\Administrators',
-        [System.Security.AccessControl.RegistryRights]::SetValue,
-        [System.Security.AccessControl.AccessControlType]::Allow
-    )
-    $acl.SetAccessRule($rule)
-    $regKey.SetAccessControl($acl)
-    $regKey.Close()
-    Set-ItemProperty -LiteralPath $gatherKey -Name 'RespectPowerModes' -Value 1 -Type DWord
-} catch {
-    Write-Warning "Could not set RespectPowerModes on WSearch gather key (TrustedInstaller-owned): $_"
-}
+Set-ItemProperty -LiteralPath $gatherKey -Name 'RespectPowerModes' -Value 1 -Type DWord -ErrorAction SilentlyContinue
 
 & $indexConf -Start
 
