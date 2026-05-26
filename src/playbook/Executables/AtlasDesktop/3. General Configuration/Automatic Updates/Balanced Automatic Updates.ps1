@@ -25,9 +25,8 @@ Set-ItemProperty -LiteralPath $uxKey -Name 'DeferQualityUpdatesPeriodInDays' -Va
 
 if ($Silent) { return }
 
-Write-Output ''
-Write-Output 'Balanced Automatic Updates enabled.'
-Write-Output '  - Feature updates deferred 365 days'
-Write-Output '  - Quality/security updates deferred 4 days'
-Write-Output '  - Driver delivery via Windows Update blocked'
+Write-Host ''
+Write-Host '[OK] Balanced Automatic Updates enabled.' -ForegroundColor Green
+Write-Host '     Feature updates deferred 365 days' -ForegroundColor DarkGray
+Write-Host '     Quality/security updates deferred 4 days' -ForegroundColor DarkGray
 $null = Read-Host 'Press Enter to exit'

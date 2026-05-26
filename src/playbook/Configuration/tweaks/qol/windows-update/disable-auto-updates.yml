@@ -10,6 +10,14 @@ actions:
     runas: currentUserElevated
     option: 'auto-updates-disable'
 
+    # Deferred auto-updates (quality: 4 days, feature: 365 days)
+  - !powerShell:
+    command: '& (Join-Path $env:windir ''AtlasDesktop\3. General Configuration\Automatic Updates\Balanced Automatic Updates.ps1'') -Silent'
+    exeDir: true
+    wait: true
+    runas: currentUserElevated
+    option: 'auto-updates-balanced'
+
     # Prevent DevHome & Outlook from re-installing
   - !registryKey: {path: 'HKLM\SOFTWARE\Microsoft\WindowsUpdate\Orchestrator\UScheduler_Oobe\DevHomeUpdate'}
   - !registryValue: {path: 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Orchestrator\UScheduler\DevHomeUpdate', value: 'workCompleted', type: REG_DWORD, data: '1'}

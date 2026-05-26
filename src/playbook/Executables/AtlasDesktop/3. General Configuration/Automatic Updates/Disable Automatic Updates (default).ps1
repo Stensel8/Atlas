@@ -18,6 +18,6 @@ Set-ItemProperty -LiteralPath $key -Name 'AUOptions' -Value 2 -Type DWord
 
 if ($JustContext -or $Silent) { return }
 
-Write-Output ''
-Write-Output 'Automatic Updates have been disabled.'
+Write-Host ''
+Write-Host '[OK] Automatic Updates have been disabled.' -ForegroundColor Green
 $null = Read-Host 'Press Enter to exit'

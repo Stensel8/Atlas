@@ -22,6 +22,6 @@ foreach ($val in @('BranchReadinessLevel', 'DeferFeatureUpdatesPeriodInDays', 'D
 }
 
 if ($Silent) { return }
-Write-Output ''
-Write-Output 'Automatic Updates have been enabled.'
+Write-Host ''
+Write-Host '[OK] Automatic Updates have been enabled.' -ForegroundColor Green
 $null = Read-Host 'Press Enter to exit'
