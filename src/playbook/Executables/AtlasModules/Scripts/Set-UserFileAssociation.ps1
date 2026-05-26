@@ -183,10 +183,16 @@ function Set-UserChoiceViaRegini {
 
         Start-Sleep -Milliseconds 100
 
-        $setIni = Join-Path $tempDir 'set.ini'
-        $setContent = "$RegPath`r`nProgId=`"$ProgId`"`r`nHash=`"$Hash`"`r`n0`r`n"
-        [System.IO.File]::WriteAllText($setIni, $setContent, [System.Text.Encoding]::ASCII)
-        & regini.exe $setIni 2>&1 | Out-Null
+        # regini.exe manages keys and security descriptors only — it cannot write string values.
+        # After the DELETE removes the UCPD DENY ACL, recreate UserChoice via the Win32 registry
+        # API in the brief window before Windows re-applies the protection.
+        $subPath = $RegPath.TrimStart('\') -replace '^Registry[/\\]User[/\\]', ''
+        $key = [Microsoft.Win32.Registry]::Users.CreateSubKey($subPath, $true)
+        if ($key) {
+            $key.SetValue('ProgId', $ProgId, [Microsoft.Win32.RegistryValueKind]::String)
+            $key.SetValue('Hash',   $Hash,   [Microsoft.Win32.RegistryValueKind]::String)
+            $key.Close()
+        }
     } finally {
         Remove-Item -LiteralPath $tempDir -Recurse -Force -ErrorAction SilentlyContinue
     }

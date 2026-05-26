@@ -5,6 +5,39 @@
     Adapted from https://github.com/AveYo/LeanAndMean
     Revised and customized for Atlas by he3als and Xyueta.
     Usage: Invoke-TrustedInstaller.ps1 "<executable>" [args]
+
+    ─── Operations requiring elevated access beyond standard admin ────────────────
+
+    1. WSearch registry keys (HKLM:\Software\Microsoft\Windows Search\Gather\...)
+       Owned by TrustedInstaller/WSearch. Deny-write to Administrators.
+       Bypass: SeTakeOwnershipPrivilege (present in elevated admin tokens).
+               Take ownership → grant Administrators SetValue → write value.
+       Script: AtlasDesktop\3. General Configuration\Search Indexing\
+               Minimal Search Indexing (default).ps1
+
+    2. UserChoice registry keys (HKCU\...\Shell\Associations\*\UserChoice)
+       Protected by Windows UCPD with a runtime DENY ACL + hash check.
+       Bypass: regini.exe DELETE (signed inbox tool, not on UCPD enforcement list)
+               removes the DENY ACL. Recreate key immediately via Win32 registry API
+               before Windows re-applies the protection. (~100 ms window.)
+       Script: AtlasModules\Scripts\Set-UserFileAssociation.ps1
+
+    3. ActivatableClassId keys (HKLM:\SOFTWARE\Microsoft\WindowsRuntime\ActivatableClassId\...)
+       May be owned by TrustedInstaller on some systems.
+       Bypass: best-effort with -ErrorAction SilentlyContinue — not critical.
+       Script: AtlasDesktop\3. General Configuration\FSO and Game Bar\*.ps1
+
+    4. C:\Program Files\WindowsApps (AppX package binaries)
+       Owned by TrustedInstaller, enforced by SYSTEM ACL.
+       Bypass: AME Wizard handles this natively via its own TI context.
+       Script: N/A (not handled by Atlas PS scripts)
+
+    5. Install-CbsPackage.ps1
+       Must run as TrustedInstaller/SYSTEM — CBS operations require it.
+       Bypass: caller must invoke this script via Invoke-TrustedInstaller.ps1.
+       Script: AtlasModules\Scripts\Install-CbsPackage.ps1
+
+    ──────────────────────────────────────────────────────────────────────────────
 #>
 
 function Invoke-TrustedInstaller ($cmd, $arg) {

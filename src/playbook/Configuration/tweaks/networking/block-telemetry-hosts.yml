@@ -3,8 +3,10 @@ title: Block Windows Telemetry via Hosts File
 description: Appends known Microsoft telemetry and data-collection endpoints to the hosts file, providing network-level blocking on top of registry-based telemetry disables
 actions:
   - !powerShell:
+    # AME Wizard strips double-quotes from command: | blocks when passing to PowerShell.
+    # Use Join-Path for paths and single-quote concatenation instead of double-quoted interpolation.
     command: |
-      $hosts  = "$env:SystemRoot\System32\drivers\etc\hosts"
+      $hosts  = Join-Path $env:SystemRoot 'System32\drivers\etc\hosts'
       $marker = '# AtlasOS telemetry block'
 
       if (Select-String -Path $hosts -Pattern $marker -Quiet -SimpleMatch) { return }
@@ -41,7 +43,7 @@ actions:
           'browser.events.data.microsoft.com'
       )
 
-      $lines = @('', $marker) + ($domains | ForEach-Object { "0.0.0.0 $_" }) + @('# end AtlasOS telemetry block')
+      $lines = @('', $marker) + ($domains | ForEach-Object { '0.0.0.0 ' + $_ }) + @('# end AtlasOS telemetry block')
       Add-Content -Path $hosts -Value $lines -Encoding UTF8
     runas: currentUserElevated
     wait: true

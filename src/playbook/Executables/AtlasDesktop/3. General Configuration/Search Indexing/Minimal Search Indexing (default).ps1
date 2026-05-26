@@ -29,9 +29,35 @@ if (-not $Silent) { Write-Output 'Configuring minimal search indexing...' }
 & $indexConf -Include -Path "$env:windir\AtlasDesktop"
 & $indexConf -Exclude -Path "$env:SystemDrive\Users"
 
-$gatherKey = 'HKLM:\Software\Microsoft\Windows Search\Gather\Windows\SystemIndex'
-if (-not (Test-Path -LiteralPath $gatherKey)) { New-Item -Path $gatherKey -Force | Out-Null }
-Set-ItemProperty -LiteralPath $gatherKey -Name 'RespectPowerModes' -Value 1 -Type DWord
+$gatherKey     = 'HKLM:\Software\Microsoft\Windows Search\Gather\Windows\SystemIndex'
+$gatherSubPath = 'Software\Microsoft\Windows Search\Gather\Windows\SystemIndex'
+
+# This key is owned by TrustedInstaller/WSearch and denies write access to Administrators.
+# We use SeTakeOwnershipPrivilege (available in elevated admin tokens) to take ownership,
+# grant Administrators SetValue, then write RespectPowerModes. WSearch is stopped at this point.
+try {
+    $regKey = [Microsoft.Win32.Registry]::LocalMachine.OpenSubKey(
+        $gatherSubPath,
+        [Microsoft.Win32.RegistryKeyPermissionCheck]::ReadWriteSubTree,
+        [System.Security.AccessControl.RegistryRights]::TakeOwnership
+    )
+    $acl = $regKey.GetAccessControl([System.Security.AccessControl.AccessControlSections]::None)
+    $acl.SetOwner([System.Security.Principal.NTAccount]'BUILTIN\Administrators')
+    $regKey.SetAccessControl($acl)
+    # Re-read ACL now that Administrators owns the key, then grant SetValue
+    $acl = $regKey.GetAccessControl()
+    $rule = [System.Security.AccessControl.RegistryAccessRule]::new(
+        [System.Security.Principal.NTAccount]'BUILTIN\Administrators',
+        [System.Security.AccessControl.RegistryRights]::SetValue,
+        [System.Security.AccessControl.AccessControlType]::Allow
+    )
+    $acl.SetAccessRule($rule)
+    $regKey.SetAccessControl($acl)
+    $regKey.Close()
+    Set-ItemProperty -LiteralPath $gatherKey -Name 'RespectPowerModes' -Value 1 -Type DWord
+} catch {
+    Write-Warning "Could not set RespectPowerModes on WSearch gather key (TrustedInstaller-owned): $_"
+}
 
 & $indexConf -Start
 
