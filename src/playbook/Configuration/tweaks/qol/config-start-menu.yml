@@ -17,9 +17,22 @@ actions:
     wait: true
   - !appx: {operation: clearCache, name: 'Microsoft.Windows.StartMenuExperienceHost*'}
 
-    # Set All Apps view to List (0=Category, 1=Grid, 2=List).
-    # Set AFTER clearCache: StartMenuExperienceHost resets this to 0 (Category) on restart
-    # when no Config blob is present. Writing it here ensures it persists.
+    # Write Start Menu pin config directly (ConfigureStartPins MDM policy is not processed
+    # by StartMenuExperienceHost on non-MDM machines; without Config the host falls back to
+    # Windows hardcoded defaults which include Solitaire, Outlook, Photos, WhatsApp stubs).
+    # Set-StartMenu.ps1 deleted Config above; write our desired pins here so the host uses
+    # them when it next starts. AllAppsViewMode must also be set AFTER clearCache or the
+    # host resets it to 0 (Category) on its first rebuild.
+  - !registryValue:
+    path: 'HKCU\Software\Microsoft\Windows\CurrentVersion\Start'
+    value: 'Config'
+    type: REG_SZ
+    data: '{"pinnedList":[{"packagedAppId":"windows.immersivecontrolpanel_cw5n1h2txyewy!microsoft.windows.immersivecontrolpanel"},{"packagedAppId":"Microsoft.WindowsTerminal_8wekyb3d8bbwe!App"},{"desktopAppLink":"%APPDATA%\\Microsoft\\Windows\\Start Menu\\Programs\\File Explorer.lnk"},{"packagedAppId":"Microsoft.WindowsStore_8wekyb3d8bbwe!App"},{"packagedAppId":"Microsoft.GamingApp_8wekyb3d8bbwe!Microsoft.Xbox.App"},{"packagedAppId":"Microsoft.WindowsCalculator_8wekyb3d8bbwe!App"},{"packagedAppId":"Microsoft.WindowsNotepad_8wekyb3d8bbwe!App"},{"packagedAppId":"Microsoft.Paint_8wekyb3d8bbwe!App"},{"packagedAppId":"Microsoft.SecHealthUI_8wekyb3d8bbwe!SecHealthUI"}]}'
+  - !registryValue:
+    path: 'HKU\AME_UserHive_Default\Software\Microsoft\Windows\CurrentVersion\Start'
+    value: 'Config'
+    type: REG_SZ
+    data: '{"pinnedList":[{"packagedAppId":"windows.immersivecontrolpanel_cw5n1h2txyewy!microsoft.windows.immersivecontrolpanel"},{"packagedAppId":"Microsoft.WindowsTerminal_8wekyb3d8bbwe!App"},{"desktopAppLink":"%APPDATA%\\Microsoft\\Windows\\Start Menu\\Programs\\File Explorer.lnk"},{"packagedAppId":"Microsoft.WindowsStore_8wekyb3d8bbwe!App"},{"packagedAppId":"Microsoft.GamingApp_8wekyb3d8bbwe!Microsoft.Xbox.App"},{"packagedAppId":"Microsoft.WindowsCalculator_8wekyb3d8bbwe!App"},{"packagedAppId":"Microsoft.WindowsNotepad_8wekyb3d8bbwe!App"},{"packagedAppId":"Microsoft.Paint_8wekyb3d8bbwe!App"},{"packagedAppId":"Microsoft.SecHealthUI_8wekyb3d8bbwe!SecHealthUI"}]}'
   - !registryValue:
     path: 'HKCU\Software\Microsoft\Windows\CurrentVersion\Start'
     value: 'AllAppsViewMode'
