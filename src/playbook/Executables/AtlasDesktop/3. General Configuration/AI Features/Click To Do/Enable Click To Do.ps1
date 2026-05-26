@@ -12,12 +12,18 @@ Assert-AtlasAdminPrivilege -ScriptPath $PSCommandPath -ScriptArgs $activeArgs
 
 Set-AtlasSettingState -SettingName 'ClickToDo' -State 1 -ScriptPath $PSCommandPath
 
-Remove-ItemProperty -LiteralPath 'HKCU:\Software\Policies\Microsoft\Windows\WindowsAI' `
-    -Name 'DisableClickToDo' -ErrorAction SilentlyContinue
-Remove-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI' `
-    -Name 'DisableClickToDo' -ErrorAction SilentlyContinue
+try {
+    Write-Host '[>>] Enabling Click To Do...' -ForegroundColor Yellow
+    Remove-ItemProperty -LiteralPath 'HKCU:\Software\Policies\Microsoft\Windows\WindowsAI' `
+        -Name 'DisableClickToDo' -ErrorAction SilentlyContinue
+    Remove-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI' `
+        -Name 'DisableClickToDo' -ErrorAction SilentlyContinue
 
-if ($Silent) { return }
-Write-Output ''
-Write-Output 'Click To Do has been enabled.'
-$null = Read-Host 'Press Enter to exit'
+    if ($Silent) { return }
+
+    Write-Host '[OK] Click To Do enabled.' -ForegroundColor Green
+    $null = Read-Host 'Press Enter to exit'
+} catch {
+    Write-Host "[!!] Failed to enable Click To Do: $_" -ForegroundColor Red
+    exit 1
+}

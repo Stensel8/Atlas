@@ -3,6 +3,7 @@ $ErrorActionPreference = 'Stop'
 # AtlasOS domain functions: Services
 
 function Set-AtlasServiceStartup {
+    [CmdletBinding()]
     param(
         [Parameter(Mandatory)][string]$Name,
         [Parameter(Mandatory)][ValidateRange(0, 4)][int]$Start
@@ -17,6 +18,7 @@ function Set-AtlasServiceStartup {
 }
 
 function Show-AtlasServiceWarning {
+    [CmdletBinding()]
     param([string]$Note)
 
     Write-Host '------------------------------------------------------' -ForegroundColor Yellow

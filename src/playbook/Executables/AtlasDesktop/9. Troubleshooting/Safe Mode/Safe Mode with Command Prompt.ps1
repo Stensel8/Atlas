@@ -4,41 +4,24 @@
 # Enables Safe Mode with Command Prompt as the shell on next reboot.
 # ============================================================================
 
-param(
-    [switch]$Silent
-)
+param([switch]$Silent)
 
 $ErrorActionPreference = 'Stop'
 
-$isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole(
-    [Security.Principal.WindowsBuiltInRole]::Administrator
-)
-if (-not $isAdmin) {
-    $argList = "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`""
-    if ($Silent) { $argList += ' -Silent' }
-    try {
-        Start-Process -FilePath 'powershell.exe' -ArgumentList $argList -Verb RunAs -Wait
-    } catch {
-        Write-Host '[!!] Administrator privileges are required.' -ForegroundColor Red
-        if (-not $Silent) { Read-Host 'Press Enter to exit' }
-        exit 1
-    }
-    exit 0
-}
+Import-Module -Name (Join-Path $env:windir 'AtlasModules\Scripts\Modules\AtlasOS\AtlasOS.psm1') -Force
 
-$settingName = 'SafeMode'
-$stateValue  = 1
-$scriptPath  = $PSCommandPath
+$activeArgs = @($PSBoundParameters.GetEnumerator() |
+    Where-Object { $_.Value -is [switch] -and $_.Value.IsPresent } |
+    ForEach-Object { "-$($_.Key)" })
+Assert-AtlasAdminPrivilege -ScriptPath $PSCommandPath -ScriptArgs $activeArgs
+
+Set-AtlasSettingState -SettingName 'SafeMode' -State 1 -ScriptPath $PSCommandPath
 
 try {
-    $atlasKey = "HKLM:\SOFTWARE\AtlasOS\Services\$settingName"
-    if (-not (Test-Path $atlasKey)) { New-Item -Path $atlasKey -Force | Out-Null }
-    Set-ItemProperty -Path $atlasKey -Name 'state' -Value $stateValue -Type DWord  -Force
-    Set-ItemProperty -Path $atlasKey -Name 'path'  -Value $scriptPath -Type String -Force
-
-    & bcdedit.exe /set '{current}' safeboot minimal       | Out-Null
+    Write-Host '[>>] Configuring Safe Mode with Command Prompt boot entry...' -ForegroundColor Yellow
+    & bcdedit.exe /set '{current}' safeboot minimal            | Out-Null
     if ($LASTEXITCODE -ne 0) { throw "bcdedit (safeboot) exited with code $LASTEXITCODE." }
-    & bcdedit.exe /set '{current}' safebootalternateshell yes | Out-Null
+    & bcdedit.exe /set '{current}' safebootalternateshell yes  | Out-Null
     if ($LASTEXITCODE -ne 0) { throw "bcdedit (safebootalternateshell) exited with code $LASTEXITCODE." }
 
     if (-not $Silent) {

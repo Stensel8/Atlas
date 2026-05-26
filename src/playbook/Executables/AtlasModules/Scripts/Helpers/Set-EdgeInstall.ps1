@@ -184,7 +184,7 @@ function Disable-EdgeUpdateInfrastructure {
         )) {
         $task = Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue
         if ($task) {
-            Unregister-ScheduledTask -InputObject $task -Confirm:$false
+            Unregister-ScheduledTask -InputObject $task -Confirm:$false -ErrorAction SilentlyContinue
         }
     }
 }

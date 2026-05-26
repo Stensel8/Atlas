@@ -28,22 +28,31 @@ foreach ($package in $Packages) {
             Remove-Item -Path $inboxPath -Force
         }
         foreach ($userInfo in $filteredPackage.PackageUserInformation) {
+            if ($null -eq $userInfo -or $null -eq $userInfo.UserSecurityID) { continue }
             $userSid = $userInfo.UserSecurityID.SID
             $endOfLifePath = "$basePath\EndOfLife\$userSid\$fullPackageName"
             New-Item -Path $endOfLifePath -Force
 
+            try {
+                if ($unregister) {
+                    Remove-AppxPackage -Package $fullPackageName -User $userSid -PreserveRoamableApplicationData
+                }
+                else {
+                    Remove-AppxPackage -Package $fullPackageName -User $userSid
+                }
+            } catch {
+                Write-Warning "Failed to remove '$fullPackageName' for user '$userSid': $_"
+            }
+        }
+        try {
             if ($unregister) {
-                Remove-AppxPackage -Package $fullPackageName -User $userSid -PreserveRoamableApplicationData
+                Remove-AppxPackage -Package $fullPackageName -AllUsers -PreserveRoamableApplicationData
             }
             else {
-                Remove-AppxPackage -Package $fullPackageName -User $userSid
+                Remove-AppxPackage -Package $fullPackageName -AllUsers
             }
-        }
-        if ($unregister) {
-            Remove-AppxPackage -Package $fullPackageName -AllUsers -PreserveRoamableApplicationData
-        }
-        else {
-            Remove-AppxPackage -Package $fullPackageName -AllUsers
+        } catch {
+            Write-Warning "Failed to remove '$fullPackageName' (AllUsers): $_"
         }
     }
 }

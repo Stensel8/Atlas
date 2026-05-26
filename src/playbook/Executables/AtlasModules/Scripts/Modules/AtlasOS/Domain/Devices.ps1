@@ -3,12 +3,13 @@ $ErrorActionPreference = 'Stop'
 # AtlasOS domain functions: Devices
 
 function Enable-AtlasDevice {
+    [CmdletBinding()]
     param(
-        [Parameter(Mandatory)][string[]]$FriendlyName,
+        [Parameter(Mandatory)][string[]]$Pattern,
         [switch]$Silent
     )
 
-    $foundDevices = @(Get-PnpDevice -FriendlyName $FriendlyName -ErrorAction SilentlyContinue)
+    $foundDevices = @(Get-PnpDevice -FriendlyName $Pattern -ErrorAction SilentlyContinue)
     foreach ($device in $foundDevices) {
         try {
             $device | Enable-PnpDevice -Confirm:$false -ErrorAction SilentlyContinue
@@ -24,12 +25,13 @@ function Enable-AtlasDevice {
 }
 
 function Disable-AtlasDevice {
+    [CmdletBinding()]
     param(
-        [Parameter(Mandatory)][string[]]$FriendlyName,
+        [Parameter(Mandatory)][string[]]$Pattern,
         [switch]$Silent
     )
 
-    $foundDevices = @(Get-PnpDevice -FriendlyName $FriendlyName -ErrorAction SilentlyContinue)
+    $foundDevices = @(Get-PnpDevice -FriendlyName $Pattern -ErrorAction SilentlyContinue)
     foreach ($device in $foundDevices) {
         try {
             $device | Disable-PnpDevice -Confirm:$false -ErrorAction SilentlyContinue

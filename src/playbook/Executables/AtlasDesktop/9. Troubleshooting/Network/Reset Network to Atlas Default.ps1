@@ -12,49 +12,55 @@ Assert-AtlasAdminPrivilege -ScriptPath $PSCommandPath -ScriptArgs $activeArgs
 
 Set-AtlasSettingState -SettingName 'DefaultAtlasNetwork' -State 1 -ScriptPath $PSCommandPath
 
-Write-Output 'Setting network settings to Atlas defaults...'
+try {
+    Write-Host '[>>] Locating network adapter driver key...' -ForegroundColor Yellow
+    $netKey = $null
+    $pnpIds = (Get-CimInstance -Class Win32_NetworkAdapter -ErrorAction SilentlyContinue).PNPDeviceID |
+        Where-Object { $_ -match 'PCI\\VEN_' }
 
-# Locate the network adapter driver class key
-$netKey = $null
-$pnpIds = (Get-CimInstance -Class Win32_NetworkAdapter -ErrorAction SilentlyContinue).PNPDeviceID |
-    Where-Object { $_ -match 'PCI\\VEN_' }
-
-foreach ($pnpId in $pnpIds) {
-    $driver = (Get-ItemProperty -LiteralPath "HKLM:\SYSTEM\CurrentControlSet\Enum\$pnpId" -Name 'Driver' -ErrorAction SilentlyContinue).Driver
-    if ($driver) {
-        $netKey = "HKLM:\SYSTEM\CurrentControlSet\Control\Class\$driver"
-        break
+    foreach ($pnpId in $pnpIds) {
+        $driver = (Get-ItemProperty -LiteralPath "HKLM:\SYSTEM\CurrentControlSet\Enum\$pnpId" -Name 'Driver' -ErrorAction SilentlyContinue).Driver
+        if ($driver) {
+            $netKey = "HKLM:\SYSTEM\CurrentControlSet\Control\Class\$driver"
+            break
+        }
     }
-}
 
-if ($netKey -and (Test-Path -LiteralPath $netKey)) {
-    # rem --------------------------
-    # rem Unknown benefit
-    # rem --------------------------
-    # rem "LargeSendOffload", "LargeSendOffloadJumboCombo", "LsoV1IPv4", "LsoV2IPv4", "LsoV2IPv6",
-    # rem "LogLevelWarn", "AlternateSemaphoreDelay", "DeviceSleepOnDisconnect", "EnableModernStandby",
-    # rem "PriorityVLANTag", "Node", "MPC", "PowerDownPll", "PMWiFiRekeyOffload",
-    # rem "ARPOffloadEnable", "bAdvancedLPs", "NSOffloadEnable", "GTKOffloadEnable",
-    # rem "Enable9KJFTpt", "EnableEDT", "GPPSW", "MasterSlave", "PacketCoalescing"
-    # rem Could cause dropped network frames: "FlowControl", "FlowControlCap"
+    if ($netKey -and (Test-Path -LiteralPath $netKey)) {
+        Write-Host '[>>] Applying Atlas network adapter settings...' -ForegroundColor Yellow
+        # rem --------------------------
+        # rem Unknown benefit
+        # rem --------------------------
+        # rem "LargeSendOffload", "LargeSendOffloadJumboCombo", "LsoV1IPv4", "LsoV2IPv4", "LsoV2IPv6",
+        # rem "LogLevelWarn", "AlternateSemaphoreDelay", "DeviceSleepOnDisconnect", "EnableModernStandby",
+        # rem "PriorityVLANTag", "Node", "MPC", "PowerDownPll", "PMWiFiRekeyOffload",
+        # rem "ARPOffloadEnable", "bAdvancedLPs", "NSOffloadEnable", "GTKOffloadEnable",
+        # rem "Enable9KJFTpt", "EnableEDT", "GPPSW", "MasterSlave", "PacketCoalescing"
+        # rem Could cause dropped network frames: "FlowControl", "FlowControlCap"
 
-    foreach ($setting in @(
-        'AutoDisableGigabit'   # Don't disable gigabit
-        'ApCompatMode'         # Access Point Compatibility Mode, 0 = High Performance
-        'SipsEnabled'          # About reducing link speed
-        'ReduceSpeedOnPowerDown'
-        'DMACoalescing'        # 'may increase latency'
-    )) {
-        foreach ($name in @($setting, "*$setting")) {
-            $existing = Get-ItemProperty -LiteralPath $netKey -Name $name -ErrorAction SilentlyContinue
-            if ($null -ne $existing) {
-                Set-ItemProperty -LiteralPath $netKey -Name $name -Value '0' -Type String -ErrorAction SilentlyContinue
+        foreach ($setting in @(
+            'AutoDisableGigabit'   # Don't disable gigabit
+            'ApCompatMode'         # Access Point Compatibility Mode, 0 = High Performance
+            'SipsEnabled'          # About reducing link speed
+            'ReduceSpeedOnPowerDown'
+            'DMACoalescing'        # 'may increase latency'
+        )) {
+            foreach ($name in @($setting, "*$setting")) {
+                $existing = Get-ItemProperty -LiteralPath $netKey -Name $name -ErrorAction SilentlyContinue
+                if ($null -ne $existing) {
+                    Set-ItemProperty -LiteralPath $netKey -Name $name -Value '0' -Type String -ErrorAction SilentlyContinue
+                }
             }
         }
     }
+
+    if (-not $Silent) {
+        Write-Host '[OK] Network settings set to Atlas defaults.' -ForegroundColor Green
+        Write-Host ''
+        Write-Host 'Please reboot your device for changes to apply.' -ForegroundColor White
+        $null = Read-Host 'Press Enter to exit'
+    }
+} catch {
+    Write-Host "[!!] Failed to apply Atlas network defaults: $_" -ForegroundColor Red
+    exit 1
 }
-
-if ($Silent) { return }
-
-Write-Output 'Finished, please reboot your device for changes to apply.'
-$null = Read-Host 'Press Enter to exit'

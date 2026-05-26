@@ -61,12 +61,12 @@ Show-PathStatus 'AppData\Local\AME Wizard Beta'   "$env:LOCALAPPDATA\AME Wizard 
 Show-PathStatus 'AppData\Roaming\AME Wizard Beta' "$env:APPDATA\AME Wizard Beta"
 Show-PathStatus 'C:\AME'                          'C:\AME'
 Show-PathStatus 'C:\ProgramData\AME'             'C:\ProgramData\AME'
-Show-PathStatus 'C:\Windows\Temp (AME files)'    'C:\Windows\Temp'
+Show-PathStatus 'C:\Windows\Temp (AME files)'    "$env:windir\Temp"
 
 # -- Atlas modules
 Write-Host "`n=== Atlas Modules ===" -ForegroundColor Cyan
-Show-PathStatus 'C:\Windows\AtlasModules'  'C:\Windows\AtlasModules'
-Show-PathStatus 'C:\Windows\AtlasDesktop'  'C:\Windows\AtlasDesktop'
+Show-PathStatus 'C:\Windows\AtlasModules'  (Join-Path $env:windir 'AtlasModules')
+Show-PathStatus 'C:\Windows\AtlasDesktop'  (Join-Path $env:windir 'AtlasDesktop')
 
 # -- RunOnce keys
 Write-Host "`n=== RunOnce keys ===" -ForegroundColor Cyan

@@ -11,27 +11,27 @@ $activeArgs = @($PSBoundParameters.GetEnumerator() |
 Assert-AtlasAdminPrivilege -ScriptPath $PSCommandPath -ScriptArgs $activeArgs
 
 if (-not $Silent) {
-    Write-Output 'This will repair and replace any corrupt Windows components and system files.'
-    Write-Output 'For general issues, this might be a fix. Note that no components of Atlas is reverted with this.'
-    Write-Output ''
+    Write-Host 'This will repair and replace any corrupt Windows components and system files.' -ForegroundColor White
+    Write-Host 'For general issues, this might be a fix. Note that no Atlas components are reverted.' -ForegroundColor White
+    Write-Host ''
     $null = Read-Host 'Press Enter to continue'
 }
 
-Write-Output 'This might take a while.'
+try {
+    Write-Host ''
+    Write-Host '[>>] Restoring the component store (DISM)...' -ForegroundColor Yellow
+    & dism.exe /online /cleanup-image /restorehealth
 
-Write-Output ''
-Write-Output '---------------------------------------------'
-Write-Output 'Restoring the component store...'
-Write-Output '---------------------------------------------'
-& dism.exe /online /cleanup-image /restorehealth
+    Write-Host ''
+    Write-Host '[>>] Restoring system files (SFC)...' -ForegroundColor Yellow
+    & sfc.exe /scannow
 
-Write-Output ''
-Write-Output '---------------------------------------------'
-Write-Output 'Restoring system files...'
-Write-Output '---------------------------------------------'
-& sfc.exe /scannow
-
-if ($Silent) { return }
-Write-Output ''
-Write-Output 'Finished, please reboot your device for changes to apply.'
-$null = Read-Host 'Press Enter to exit'
+    if (-not $Silent) {
+        Write-Host ''
+        Write-Host '[OK] Repair complete. Please reboot your device for changes to apply.' -ForegroundColor Green
+        $null = Read-Host 'Press Enter to exit'
+    }
+} catch {
+    Write-Host "[!!] Repair failed: $_" -ForegroundColor Red
+    exit 1
+}

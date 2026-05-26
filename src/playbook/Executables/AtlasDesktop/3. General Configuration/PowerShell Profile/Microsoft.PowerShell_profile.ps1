@@ -1,3 +1,4 @@
+#Requires -Version 5.1
 # AtlasOS PowerShell Profile
 
 # Oh My Posh — Atlas theme

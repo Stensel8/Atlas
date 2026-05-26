@@ -6,39 +6,21 @@
 # (prevents the "managed by your organization" greyed-out state).
 # ============================================================================
 
-param(
-    [switch]$Silent
-)
+param([switch]$Silent)
 
 $ErrorActionPreference = 'Stop'
 
-$isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole(
-    [Security.Principal.WindowsBuiltInRole]::Administrator
-)
-if (-not $isAdmin) {
-    $argList = "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`""
-    if ($Silent) { $argList += ' -Silent' }
-    try {
-        Start-Process -FilePath 'powershell.exe' -ArgumentList $argList -Verb RunAs -Wait
-    }
-    catch {
-        Write-Host '[!!] Administrator privileges are required.' -ForegroundColor Red
-        if (-not $Silent) { Read-Host 'Press Enter to exit' }
-        exit 1
-    }
-    exit 0
-}
+Import-Module -Name (Join-Path $env:windir 'AtlasModules\Scripts\Modules\AtlasOS\AtlasOS.psm1') -Force
 
-$settingName = 'LockScreen'
-$stateValue = 0
-$scriptPath = $PSCommandPath
+$activeArgs = @($PSBoundParameters.GetEnumerator() |
+    Where-Object { $_.Value -is [switch] -and $_.Value.IsPresent } |
+    ForEach-Object { "-$($_.Key)" })
+Assert-AtlasAdminPrivilege -ScriptPath $PSCommandPath -ScriptArgs $activeArgs
+
+Set-AtlasSettingState -SettingName 'LockScreen' -State 0 -ScriptPath $PSCommandPath
 
 try {
-    $atlasKey = "HKLM:\SOFTWARE\AtlasOS\Services\$settingName"
-    if (-not (Test-Path $atlasKey)) { New-Item -Path $atlasKey -Force | Out-Null }
-    Set-ItemProperty -Path $atlasKey -Name 'state' -Value $stateValue -Type DWord  -Force
-    Set-ItemProperty -Path $atlasKey -Name 'path'  -Value $scriptPath -Type String -Force
-
+    Write-Host '[>>] Applying lock screen policy...' -ForegroundColor Yellow
     $policyKey = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Personalization'
     if (-not (Test-Path $policyKey)) { New-Item -Path $policyKey -Force | Out-Null }
     Set-ItemProperty -Path $policyKey -Name 'NoLockScreen'         -Value 1 -Type DWord -Force
@@ -48,8 +30,7 @@ try {
         Write-Host '[OK] Lock screen hidden.' -ForegroundColor Green
         Read-Host 'Press Enter to exit'
     }
-}
-catch {
+} catch {
     Write-Host "[!!] Failed to hide lock screen: $_" -ForegroundColor Red
     exit 1
 }

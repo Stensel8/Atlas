@@ -3,6 +3,7 @@ $ErrorActionPreference = 'Stop'
 # AtlasOS domain functions: Settings
 
 function Set-AtlasSettingState {
+    [CmdletBinding()]
     param(
         [Parameter(Mandatory)][string]$SettingName,
         [Parameter(Mandatory)][int]$State,
@@ -20,6 +21,7 @@ function Set-AtlasSettingState {
 }
 
 function Invoke-AtlasSettingsPage {
+    [CmdletBinding()]
     param(
         [Parameter(Mandatory)][ValidateSet('hide', 'unhide')][string]$Operation,
         [Parameter(Mandatory)][string]$Page

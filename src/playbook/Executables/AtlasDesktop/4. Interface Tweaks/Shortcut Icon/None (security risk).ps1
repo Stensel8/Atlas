@@ -15,7 +15,7 @@ Set-AtlasSettingState -SettingName 'ShortcutIcon' -State 2 -ScriptPath $PSComman
 $shellIcons = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Icons'
 if (-not (Test-Path -LiteralPath $shellIcons)) { New-Item -Path $shellIcons -Force | Out-Null }
 New-ItemProperty -LiteralPath $shellIcons -Name '29' `
-    -Value 'C:\Windows\AtlasModules\Other\Blank.ico,0' -PropertyType String -Force | Out-Null
+    -Value "$env:windir\AtlasModules\Other\Blank.ico,0" -PropertyType String -Force | Out-Null
 
 if ($Silent) { return }
 Write-Output ''

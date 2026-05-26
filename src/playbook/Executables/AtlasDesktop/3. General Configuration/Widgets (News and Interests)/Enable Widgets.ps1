@@ -14,45 +14,29 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-$isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole(
-    [Security.Principal.WindowsBuiltInRole]::Administrator
-)
-if (-not $isAdmin) {
-    $argList = "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`""
-    if ($Silent)   { $argList += ' -Silent' }
-    if ($NoAction) { $argList += ' -NoAction' }
-    try {
-        Start-Process -FilePath 'powershell.exe' -ArgumentList $argList -Verb RunAs -Wait
-    } catch {
-        Write-Host '[!!] Administrator privileges are required.' -ForegroundColor Red
-        if (-not $Silent) { Read-Host 'Press Enter to exit' }
-        exit 1
-    }
-    exit 0
-}
+Import-Module -Name (Join-Path $env:windir 'AtlasModules\Scripts\Modules\AtlasOS\AtlasOS.psm1') -Force
 
-$settingName = 'Widgets'
-$stateValue  = 1
-$scriptPath  = $PSCommandPath
+$activeArgs = @($PSBoundParameters.GetEnumerator() |
+    Where-Object { $_.Value -is [switch] -and $_.Value.IsPresent } |
+    ForEach-Object { "-$($_.Key)" })
+Assert-AtlasAdminPrivilege -ScriptPath $PSCommandPath -ScriptArgs $activeArgs
+
+Set-AtlasSettingState -SettingName 'Widgets' -State 1 -ScriptPath $PSCommandPath
 
 try {
-    $atlasKey = "HKLM:\SOFTWARE\AtlasOS\Services\$settingName"
-    if (-not (Test-Path $atlasKey)) { New-Item -Path $atlasKey -Force | Out-Null }
-    Set-ItemProperty -Path $atlasKey -Name 'state' -Value $stateValue -Type DWord  -Force
-    Set-ItemProperty -Path $atlasKey -Name 'path'  -Value $scriptPath -Type String -Force
-
+    Write-Host '[>>] Checking Edge/WebView2 requirement...' -ForegroundColor Yellow
     $edgeCheck = Join-Path $env:windir 'AtlasModules\Scripts\Test-EdgeInstall.ps1'
     & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $edgeCheck
     if ($LASTEXITCODE -ne 0) { exit 1 }
 
     Write-Host '[>>] Enabling Widgets...' -ForegroundColor Yellow
-
     Remove-ItemProperty -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Feeds' `
         -Name 'EnableFeeds' -ErrorAction SilentlyContinue
     Remove-ItemProperty -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Dsh' `
         -Name 'AllowNewsAndInterests' -ErrorAction SilentlyContinue
 
     if (-not $NoAction) {
+        Write-Host '[>>] Restarting Explorer...' -ForegroundColor Yellow
         Stop-Process -Name 'explorer' -Force -ErrorAction SilentlyContinue
         Start-Sleep -Seconds 3
         Start-Process 'ms-settings:taskbar'

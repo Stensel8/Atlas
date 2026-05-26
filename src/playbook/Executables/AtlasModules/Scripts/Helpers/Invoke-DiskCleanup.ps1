@@ -139,7 +139,7 @@ if ($vssadminExitCode -ne 0) {
     $noRestorePoints = $vssadminOutput -match 'No items found that satisfy the query'
     if ($noRestorePoints) {
         Write-Output 'No restore points found, skipping shadow copy deletion.'
-        $global:LASTEXITCODE = 0
+        exit 0
     }
     else {
         throw "vssadmin.exe failed to delete restore points with exit code $vssadminExitCode."

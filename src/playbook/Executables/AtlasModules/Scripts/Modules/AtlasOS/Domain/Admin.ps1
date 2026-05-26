@@ -3,6 +3,7 @@ $ErrorActionPreference = 'Stop'
 # AtlasOS domain functions: Admin
 
 function Assert-AtlasAdminPrivilege {
+    [CmdletBinding()]
     param(
         [Parameter(Mandatory)][string]$ScriptPath,
         [string[]]$ScriptArgs = @()

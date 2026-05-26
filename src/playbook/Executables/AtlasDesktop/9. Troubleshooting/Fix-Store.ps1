@@ -7,21 +7,12 @@ param([switch]$Silent)
 
 $ErrorActionPreference = 'Stop'
 
-# --- Admin elevation ---
-$identity  = [Security.Principal.WindowsIdentity]::GetCurrent()
-$principal = [Security.Principal.WindowsPrincipal]::new($identity)
-if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-    $argList = "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`""
-    if ($Silent) { $argList += ' -Silent' }
-    try {
-        Start-Process -FilePath 'powershell.exe' -ArgumentList $argList -Verb RunAs -Wait
-    } catch {
-        Write-Host 'Administrator privileges are required.' -ForegroundColor Red
-        if (-not $Silent) { $null = Read-Host 'Press Enter to exit' }
-        exit 1
-    }
-    exit 0
-}
+Import-Module -Name (Join-Path $env:windir 'AtlasModules\Scripts\Modules\AtlasOS\AtlasOS.psm1') -Force
+
+$activeArgs = @($PSBoundParameters.GetEnumerator() |
+    Where-Object { $_.Value -is [switch] -and $_.Value.IsPresent } |
+    ForEach-Object { "-$($_.Key)" })
+Assert-AtlasAdminPrivilege -ScriptPath $PSCommandPath -ScriptArgs $activeArgs
 
 # --- Constants ---
 
@@ -32,7 +23,7 @@ $gamingServices  = @('GamingServices', 'GamingServicesNet', 'XboxNetApiSvc', 'Xb
 $allRootServices = $storeServices + $gamingServices
 
 # SQLite database tracking all installed AppX packages; corruption causes 0x80073CF9 and similar errors
-$stateRepoFile = 'C:\ProgramData\Microsoft\Windows\AppRepository\StateRepository-Deployment.srd'
+$stateRepoFile = Join-Path $env:ProgramData 'Microsoft\Windows\AppRepository\StateRepository-Deployment.srd'
 
 # --- Output helpers ---
 # Each step prints its description without a newline, then ends with ' OK' or ' failed' on the same line.
