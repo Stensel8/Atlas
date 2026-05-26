@@ -82,7 +82,7 @@ function Assert-AtlasWingetReady {
     # winget-install calls exit internally, must run in a child process
     $scriptFile = Join-Path (Get-InstalledScript 'winget-install' -ErrorAction Stop).InstalledLocation 'winget-install.ps1'
     $ps = if (Get-Command pwsh -ErrorAction SilentlyContinue) { 'pwsh' } else { 'powershell' }
-    $result = Start-Process $ps -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$scriptFile`"" -Wait -PassThru
+    $result = Start-Process $ps -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$scriptFile`"" -WindowStyle Hidden -Wait -PassThru
     if ($result.ExitCode -ne 0) {
         throw "winget-install exited with code $($result.ExitCode)."
     }
