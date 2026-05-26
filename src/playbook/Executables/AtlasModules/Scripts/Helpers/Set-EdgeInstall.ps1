@@ -412,6 +412,9 @@ if ($UninstallEdge) {
     Stop-EdgeProcesses
     Disable-EdgeUpdateInfrastructure
 
+    # Try the newest available setup.exe uninstaller once, then fall through to
+    # winget/force-removal if Edge is still present. All intermediate methods are
+    # silent — only the final success or failure is reported.
     $setupCandidates = @()
     foreach ($root in @(
             "$([Environment]::GetFolderPath('ProgramFilesx86'))\Microsoft\Edge\Application",
@@ -422,39 +425,23 @@ if ($UninstallEdge) {
         }
     }
 
-    $setupCandidates = @($setupCandidates | Sort-Object -Property FullName -Unique)
-    if ($setupCandidates.Count -gt 0) {
-        foreach ($setup in $setupCandidates) {
-            Write-Status "Running uninstaller at '$($setup.FullName)'..."
-            $process = Start-Process -FilePath $setup.FullName -ArgumentList '--uninstall --msedge --system-level --verbose-logging --force-uninstall' -WindowStyle Hidden -Wait -PassThru
-            if (($process.ExitCode -eq 0) -or (-not (Test-EdgeInstalled))) {
-                break
-            }
+    $newestSetup = @($setupCandidates | Sort-Object {
+        try { [System.Version]($_.Directory.Parent.Name) } catch { [System.Version]'0.0.0.0' }
+    } -Descending) | Select-Object -First 1
 
-            Write-Status "Edge uninstaller exited with code $($process.ExitCode); trying fallback methods." -Level Info
-        }
-    }
-    elseif (Test-EdgeInstalled) {
-        Write-Status 'Could not locate a local Edge installer to perform uninstallation.' -Level Warning
+    if ($newestSetup) {
+        $null = Start-Process -FilePath $newestSetup.FullName -ArgumentList '--uninstall --msedge --system-level --verbose-logging --force-uninstall' -WindowStyle Hidden -Wait -PassThru
     }
 
     Stop-EdgeProcesses
     if (Test-EdgeInstalled) {
-        $legacyRemoved = $false
         try {
-            Write-Status 'Trying PowerShell-based Edge removal fallback...'
-
-            # Attempt winget uninstall first (cleanest path)
             if ($null -ne (Get-Command winget -ErrorAction SilentlyContinue)) {
                 & winget uninstall --id Microsoft.Edge --silent --accept-source-agreements --disable-interactivity 2>&1 | Out-Null
                 Stop-EdgeProcesses
             }
 
-            if (-not (Test-EdgeInstalled)) {
-                $legacyRemoved = $true
-            }
-            else {
-                # Force-remove Edge installation directories via takeown + icacls
+            if (Test-EdgeInstalled) {
                 foreach ($edgeRoot in @(
                     "$([Environment]::GetFolderPath('ProgramFilesx86'))\Microsoft\Edge",
                     "$([Environment]::GetFolderPath('ProgramFiles'))\Microsoft\Edge",
@@ -468,7 +455,6 @@ if ($UninstallEdge) {
                     }
                 }
 
-                # Remove Edge registry artifacts
                 foreach ($regPath in @(
                     'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Microsoft Edge',
                     'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Microsoft Edge',
@@ -479,21 +465,20 @@ if ($UninstallEdge) {
                 }
 
                 Stop-EdgeProcesses
-                $legacyRemoved = -not (Test-EdgeInstalled)
             }
         }
         catch {
             if (Test-EdgeInstalled) {
-                Write-Status "PowerShell Edge removal fallback failed: $($_.Exception.Message)" -Level Warning
+                Write-Status "Edge removal failed: $($_.Exception.Message)" -Level Warning
             }
         }
 
-        if ((-not $legacyRemoved) -and (Test-EdgeInstalled)) {
+        if (Test-EdgeInstalled) {
             if ($KeepAppX -or $NonInteractive) {
                 Write-Status 'Edge binaries were not fully removed. Continuing so playbook cleanup can finish.' -Level Warning
             }
             else {
-                Write-Status 'Failed to uninstall Microsoft Edge using all available removal methods.' -Level Critical -Exit -ExitCode 12
+                Write-Status 'Failed to uninstall Microsoft Edge.' -Level Critical -Exit -ExitCode 12
             }
         }
         else {
@@ -501,10 +486,10 @@ if ($UninstallEdge) {
         }
     }
     else {
-        Write-Status 'Edge is already uninstalled.' -Level Success
+        Write-Status 'Successfully removed Microsoft Edge.' -Level Success
     }
 
-    # Remove stale Edge shortcuts from common Start Menu and public Desktop
+    # Remove stale Edge shortcuts silently
     foreach ($dir in @(
         [Environment]::GetFolderPath('CommonPrograms'),
         [Environment]::GetFolderPath('CommonDesktopDirectory')
@@ -512,10 +497,7 @@ if ($UninstallEdge) {
         if (-not (Test-Path $dir)) { continue }
         Get-ChildItem -Path $dir -Filter '*.lnk' -Recurse -ErrorAction SilentlyContinue |
             Where-Object { $_.BaseName -match '\bEdge\b' } |
-            ForEach-Object {
-                Write-Status "Removing Edge shortcut: $($_.Name)" -Level Info
-                Remove-Item -LiteralPath $_.FullName -Force -ErrorAction SilentlyContinue
-            }
+            ForEach-Object { Remove-Item -LiteralPath $_.FullName -Force -ErrorAction SilentlyContinue }
     }
 
     Write-Output ""
