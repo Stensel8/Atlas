@@ -1,15 +1,18 @@
 #Requires -Version 5.1
+# oh-my-posh and zoxide require Invoke-Expression for shell initialization — no alternative API exists.
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingInvokeExpression', '')]
+param()
 # AtlasOS PowerShell Profile
 
 # Oh My Posh — Atlas theme
 $_ompCfg = Join-Path $env:APPDATA 'AtlasOS\atlas.omp.json'
 if ((Get-Command oh-my-posh -ErrorAction SilentlyContinue) -and (Test-Path -LiteralPath $_ompCfg)) {
-    oh-my-posh init pwsh --config $_ompCfg | Invoke-Expression
+    oh-my-posh init pwsh --config $_ompCfg | Invoke-Expression # DevSkim: ignore DS104456
 }
 
 # zoxide — smart cd
 if (Get-Command zoxide -ErrorAction SilentlyContinue) {
-    zoxide init --cmd z powershell | Out-String | Invoke-Expression
+    zoxide init --cmd z powershell | Out-String | Invoke-Expression # DevSkim: ignore DS104456
 }
 
 # PSReadLine

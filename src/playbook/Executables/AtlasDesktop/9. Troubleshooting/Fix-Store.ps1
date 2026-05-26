@@ -74,7 +74,7 @@ function Stop-ServiceSafe ([string]$Name) {
     if (-not $svc -or $svc.Status -eq 'Stopped') { return }
     Stop-Service -Name $Name -Force -ErrorAction SilentlyContinue
     # Wait up to 15 s for the service to reach Stopped before moving on
-    try { $svc.WaitForStatus('Stopped', [TimeSpan]::FromSeconds(15)) } catch { }
+    try { $svc.WaitForStatus('Stopped', [TimeSpan]::FromSeconds(15)) } catch { $null = $_ }
 }
 
 function Start-ServiceSafe ([string]$Name) {
@@ -98,7 +98,6 @@ Write-Host ''
 Write-Step 'Collecting dependent services...'
 $dependents = Get-ServiceDependentsBFS -Names $allRootServices
 $stopOrder  = $dependents + $allRootServices
-$startOrder = $storeServices + $gamingServices + $dependents
 Write-OK
 
 # Step 2: backup current startup types before touching anything

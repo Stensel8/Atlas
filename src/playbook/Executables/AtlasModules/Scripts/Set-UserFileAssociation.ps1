@@ -54,8 +54,8 @@ $ErrorActionPreference = 'Stop'
     [Byte[]] $bytesBaseInfo = [System.Text.Encoding]::Unicode.GetBytes($baseInfo)
     $bytesBaseInfo += 0x00, 0x00
 
-    # Windows uses MD5 internally for the UserChoice hash, so we can't swap this out. # DevSkim: ignore DS126858
-    $hashProvider = [System.Security.Cryptography.MD5CryptoServiceProvider]::new()
+    # Windows uses MD5 internally for the UserChoice hash, so we can't swap this out.
+    $hashProvider = [System.Security.Cryptography.MD5CryptoServiceProvider]::new() # DevSkim: ignore DS126858
     [Byte[]] $initialHash = $hashProvider.ComputeHash($bytesBaseInfo)
 
     $lengthBase = ($baseInfo.Length * 2) + 2
