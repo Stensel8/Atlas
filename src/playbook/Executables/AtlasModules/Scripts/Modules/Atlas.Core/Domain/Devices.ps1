@@ -1,6 +1,6 @@
 #Requires -Version 5.1
 $ErrorActionPreference = 'Stop'
-# AtlasOS domain functions: Devices
+# Atlas.Core domain functions: Devices
 
 function Enable-AtlasDevice {
     [CmdletBinding()]

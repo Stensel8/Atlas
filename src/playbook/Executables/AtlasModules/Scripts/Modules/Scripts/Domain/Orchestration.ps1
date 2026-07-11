@@ -4,7 +4,7 @@ $ErrorActionPreference = 'Stop'
 
 function Invoke-AllSystemScripts {
     Write-Host "Running scripts"
-    Backup-AtlasServices
+    Export-AtlasServicesBackup
     Update-ClientCBS
     Disable-CoreIsolation
     Disable-DeviceSet

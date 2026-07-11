@@ -3,7 +3,7 @@ param([switch]$NoAction)
 
 $ErrorActionPreference = 'Stop'
 
-Import-Module -Name (Join-Path $env:windir 'AtlasModules\Scripts\Modules\AtlasOS\AtlasOS.psm1') -Force
+Import-Module -Name (Join-Path $env:windir 'AtlasModules\Scripts\Modules\Atlas.Core\Atlas.Core.psd1') -Force
 Assert-AtlasAdminPrivilege -ScriptPath $PSCommandPath -ScriptArgs @()
 
 Write-Output 'Disabling and uninstalling Copilot...'

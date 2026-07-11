@@ -12,7 +12,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-Import-Module -Name (Join-Path $env:windir 'AtlasModules\Scripts\Modules\AtlasOS\AtlasOS.psm1') -Force
+Import-Module -Name (Join-Path $env:windir 'AtlasModules\Scripts\Modules\Atlas.Core\Atlas.Core.psd1') -Force
 
 $activeArgs = @($PSBoundParameters.GetEnumerator() |
     Where-Object { $_.Value -is [switch] -and $_.Value.IsPresent } |

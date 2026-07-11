@@ -1,6 +1,6 @@
 #Requires -Version 5.1
 $ErrorActionPreference = 'Stop'
-# AtlasOS domain functions: Settings
+# Atlas.Core domain functions: Settings
 
 function Set-AtlasSettingState {
     [CmdletBinding()]

@@ -2,7 +2,7 @@
 
 $ErrorActionPreference = 'Stop'
 
-Import-Module -Name (Join-Path $env:windir 'AtlasModules\Scripts\Modules\AtlasOS\AtlasOS.psm1') -Force
+Import-Module -Name (Join-Path $env:windir 'AtlasModules\Scripts\Modules\Atlas.Core\Atlas.Core.psd1') -Force
 Assert-AtlasAdminPrivilege -ScriptPath $PSCommandPath -ScriptArgs @()
 
 & bcdedit.exe /set '{current}' safeboot minimal | Out-Null

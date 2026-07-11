@@ -1,8 +1,8 @@
 #Requires -Version 5.1
 $ErrorActionPreference = 'Stop'
-# Utility domain functions: ScheduledTasks
+# Atlas.TasksProcs domain functions: ScheduledTasks
 
-function Stop-TasksUnderRoots {
+function Stop-AtlasScheduledTaskUnderRoot {
     param([string[]]$RootsLower)
 
     try {

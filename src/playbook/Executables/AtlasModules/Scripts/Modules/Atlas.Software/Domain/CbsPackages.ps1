@@ -1,6 +1,6 @@
 #Requires -Version 5.1
 $ErrorActionPreference = 'Stop'
-# System script domain functions: ClientCbs
+# Atlas.Software domain functions: CbsPackages
 
 function Update-ClientCBS {
     # --------------------------------------------------------------

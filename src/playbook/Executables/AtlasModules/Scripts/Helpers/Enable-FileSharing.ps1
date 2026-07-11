@@ -5,7 +5,7 @@ Set-StrictMode -Version 3.0
 
 $windir = [Environment]::GetFolderPath('Windows')
 Import-Module (Join-Path $windir 'AtlasModules\Scripts\Modules\Qol\Qol.psm1')         -Force
-Import-Module (Join-Path $windir 'AtlasModules\Scripts\Modules\Scripts\Scripts.psm1') -Force
+Import-Module (Join-Path $windir 'AtlasModules\Scripts\Modules\Atlas.Services\Atlas.Services.psd1') -Force
 
 # Enable network items
 Enable-NetAdapterBinding -Name '*' -ComponentID ms_msclient, ms_server, ms_lltdio, ms_rspndr | Out-Null

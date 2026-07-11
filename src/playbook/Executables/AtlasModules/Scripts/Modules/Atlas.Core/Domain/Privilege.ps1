@@ -1,6 +1,6 @@
 #Requires -Version 5.1
 $ErrorActionPreference = 'Stop'
-# AtlasOS domain functions: Admin
+# Atlas.Core domain functions: Privilege
 
 function Assert-AtlasAdminPrivilege {
     [CmdletBinding()]

@@ -1,17 +1,20 @@
 #Requires -Version 5.1
 
-function New-Shortcut {
+# Atlas.Shortcuts - shortcut creation helpers.
+Set-StrictMode -Version 3.0
+
+function New-AtlasShortcut {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory = $True)][ValidateNotNullOrEmpty()][string]$Source,
         [Parameter(Mandatory = $True)][ValidateNotNullOrEmpty()][string]$Destination,
         [ValidateNotNullOrEmpty()][string]$WorkingDir,
         [ValidateNotNullOrEmpty()][string]$Arguments,
-    	[ValidateNotNullOrEmpty()][string]$Icon,
+        [ValidateNotNullOrEmpty()][string]$Icon,
         [switch]$IfExist
     )
 
-    if (!(Test-Path $Source) -and !(Get-Command $Source -EA 0)) {
+    if (!(Test-Path $Source) -and !(Get-Command $Source -ErrorAction SilentlyContinue)) {
         throw "Source '$source' not found."
     }
 
@@ -36,4 +39,4 @@ function New-Shortcut {
     $Shortcut.Save()
 }
 
-Export-ModuleMember -Function New-Shortcut
+Export-ModuleMember -Function New-AtlasShortcut

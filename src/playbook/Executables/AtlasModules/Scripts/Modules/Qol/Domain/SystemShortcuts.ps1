@@ -4,7 +4,7 @@ $ErrorActionPreference = 'Stop'
 
 function Add-NetworkSharingShortcut {
     & "$windir\AtlasModules\initPowerShell.ps1"
-    New-Shortcut -Source 'control.exe' `
+    New-AtlasShortcut -Source 'control.exe' `
         -Destination "$([Environment]::GetFolderPath('Windows'))\AtlasDesktop\3. General Configuration\File Sharing\Sharing Settings.lnk" `
         -Arguments '/name Microsoft.NetworkAndSharingCenter /page Advanced'
 }

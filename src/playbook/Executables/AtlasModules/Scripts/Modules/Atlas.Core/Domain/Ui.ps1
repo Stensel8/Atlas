@@ -1,6 +1,6 @@
 #Requires -Version 5.1
 $ErrorActionPreference = 'Stop'
-# Utility domain functions: Ui
+# Atlas.Core domain functions: Ui
 
 function Write-Title {
     param (

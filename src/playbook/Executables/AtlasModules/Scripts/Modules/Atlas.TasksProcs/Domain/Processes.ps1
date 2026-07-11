@@ -1,8 +1,8 @@
 #Requires -Version 5.1
 $ErrorActionPreference = 'Stop'
-# Utility domain functions: Processes
+# Atlas.TasksProcs domain functions: Processes
 
-function Stop-ProcessesUnderRoots {
+function Stop-AtlasProcessUnderRoot {
     param([string[]]$RootsLower)
 
     foreach ($proc in Get-Process -ErrorAction SilentlyContinue) {
